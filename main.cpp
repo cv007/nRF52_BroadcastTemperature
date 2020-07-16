@@ -5,13 +5,15 @@ nRF52840 Dongle
 advertise temperature, with the bluetooth name showing a letter A-Z followed
 by the value in degrees F to the tenth degree
     A 80.2  C 72.5  T-10.3
-also a UUID value is used to show a counter and temperature history data in bcd
-    de9f0001-0774-0769-0779-077907700771
+also a UUID value is used to show battery voltage in millivolts,
+a counter and temperature history data in bcd
+    de9f0001-3021-0769-0779-077907700771
     de9f is a fixed value (degF)
     0001 is a counter, incremented every time a new temp is taken (1 minute)
+    3021 is battery voltage in millivolts (3.021v)- battery is connected to VDD
     the rest of the 4 digit bcd values are 5 minute averages
-    0774 is the current 5 minute average (including current temp)
-    0769 is the previous 5 minute average, and so on
+    0769 is the current 5 minute average (including current temp)
+    0779 is the previous 5 minute average, and so on
 
 the letter (A - Z) can be changed at power on- 
     green led 5 blinks = can start setting new letter if wanted
