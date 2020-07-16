@@ -12,6 +12,8 @@
 
 /*------------------------------------------------------------------------------
     Temperature
+    assuming softdevice in use 
+    (softdevice takes over temp sensor, so have to use sd)
 ------------------------------------------------------------------------------*/
 template<uint8_t HistSiz_>
 struct Temperature {
