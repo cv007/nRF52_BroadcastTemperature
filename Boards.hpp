@@ -3,6 +3,8 @@
 #include <cstdbool>
 #include <cstdint>
 
+#include "nrf_delay.h"
+
 #include "Gpio.hpp"
 
 #define SA static auto

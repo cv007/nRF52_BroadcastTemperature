@@ -3,9 +3,7 @@ sdk_config.h-
 
     NRF_SDH_BLE_LOG_ENABLED 0
 
-    both need to be enabled
-    #define NRFX_SAADC_ENABLED 1
-    #define SAADC_ENABLED 1
+    using own drivers for saadc, so do not need to enable
 
 
 removed 2 register attributes in-

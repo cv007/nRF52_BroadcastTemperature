@@ -9,7 +9,6 @@
 #define U32 uint32_t
 #define SA [[gnu::always_inline]] static auto
 //#define SA [[gnu::noinline]] static auto
-
 #define SCA static constexpr auto
 
 /*------------------------------------------------------------------------------
