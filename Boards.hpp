@@ -30,6 +30,9 @@ struct Pca10059 {
     SCA &ledRed1    { led2R };
     SCA &ledGreen1  { led2G };
     SCA &ledBlue1   { led2B };
+    SCA &ledRed     { led2R };
+    SCA &ledGreen   { led2G };
+    SCA &ledBlue    { led2B };
 
             //someone is required to run init to setup pins
 SA  init    () {
@@ -64,13 +67,13 @@ SA  error   (uint16_t hex) {
             }
 
             //show a caution blink
-SA  caution () {
-                ledRed1.blinkN( 1, 2 );
+SA  caution (uint16_t ms = 1) {
+                ledRed1.blinkN( 1, ms );
             }
 
             //show an ok blink
-SA  ok      () {
-                ledGreen2.blinkN( 1, 2 );
+SA  ok      (uint16_t ms = 1) {
+                ledGreen1.blinkN( 1, ms );
             }
 
 };

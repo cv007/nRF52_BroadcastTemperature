@@ -53,9 +53,9 @@ SA  update          () {
     public:
 //============
 
-SA  read            () {
-                        return update();
-                    }
+SA  read            () { return update(); }
+
+SA  isOk            () { return voltage_ > 2100 ; }
 
 };
 
@@ -349,12 +349,18 @@ SA  power           (uint8_t v) {
 SA  start           () -> void {
                         if( isActive_ ) return;
                         //set params if have not started before, else use NULL so will just update data
-                        ble_gap_adv_params_t const *pp = (handle_ == BLE_GAP_ADV_SET_HANDLE_NOT_SET) ? &params_ : NULL;
-                        error.check( sd_ble_gap_adv_set_configure(&handle_, &pdata_, pp) );
+                        //(have to use this method if advertising is still active, but we are stopped here)
+                        // ble_gap_adv_params_t const *pp = (handle_ == BLE_GAP_ADV_SET_HANDLE_NOT_SET) ? &params_ : NULL;
+                        // error.check( sd_ble_gap_adv_set_configure(&handle_, &pdata_, pp) );
+                       
+                        // OR just set parameters also (if we change parameters over time)
+                        // which will work because we are stopped
+                        error.check( sd_ble_gap_adv_set_configure(&handle_, &pdata_, &params_) );
                         error.check( sd_ble_gap_adv_start(handle_, BLE_CONN_CFG_TAG_DEFAULT) );
                         isActive_ = true;
                         power( txPower_ );
-                        board.ledBlue1.blinkN( 1, 1 );
+                        if( Battery::isOk() ) board.ok(); else board.caution();
+
                     }
 
 SA  stop            () -> void {
