@@ -259,7 +259,7 @@ SA  update          ( uint8_t (&buf)[31] ) -> void {
 SA  init            () {
                         char ltr = 'A'-1;
                         auto inactiveCount = 0;
-                        board.ledGreen2.blinkN( 5, 100 );
+                        board.ledGreen2.blinkN( 5, 50 );
                         for(; inactiveCount < (10000/50); ){ //10 seconds timeout
                             if( board.sw1.isOff() ){
                                 inactiveCount++;
@@ -267,16 +267,16 @@ SA  init            () {
                                 continue;
                             }
                             //sw1 pressed
-                            board.ledRed1.blinkN( 1, 10 );
+                            board.ledRed1.blinkN( 1, 5 );
                             inactiveCount = 0;
                             if( ++ltr > 'Z' ) ltr = 'A';
                             board.sw1.debounce( 100 );
                         }
                         if( ltr != ('A'-1) ){
                             setNameFlash( ltr );
-                            board.ledGreen2.blinkN( 2, 500 );
+                            board.ledGreen2.blinkN( 2, 250 );
                         } else {
-                            board.ledGreen2.blinkN( 5, 100 );
+                            board.ledGreen2.blinkN( 5, 50 );
                         }
                         //set ram version from flash
                         setName( getNameFlash() );

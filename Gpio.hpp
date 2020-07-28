@@ -8,7 +8,7 @@
 
 #define U32 uint32_t
 #define SA [[gnu::always_inline]] static auto
-//#define SA [[gnu::noinline]] static auto
+// #define SA [[gnu::noinline]] static auto
 #define SCA static constexpr auto
 
 /*------------------------------------------------------------------------------
@@ -189,12 +189,13 @@ SA  clearLatch  ()          { reg.LATCH = bm_; }
 //------------
 //  misc
 //------------
-SA  blinkN      (uint16_t n, uint32_t periodms, uint32_t lastdelayms = 0) {
+SA  blinkN      (uint16_t n, uint32_t mson, uint32_t msoff = 0, uint32_t lastdelayms = 0) {
                     if( not isOutput() ) return;
-                    uint32_t mshalf = periodms>>1;
-                    if( not mshalf ) mshalf = 1;
-                    uint32_t n2 = n*2; //will also keep return led state same as before
-                    while( n2-- ){ toggle(); nrf_delay_ms( mshalf ); }
+                    if( not msoff ) msoff = mson;
+                    while( n-- ){ 
+                        toggle(); nrf_delay_ms( mson );  
+                        toggle(); nrf_delay_ms( msoff );  
+                    }
                     if( lastdelayms ) nrf_delay_ms( lastdelayms );
                     //will be in same state as when we arrived
                 }
