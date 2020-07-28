@@ -189,15 +189,17 @@ SA  clearLatch  ()          { reg.LATCH = bm_; }
 //------------
 //  misc
 //------------
-SA  blinkN      (uint16_t n, uint32_t periodms) {
+SA  blinkN      (uint16_t n, uint32_t periodms, uint32_t lastdelayms = 0) {
                     if( not isOutput() ) return;
                     uint32_t mshalf = periodms>>1;
                     if( not mshalf ) mshalf = 1;
                     uint32_t n2 = n*2; //will also keep return led state same as before
                     while( n2-- ){ toggle(); nrf_delay_ms( mshalf ); }
+                    if( lastdelayms ) nrf_delay_ms( lastdelayms );
                     //will be in same state as when we arrived
                 }
 
+                //just a short blip
 SA  blink1      () { blinkN(1,1); }
 
                 //for switches, wait for sw release of N ms, or a max of 3 sec if no release

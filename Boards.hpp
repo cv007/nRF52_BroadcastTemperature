@@ -45,10 +45,10 @@ SA  init    () {
 
             //signal board is alive
 SA  alive   () {
-                led1G.blinkN(1,50); nrf_delay_ms( 200 );
-                led2R.blinkN(1,50); nrf_delay_ms( 200 );
-                led2G.blinkN(1,50); nrf_delay_ms( 200 );
-                led2B.blinkN(1,50); nrf_delay_ms( 200 );
+                led1G.blinkN(1,50,200); 
+                led2R.blinkN(1,50,200);
+                led2G.blinkN(1,50,200); 
+                led2B.blinkN(1,50,200); 
             }
 
             //show error code via led's, skip leading 0's
