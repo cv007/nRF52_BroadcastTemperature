@@ -12,29 +12,9 @@
 #define SCA static constexpr auto
 
 /*------------------------------------------------------------------------------
-    enums - in structs so do not pollute the global namespace
-------------------------------------------------------------------------------*/
-struct SAADC_PSEL       { enum PSEL     { NC, AIN0, AIN1, AIN2, AIN3, AIN4, AIN5, 
-                                          AIN6, AIN7, VDD, VDDHDIV5 = 0x0D }; };
-struct SAADC_CH         { enum CH       { CH0, CH1, CH2, CH3, CH4, CH5, CH6, CH7 }; };
-struct SAADC_GAIN       { enum GAIN     { DIV6, DIV5, DIV4, DIV3, DIV2, DIV1, 
-                                          MUL2, MUL4 }; };
-struct SAADC_REFSEL     { enum REFSEL   { INT0V6, VDD_DIV4 }; };
-struct SAADC_TACQ       { enum TACQ     { T3US, T5US, T10US, T15US, T20US, T40US }; };
-struct SAADC_MODE       { enum MODE     { SE, DIFF }; };
-struct SAADC_RESISTOR   { enum RESISTOR { BYPASS, PULLGND, PULLVDD, PULLVDD_DIV2 }; };
-struct SAADC_BURST      { enum BURST    { BURSTOFF, BURSTON }; };
-struct SAADC_RES        { enum RES      { RES8, RES10, RES12, RES14 }; };
-struct SAADC_INT        { enum INT      { STARTED, END, DONE, RESULT, CALIBRATE, STOPPED,
-                                          CH0H, CH0L, CH1H, CH1L, CH2H, CH2L, CH3H, CH3L,
-                                          CH4H, CH4L, CH5H, CH5L, CH6H, CH6L, CH7H, CH7L }; };
-struct SAADC_OVERSAMP   { enum OVERSAMP { OVEROFF, OVER2X, OVER4X, OVER8X, OVER16X, OVER32X, 
-                                          OVER64X, OVER128X, OVER256X  }; };
-
-/*------------------------------------------------------------------------------
     Saadc struct
 ------------------------------------------------------------------------------*/
-struct Saadc : SAADC_CH, SAADC_PSEL, SAADC_RES, SAADC_INT,SAADC_OVERSAMP {
+struct Saadc {
 
 //============
     protected:
@@ -121,6 +101,24 @@ struct Saadc : SAADC_CH, SAADC_PSEL, SAADC_RES, SAADC_INT,SAADC_OVERSAMP {
 //============
     public:
 //============
+
+    // enums
+    enum PSEL     { NC, AIN0, AIN1, AIN2, AIN3, AIN4, AIN5, AIN6, AIN7, 
+                    VDD, VDDHDIV5 = 0x0D };
+    enum CH       { CH0, CH1, CH2, CH3, CH4, CH5, CH6, CH7 };
+    enum GAIN     { DIV6, DIV5, DIV4, DIV3, DIV2, DIV1, MUL2, MUL4 };
+    enum REFSEL   { INT0V6, VDD_DIV4 };
+    enum TACQ     { T3US, T5US, T10US, T15US, T20US, T40US };
+    enum MODE     { SE, DIFF };
+    enum RESISTOR { BYPASS, PULLGND, PULLVDD, PULLVDD_DIV2 };
+    enum BURST    { BURSTOFF, BURSTON };
+    enum RES      { RES8, RES10, RES12, RES14 };
+    enum INT      { STARTED, END, DONE, RESULT, CALIBRATE, STOPPED,
+                    CH0H, CH0L, CH1H, CH1L, CH2H, CH2L, CH3H, CH3L,
+                    CH4H, CH4L, CH5H, CH5L, CH6H, CH6L, CH7H, CH7L };
+    enum OVERSAMP { OVEROFF, OVER2X, OVER4X, OVER8X, OVER16X, OVER32X, 
+                    OVER64X, OVER128X, OVER256X  };
+
 
     //give public access to registers
     static inline volatile Saadc_&
@@ -259,8 +257,7 @@ SA  deinit          (CH e) {
 /*------------------------------------------------------------------------------
     SaadcChan struct
 ------------------------------------------------------------------------------*/
-struct SaadcChan : Saadc, SAADC_GAIN, SAADC_REFSEL, SAADC_TACQ,
-                   SAADC_MODE, SAADC_RESISTOR, SAADC_BURST {
+struct SaadcChan : Saadc {
 
 //============
     private:

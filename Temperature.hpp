@@ -8,7 +8,6 @@
 #define SA [[gnu::noinline]] static auto
 #define SCA static constexpr auto
 #define SI static inline
-#define I16 int16_t
 
 /*------------------------------------------------------------------------------
     Temperature
@@ -22,9 +21,11 @@ struct Temperature {
     private:
 //============
 
-    SI I16 tempHistory_[HistSiz_];
+    using tempT = int16_t;
 
-SA  addHistory      (I16 v) {
+    SI tempT tempHistory_[HistSiz_];
+
+SA  addHistory      (tempT v) {
                         static bool isInit;
                         static uint8_t idx;
 
@@ -42,7 +43,7 @@ SA  addHistory      (I16 v) {
 //===========
 
 SA  read            () {
-                        I16 f = -999; //-99.9 = failed to get
+                        tempT f = -999; //-99.9 = failed to get
                         int32_t t;
                         if( sd_temp_get(&t) ) return f;
                         f = (t*10*9/5+320*4)/4; // Fx10
@@ -53,7 +54,7 @@ SA  read            () {
                     }
 
 SA  average         () {
-                        I16 avg{0};
+                        tempT avg{0};
                         for( auto& i : tempHistory_ ) avg += i;
                         return avg / HistSiz_;
                     }
@@ -65,7 +66,6 @@ SA  histSize        () { return HistSiz_; }
 #undef SA
 #undef SCA
 #undef SI
-#undef I16
 
 
 
