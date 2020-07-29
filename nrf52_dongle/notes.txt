@@ -22,6 +22,6 @@ added CXX flags -std=c++17
 
 added source files-
 $(SDK_ROOT)/modules/nrfx/hal/nrf_nvmc.c
-$(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_saadc.c
+
 
 
