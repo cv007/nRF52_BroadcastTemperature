@@ -25,7 +25,8 @@ namespace GPIO {
 using namespace GPIO;
 
 /*------------------------------------------------------------------------------
-    Gpio struct - 1 template parameter of GPIO::PIN
+    Gpio struct - template parameter of GPIO::PIN, 
+                  and INVERT with a default of HIGHISON
 ------------------------------------------------------------------------------*/
 template<PIN Pin_, INVERT Inv_ = HIGHISON>
 struct Gpio {
