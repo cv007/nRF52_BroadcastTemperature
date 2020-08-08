@@ -45,10 +45,10 @@ SA  init    () {
 
             //signal board is alive
 SA  alive   () {
-                led1G.blinkN(1,25,25,200); 
+                led1G.blinkN(1,25,25,200);
                 led2R.blinkN(1,25,25,200);
-                led2G.blinkN(1,25,25,200); 
-                led2B.blinkN(1,25,25,200); 
+                led2G.blinkN(1,25,25,200);
+                led2B.blinkN(1,25,25,200);
             }
 
             //show error code via led's, skip leading 0's
@@ -78,13 +78,80 @@ SA  ok      (uint16_t ms = 1) {
 
 };
 
+#endif //NRF52840
+
+#ifdef NRF52810
+/*------------------------------------------------------------------------------
+    Laird module w/nrf52810
+------------------------------------------------------------------------------*/
+struct Laird52810 {
+
+    //these pins are not init until init() is run
+    //(could init each here, but do not want possible resulting constructor guard)
+    SI Gpio<P0_7>  ledRed; //board label 1
+    SI Gpio<P0_8>  ledGreen; //board label 2
+    SI Gpio<P0_27, LOWISON>  sw1; //SW1
+
+    //'generic' led names (some may be in code already, so create those names)
+    SCA &ledGreen2  { ledGreen };
+    SCA &ledRed1    { ledRed };
+
+            //someone is required to run init to setup pins
+SA  init    () {
+                ledRed.init( OUTPUT );
+                ledGreen.init( OUTPUT );
+                sw1.init( INPUT, PULLUP );
+            }
+
+            //signal board is alive
+SA  alive   () {
+                ledGreen.blinkN(1,25,25,200);
+                ledRed.blinkN(1,25,25,200);
+            }
+
+            //show error code via led's, skip leading 0's
+            //show 1-15 blinks for each nibble (0x01-0x0f)
+            //a zero will be a short green blink
+SA  error   (uint16_t hex) {
+                bool lz = true;
+                for( auto i = 12; i >= 0; i -= 4 ){
+                    uint8_t v = (hex>>i) bitand 0xf;
+                    if( v == 0 and lz == true ) continue; //skip leading 0's
+                    lz = false;
+                    if( v ) ledRed.blinkN( v, 500 );
+                    else ledGreen.blinkN( 1, 50 ); //0 is 1 short blue blink
+                    nrf_delay_ms( 500 );
+                }
+            }
+
+            //show a caution blink
+SA  caution (uint16_t ms = 1) {
+                ledRed.blinkN( 1, ms );
+            }
+
+            //show an ok blink
+SA  ok      (uint16_t ms = 1) {
+                ledGreen.blinkN( 1, ms );
+            }
+
+};
+
+#endif
+
 #undef SA
 #undef SCA
 #undef SI
 
-#endif //NRF52840
 
 
-//choose board here for all who include this file
+//choose board in nrfConfig.hpp
 //someone will need to run board.init()
+
+
+#ifdef NRF52840_DONGLE
 inline Pca10059 board;
+#endif
+
+#ifdef LAIRD_52810
+inline Laird52810 board;
+#endif

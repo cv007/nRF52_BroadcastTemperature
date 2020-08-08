@@ -1,0 +1,27 @@
+
+sdk_config.h-
+
+    NRF_SDH_BLE_LOG_ENABLED 0
+
+    using own drivers for saadc, so do not need to enable
+
+
+removed 2 register attributes in-
+$(SDK_ROOT)/components/toolchain/cmsis/include/cmsis_gcc.h
+    __get_PSP, __get_MSP (were using register attributes, c++ not liking that)
+
+
+$(SDK_ROOT)/components/toolchain/gcc/Makefile_common
+    added objdump in %.out to create lss file (lss to same folder as makefile)
+
+
+makefile -
+
+changed main.c to main.cpp
+added CXX flags -std=c++17
+
+added source files-
+$(SDK_ROOT)/modules/nrfx/hal/nrf_nvmc.c
+
+
+
