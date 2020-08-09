@@ -16,3 +16,13 @@ namespace GPIO {
 }
 
 
+
+/* 
+Supported tx_power values: 
+    -40dBm, -20dBm, -16dBm, -12dBm, -8dBm, -4dBm, 
+    0dBm, +3dBm, +4dBm
+
+S112
+using 1-9 as power levels (and 0=0dbm)
+*/
+inline constexpr int8_t SD_TX_LEVELS[]{0,-40,-20,-16,-12,-8,-4,0,3,4};

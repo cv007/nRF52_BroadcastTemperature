@@ -163,8 +163,8 @@ struct MyTemperatureAD {
     SI char fullnameLetter_; //ram copy, in case want to temporarily change
     //bootloader is at 0xE0000, so use page before (0xE0000-0x1000 = 0xDF000)
     //for flash stored letter - 'A' - 'Z'
-    SI volatile char& fullnameLetterFlash_{ *(reinterpret_cast<char*>(0xDF000)) };
-    SCA lastPageFlash_{0xDF000};
+    SI volatile char& fullnameLetterFlash_{ *(reinterpret_cast<char*>(LAST_PAGE)) };
+    SCA lastPageFlash_{LAST_PAGE};
 
 SA  makeValidLetter (const char c)  { return (c >= 'A' and c <= 'Z') ? c : 'T'; }
 SA  uuidCountInc    ()              { if(++uuidData_.count > 9999) uuidData_.count = 0; return uuidData_.count; }
@@ -274,9 +274,9 @@ SA  init            () {
                         }
                         if( ltr != ('A'-1) ){
                             setNameFlash( ltr );
-                            board.ledGreen2.blinkN( 2, 250 );
+                            board.ledGreen2.blinkN( 2, 250, 250, 1000 );
                         } else {
-                            board.ledGreen2.blinkN( 5, 50 );
+                            board.ledGreen2.blinkN( 5, 50, 50, 1000 );
                         }
                         //set ram version from flash
                         setName( getNameFlash() );
@@ -300,11 +300,9 @@ struct Advertising {
 
     SI AdT_ ADdata_;
 
-    /* Supported tx_power values: -40dBm, -20dBm, -16dBm, -12dBm, -8dBm, -4dBm,
-    0dBm, +2dBm, +3dBm, +4dBm, +5dBm, +6dBm, +7dBm and +8dBm */
-    //using 1-14 as power levels (and 0=0dbm)
-    static constexpr int8_t txLevels_[]{0,-40,-20,-16,-12,-8,-4,0,2,3,4,5,6,7,8};
-    SI int8_t txPower_{8}; //+2
+    //nRF528xx.hpp will have SD_TX_LEVELS 
+    //(1-14 for S140, 1-9 for S112)
+    SI int8_t txPower_{0};
 
     SI ble_gap_adv_params_t params_;
     SI uint8_t handle_{BLE_GAP_ADV_SET_HANDLE_NOT_SET};
@@ -342,8 +340,8 @@ SA  init            () {
 
                     //1-14 = -40 to +8 dBm
 SA  power           (uint8_t v) {
-                        if( v >= sizeof(txLevels_) ) v = sizeof(txLevels_)-1;
-                        error.check( sd_ble_gap_tx_power_set(BLE_GAP_TX_POWER_ROLE_ADV, handle_, txLevels_[v] ) );
+                        if( v >= sizeof(SD_TX_LEVELS) ) v = sizeof(SD_TX_LEVELS)-1;
+                        error.check( sd_ble_gap_tx_power_set(BLE_GAP_TX_POWER_ROLE_ADV, handle_, SD_TX_LEVELS[v] ) );
                     }
 
 SA  start           () -> void {

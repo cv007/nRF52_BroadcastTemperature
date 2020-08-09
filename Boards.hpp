@@ -92,7 +92,7 @@ struct Laird52810 {
     SI Gpio<P0_8>  ledGreen; //board label 2
     SI Gpio<P0_27, LOWISON>  sw1; //SW1
 
-    //'generic' led names (some may be in code already, so create those names)
+    //alias for other led names already in use
     SCA &ledGreen2  { ledGreen };
     SCA &ledRed1    { ledRed };
 
@@ -126,12 +126,12 @@ SA  error   (uint16_t hex) {
 
             //show a caution blink
 SA  caution (uint16_t ms = 1) {
-                ledRed.blinkN( 1, ms );
+                ledRed.blinkN( 5, ms );
             }
 
             //show an ok blink
 SA  ok      (uint16_t ms = 1) {
-                ledGreen.blinkN( 1, ms );
+                ledGreen.blinkN( 5, ms );
             }
 
 };
