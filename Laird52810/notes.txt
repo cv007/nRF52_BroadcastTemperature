@@ -2,6 +2,11 @@
 sdk_config.h-
 
     NRF_SDH_BLE_LOG_ENABLED 0
+    
+    NRF_SDH_CLOCK_LF_SRC 0 
+    NRF_SDH_CLOCK_LF_ACCURACY 1
+        my BL651 board- there is footprint for ext 32k xtal, but not populated,
+        so use internl clock
 
     using own drivers for saadc, so do not need to enable
 

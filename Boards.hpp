@@ -126,12 +126,13 @@ SA  error   (uint16_t hex) {
 
             //show a caution blink
 SA  caution (uint16_t ms = 1) {
-                ledRed.blinkN( 5, ms );
+                ledRed.blinkN( 1, ms );
             }
 
             //show an ok blink
 SA  ok      (uint16_t ms = 1) {
-                ledGreen.blinkN( 5, ms );
+                // ledGreen.blinkN( 5, ms );
+                ledRed.blinkN( 1, ms );
             }
 
 };
