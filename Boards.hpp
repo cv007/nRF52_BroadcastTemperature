@@ -131,8 +131,7 @@ SA  caution (uint16_t ms = 1) {
 
             //show an ok blink
 SA  ok      (uint16_t ms = 1) {
-                // ledGreen.blinkN( 5, ms );
-                ledRed.blinkN( 1, ms );
+                ledGreen.blinkN( 1, ms );
             }
 
 };

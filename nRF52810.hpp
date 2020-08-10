@@ -23,6 +23,6 @@ Supported tx_power values:
     0dBm, +3dBm, +4dBm
 
 S112
-using 1-9 as power levels (and 0=0dbm)
+using 1-9 as power levels (and 0=0dbm=default)
 */
 inline constexpr int8_t SD_TX_LEVELS[]{0,-40,-20,-16,-12,-8,-4,0,3,4};

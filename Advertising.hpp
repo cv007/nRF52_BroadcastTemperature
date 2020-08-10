@@ -300,8 +300,8 @@ struct Advertising {
 
     SI AdT_ ADdata_;
 
-    //nRF528xx.hpp will have SD_TX_LEVELS 
-    //(1-14 for S140, 1-9 for S112)
+    //nRF528xx.hpp will create the SD_TX_LEVELS array for each device
+    //(1-14 for S140/52840, 1-9 for S112/52810)
     SI int8_t txPower_{0};
 
     SI ble_gap_adv_params_t params_;
@@ -338,7 +338,7 @@ SA  init            () {
                         if( InitCB_ ) InitCB_();
                     }
 
-                    //1-14 = -40 to +8 dBm
+                    //1-14 = -40 to +8 dBm, or 1-9 -40 to +4 dBm
 SA  power           (uint8_t v) {
                         if( v >= sizeof(SD_TX_LEVELS) ) v = sizeof(SD_TX_LEVELS)-1;
                         error.check( sd_ble_gap_tx_power_set(BLE_GAP_TX_POWER_ROLE_ADV, handle_, SD_TX_LEVELS[v] ) );

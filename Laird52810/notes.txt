@@ -5,6 +5,8 @@ sdk_config.h-
     
     NRF_SDH_CLOCK_LF_SRC 0 
     NRF_SDH_CLOCK_LF_ACCURACY 1
+    NRF_SDH_CLOCK_LF_RC_CTIV 16 //calibration timing interval in 1/4sec, 1-32
+    NRF_SDH_CLOCK_LF_RC_TEMP_CTIV 2 //see softdevide documentation
         my BL651 board- there is footprint for ext 32k xtal, but not populated,
         so use internl clock
 

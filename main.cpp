@@ -76,12 +76,12 @@ will enable DCDCEN for REG1
 -----------------------------------------------------------------------------*/
 int main() {
 
-    board.init();           //init board pins
-    board.alive();          //blink led's to show boot
+   board.init();           //init board pins
+   board.alive();          //blink led's to show boot
+
 
                             //start power management
     error.check( nrf_pwr_mgmt_init() );
-
                             //enable REG1 Dc-Dc (instead of LDO, for 1.8v system)
     nrf_power_dcdcen_set( true );
 

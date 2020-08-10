@@ -50,15 +50,35 @@ struct Gpio {
     template<uint8_t PinN_>
     struct Gpio_ {
                 U32 unused1[0x504/4];
-                U32 OUT;        //0x504
+    union  {    U32 OUT32; //0x50420
+    struct {        U32         : PinN_;
+                    U32 OUT     : 1;
+                    U32         : 31-PinN_;
+    };};
                 U32 OUTSET;     //0x508
                 U32 OUTCLR;     //0x50C
-                U32 IN;         //0x510
-                U32 DIR;        //0x514
+    union  {    U32 IN32;       //0x510
+    struct {        U32         : PinN_;
+                    U32 IN      : 1;
+                    U32         : 31-PinN_;
+    };};
+    union  {    U32 DIR32;      //0x514
+    struct {        U32         : PinN_;
+                    U32 DIR     : 1;
+                    U32         : 31-PinN_;
+    };};
                 U32 DIRSET;     //0x518
                 U32 DIRCLR;     //0x51C
-                U32 LATCH;      //0x520
-                U32 DETECTMODE; //0x524
+    union  {    U32 LATCH32;    //0x520
+    struct {        U32         : PinN_;
+                    U32 LATCH   : 1;
+                    U32         : 31-PinN_;
+    };};
+    union  {    U32 DETECTMODE32; //0x524
+    struct {        U32             : PinN_;
+                    U32 DETECTMODE  : 1;
+                    U32             : 31-PinN_;
+    };};
                 U32 unused2[(0x700-0x528)/4 + PinN_];
                 //0x700+Pin_*4
     union  {    U32 PIN_CNF;
@@ -152,17 +172,17 @@ SA  init        (Ts... ts)  { initT it{2}; init_(it, ts...); }
 //------------
 //  output
 //------------
-SA  high        ()          { reg.OUTSET = bm_; }
-SA  low         ()          { reg.OUTCLR = bm_; }
+SA  high        ()          { reg.OUTSET = bm_; } //register wide write
+SA  low         ()          { reg.OUTCLR = bm_; } //register wide write
 SA  off         ()          { if constexpr( inv_ ) high(); else low(); }
 SA  on          ()          { if constexpr( inv_ ) low(); else high(); }
 SA  on          (bool tf)   { if( tf ) on(); else off(); }
-SA  toggle      ()          { if( reg.OUT bitand bm_ ) low(); else high(); }
+SA  toggle      ()          { if( reg.OUT ) low(); else high(); }
 
 //------------
 //  input
 //------------
-SA  isHigh      ()          { return reg.IN bitand bm_; }
+SA  isHigh      ()          { return reg.IN; }
 SA  isLow       ()          { return not isHigh(); }
 SA  isOn        ()          { if constexpr( inv_ ) return isLow(); else return isHigh(); }
 SA  isOff       ()          { return not isOn(); }
@@ -175,17 +195,18 @@ SA  drive       (DRIVE e)   { reg.DRIVE = e; }
 SA  sense       (SENSE e)   { reg.SENSE = e; }
 SA  inputOff    ()          { reg.INBUF = 1; }
 SA  inputOn     ()          { reg.INBUF = 0; }
-SA  latchOff    ()          { reg.DETECTMODE and_eq compl bm_; }
-SA  latchOn     ()          { reg.DETECTMODE or_eq bm_; }
+SA  latchOff    ()          { reg.DETECTMODE = 0; }
+SA  latchOn     ()          { reg.DETECTMODE = 1; }
 
 //------------
 //  status
 //------------
 SA  isOutput    ()          { return reg.DIRP; }
-SA  isInput     ()          { return (reg.PIN_CNF bitand 3) == 0; }
-SA  isAnalog    ()          { return (reg.PIN_CNF bitand 3) == 2; }
-SA  isLatch     ()          { return reg.lATCH bitand bm_; }
-SA  clearLatch  ()          { reg.LATCH = bm_; }
+SA  isInbuf     ()          { return reg.INBUF == 0; } //1=off, 0=on
+SA  isInput     ()          { return not isOutput() and isInbuf(); }
+SA  isAnalog    ()          { return not isOutput() and not isInbuf(); }
+SA  isLatch     ()          { return reg.lATCH; }
+SA  clearLatch  ()          { reg.LATCH = 1; }
 
 //------------
 //  misc
