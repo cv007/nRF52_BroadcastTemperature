@@ -174,8 +174,8 @@ SA  init        (Ts... ts)  { initT it{2}; init_(it, ts...); }
 //------------
 SA  high        ()          { reg.OUTSET = bm_; } //register wide write
 SA  low         ()          { reg.OUTCLR = bm_; } //register wide write
-SA  off         ()          { if constexpr( inv_ ) high(); else low(); }
-SA  on          ()          { if constexpr( inv_ ) low(); else high(); }
+SA  off         ()          { if ( inv_ ) high(); else low(); }
+SA  on          ()          { if ( inv_ ) low(); else high(); }
 SA  on          (bool tf)   { if( tf ) on(); else off(); }
 SA  toggle      ()          { if( reg.OUT ) low(); else high(); }
 
@@ -184,7 +184,7 @@ SA  toggle      ()          { if( reg.OUT ) low(); else high(); }
 //------------
 SA  isHigh      ()          { return reg.IN; }
 SA  isLow       ()          { return not isHigh(); }
-SA  isOn        ()          { if constexpr( inv_ ) return isLow(); else return isHigh(); }
+SA  isOn        ()          { return inv_ ? isLow() : isHigh(); }
 SA  isOff       ()          { return not isOn(); }
 
 //------------
@@ -204,6 +204,7 @@ SA  latchOn     ()          { reg.DETECTMODE = 1; }
 SA  isOutput    ()          { return reg.DIRP; }
 SA  isInbuf     ()          { return reg.INBUF == 0; } //1=off, 0=on
 SA  isInput     ()          { return not isOutput() and isInbuf(); }
+SA  isOutputOnly()          { return isOutput() and not isInbuf(); }
 SA  isAnalog    ()          { return not isOutput() and not isInbuf(); }
 SA  isLatch     ()          { return reg.lATCH; }
 SA  clearLatch  ()          { reg.LATCH = 1; }
