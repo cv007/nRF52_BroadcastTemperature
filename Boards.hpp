@@ -84,10 +84,27 @@ SA  ok      (uint16_t ms = 1) {
 /*------------------------------------------------------------------------------
     Laird module w/nrf52810
 ------------------------------------------------------------------------------*/
-struct Laird52810 {
+struct BL651tempBoard {
+
+    //SDA - P0_13 - input, S0D1
+    //SCL - P0_15 - input, SOD1
+    //PWR - P0_17 - output, power to i2c devices tmp117/si7051
+    SI Gpio<P0_13>  sda; 
+    SI Gpio<P0_15>  scl;
+    SI Gpio<P0_17>  i2cDevicePwr; 
+
+SA  i2cInit () {
+                sda.init( INPUT, S0D1, PULLUP );
+                scl.init( INPUT, S0D1, PULLUP );
+                i2cDevicePwr.init( OUTPUT, S0H1 );
+            }
+SA  i2cDeinit () {
+                sda.init(); //all default values
+                scl.init();
+                i2cDevicePwr.init();
+            }
 
     //these pins are not init until init() is run
-    //(could init each here, but do not want possible resulting constructor guard)
     SI Gpio<P0_7>  ledRed; //board label 1
     SI Gpio<P0_8>  ledGreen; //board label 2
     SI Gpio<P0_27, LOWISON>  sw1; //SW1
@@ -152,6 +169,6 @@ SA  ok      (uint16_t ms = 1) {
 inline Pca10059 board;
 #endif
 
-#ifdef LAIRD_52810
-inline Laird52810 board;
+#ifdef NRF52810_BL651_TEMP
+inline BL651tempBoard board;
 #endif

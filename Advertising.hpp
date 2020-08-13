@@ -140,14 +140,14 @@ SA  makeBCD     (uint8_t *buf, const uint16_t (&vals)[8]) {
     MyTemperatureAD - AD data struct(s) to make up payload of adv pdu
     <HistMinutes_> is how many minute to average for a single historical temp
 ------------------------------------------------------------------------------*/
-template<unsigned HistMinutes_ = 5>
+template<typename TempDriver_>
 struct MyTemperatureAD {
 
 //============
     private:
 //============
 
-    SI Temperature<HistMinutes_> temp_;
+    SI TempDriver_ temp_;
 
     using uuidDataT = union {
         uint16_t all[8];
@@ -382,7 +382,15 @@ SA  stop            () -> void {
     call below timer init function to start a 60s timer to run update
 */
 void advInitCB(); //called from adv.init()
-inline Advertising< MyTemperatureAD<5>, 3000, advInitCB > adv; 
+#ifdef TEMPERTURE_INTERNAL
+inline Advertising< MyTemperatureAD<TemperatureInternal<5> >, 3000, advInitCB > adv; 
+#elif defined TEMPERATURE_TMP117
+inline Advertising< MyTemperatureAD<TemperatureInternal<5> >, 3000, advInitCB > adv; 
+#elif defined TEMPERATURE_SI7051
+inline Advertising< MyTemperatureAD<TemperatureInternal<5> >, 3000, advInitCB > adv;
+#else
+#error "Temperature source not defined in nRFconfig.hpp" 
+#endif
 
 #include "Timer.hpp"
 inline Timer timerAdvUpdate;
