@@ -135,14 +135,14 @@ SA  error   (uint16_t hex) {
                     uint8_t v = (hex>>i) bitand 0xf;
                     if( v == 0 and lz == true ) continue; //skip leading 0's
                     lz = false;
-                    if( v ) ledRed.blinkN( v, 500 );
-                    else ledGreen.blinkN( 1, 50 ); //0 is 1 short blue blink
+                    if( v ) ledRed.blinkN( v, 500 ); //v times, 500ms on, 0ms off, no post delay
+                    else ledGreen.blinkN( 1, 50 ); //0 is 1 short green blink
                     nrf_delay_ms( 500 );
                 }
             }
 
             //show a caution blink
-SA  caution (uint16_t ms = 1) {
+SA  caution (uint16_t ms = 5) {
                 ledRed.blinkN( 1, ms );
             }
 
