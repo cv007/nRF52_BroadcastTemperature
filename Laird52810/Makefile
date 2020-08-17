@@ -51,9 +51,12 @@ SRC_FILES += $(SDK_ROOT)/modules/nrfx/drivers/src/prs/nrfx_prs.c
 SRC_FILES += $(SDK_ROOT)/modules/nrfx/hal/nrf_nvmc.c
 # SRC_FILES += $(SDK_ROOT)/components/libraries/bsp/bsp.c
 SRC_FILES += $(PROJ_DIR)/main.cpp
-# SRC_FILES += $(SDK_ROOT)/external/segger_rtt/SEGGER_RTT.c
+
+#to use Segger RTT
+SRC_FILES += $(SDK_ROOT)/external/segger_rtt/SEGGER_RTT.c
 # SRC_FILES += $(SDK_ROOT)/external/segger_rtt/SEGGER_RTT_Syscalls_GCC.c
 # SRC_FILES += $(SDK_ROOT)/external/segger_rtt/SEGGER_RTT_printf.c
+
 SRC_FILES += $(SDK_ROOT)/components/ble/common/ble_advdata.c
 SRC_FILES += $(SDK_ROOT)/components/ble/common/ble_srv_common.c
 SRC_FILES += $(SDK_ROOT)/external/utf_converter/utf.c

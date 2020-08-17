@@ -68,7 +68,8 @@ will enable DCDCEN for REG1
 #include "Errors.hpp"       //provides inline class var 'error'
 #include "Ble.hpp"          //provides inline class var 'ble'
 
-#include "Saadc.hpp"
+#include "Print.hpp"        //RTT print
+
 
 
 /*-----------------------------------------------------------------------------
@@ -90,8 +91,10 @@ int main() {
 
     adv.init();             //advertising init
 
+    int count = 0;
     while( true ) {  
         nrf_pwr_mgmt_run();  
+        Print( "count: %d\n", count++ );
     }
 
 }
