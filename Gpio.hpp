@@ -215,7 +215,7 @@ SA  clearLatch  ()          { reg.LATCH = 1; }
                 //so can get pin number from an existing instance
                 //(if user only has the instance name, but needs the pin number)
                 //the GPIO::PIN numbers in use match the pin number scheme used
-                //in places that sets a a peripheral pin
+                //in places that sets a peripheral pin
                 //  PSEL.SCA = board.sca.pinNumber();
 SA  pinNumber   ()          { return (U32)Pin_; }
 
