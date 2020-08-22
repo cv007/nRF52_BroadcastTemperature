@@ -68,8 +68,7 @@ will enable DCDCEN for REG1
 #include "Errors.hpp"       //provides inline class var 'error'
 #include "Ble.hpp"          //provides inline class var 'ble'
 
-#include "Print.hpp"        //RTT print
-
+#include "Print.hpp"
 
 
 /*-----------------------------------------------------------------------------
@@ -77,8 +76,12 @@ will enable DCDCEN for REG1
 -----------------------------------------------------------------------------*/
 int main() {
 
-   board.init();           //init board pins
-   board.alive();          //blink led's to show boot
+    // Debug( RGBfg(255,0,150) "color " RED "red " GREEN "green " BLUE "blue " 
+    //        YELLOW "yellow " MAGENTA "magenta " CYAN "cyan " WHITE "white\n" );
+    Debug( "{R/}red {G|}green {B/}blue {Y|}yellow {M/}magenta {C|}cyan {W}white\n" );
+
+    board.init();           //init board pins
+    board.alive();          //blink led's to show boot
 
                             //start power management
     error.check( nrf_pwr_mgmt_init() );
@@ -91,10 +94,8 @@ int main() {
 
     adv.init();             //advertising init
 
-    int count = 0;
     while( true ) {  
         nrf_pwr_mgmt_run();  
-        Print( "count: %d\n", count++ );
     }
 
 }

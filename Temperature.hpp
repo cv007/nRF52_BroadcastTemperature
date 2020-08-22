@@ -5,6 +5,8 @@
 
 #include "nrf_sdh.h"
 
+#include "Print.hpp"
+
 #define SA [[gnu::noinline]] static auto
 #define SCA static constexpr auto
 #define SI static inline
@@ -23,6 +25,8 @@ struct Temperature {
     Temperature(){} //cannot use this class directly
 
     SI int16_t tempHistory_[HistSiz_];
+    SCA TEMP_MAX{ 180*10 };
+    SCA TEMP_MIN{ -40*10 };
 
 SA  addHistory      (int16_t v) {
                         static bool isInit;
@@ -31,10 +35,13 @@ SA  addHistory      (int16_t v) {
                         if( not isInit ){ //first time, populate all with same value
                             for( auto& i : tempHistory_ ) i = v;
                             isInit = true;
-                            return;
                         }
+                        if( v < TEMP_MIN ) v = TEMP_MIN;
+                        if( v > TEMP_MAX ) v = TEMP_MAX;
                         tempHistory_[idx++] = v;
                         if( idx >= HistSiz_ ) idx = 0;
+
+                        return v; //the min/max limited value
                     }
 
 //===========
@@ -64,9 +71,9 @@ SA  read            () {
                         int32_t t;
                         if( sd_temp_get(&t) ) return f;
                         f = (t*10*9/5+320*4)/4; // Fx10
-                        if( f < -400 ) f = -400; // -40.0 min
-                        if( f > 1800 ) f = 1800; //180.0 max
-                        Temperature<HistSiz_>::addHistory( f );
+                        f = Temperature<HistSiz_>::addHistory( f );
+                        DebugFuncHeader();
+                        Debug("\traw: %d\n\t  F: %02d.%d\n", t, f/10, f%10);
                         return f;
                     }
 };
@@ -80,9 +87,10 @@ SA  read            () {
 
                         //get temp Fx10 into f
 
-                        if( f < -400 ) f = -400; // -40.0 min
-                        if( f > 1800 ) f = 1800; //180.0 max
-                        Temperature<HistSiz_>::addHistory( f );
+
+                        f = Temperature<HistSiz_>::addHistory( f );
+                        DebugFuncHeader();
+                        Debug("\traw: %d\n\tF: %02d.%d\n", t, f/10, f%10);
                         return f;
                     }
 };
@@ -96,9 +104,9 @@ SA  read            () {
 
                         //get temp Fx10 into f
 
-                        if( f < -400 ) f = -400; // -40.0 min
-                        if( f > 1800 ) f = 1800; //180.0 max
-                        Temperature<HistSiz_>::addHistory( f );
+                        f = Temperature<HistSiz_>::addHistory( f );
+                        DebugFuncHeader();
+                        Debug("\traw: %d\n\tF: %02d.%d\n", t, f/10, f%10);
                         return f;
                     }
 };

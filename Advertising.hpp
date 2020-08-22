@@ -13,6 +13,7 @@
 #include "Temperature.hpp"
 #include "Errors.hpp"       //error
 #include "Saadc.hpp"
+#include "Print.hpp"
 
 #define SA [[gnu::noinline]] static auto
 #define SCA static constexpr auto
@@ -327,6 +328,34 @@ struct Advertising {
 SA  update          (void* pcontext = nullptr) -> void {
                         stop();
                         ADdata_.update(buffer_);
+
+                        //=== Debug ===
+                        DebugFuncHeader();
+                        Debug( "\t{C}[advertising packet]{W}\n" );
+                        auto i = 0;
+                        while( buffer_[i] ){
+                            auto len = buffer_[i++];
+                            auto typ = buffer_[i++];
+                            Debug( "\tlen: %2u  type: %02x  data: ", len--, typ );
+                             if( typ == 9 ){ //name
+                                Debug( "%.*s ", len, &buffer_[i] ); 
+                                i += len;
+                            } else if( typ == 7 ){ //uuid
+                                for( auto j = len-1; j >= 0; j-=2 ){
+                                     Debug( "%02X%02X ", buffer_[i+j], buffer_[i+j-1] );
+                                }
+                                i += len;
+                            } else {
+                                for( auto j = 0; j < len; j++ ){
+                                     Debug( "%02X ", buffer_[i+j] );
+                                }
+                                i += len;
+                            }
+                            Debug( "\n" );
+                        }
+                        Debug( "\n" );
+                        //=== Debug ===
+
                         start();
                     }
 
@@ -383,13 +412,13 @@ SA  stop            () -> void {
 */
 void advInitCB(); //called from adv.init()
 #ifdef TEMPERTURE_INTERNAL
-inline Advertising< MyTemperatureAD<TemperatureInternal<5> >, 3000, advInitCB > adv; 
+    inline Advertising< MyTemperatureAD<TemperatureInternal<5> >, 3000, advInitCB > adv; 
 #elif defined TEMPERATURE_TMP117
-inline Advertising< MyTemperatureAD<TemperatureInternal<5> >, 3000, advInitCB > adv; 
+    inline Advertising< MyTemperatureAD<TemperatureInternal<5> >, 3000, advInitCB > adv; 
 #elif defined TEMPERATURE_SI7051
-inline Advertising< MyTemperatureAD<TemperatureInternal<5> >, 3000, advInitCB > adv;
+    inline Advertising< MyTemperatureAD<TemperatureInternal<5> >, 3000, advInitCB > adv;
 #else
-#error "Temperature source not defined in nRFconfig.hpp" 
+    #error "Temperature source not defined in nRFconfig.hpp" 
 #endif
 
 #include "Timer.hpp"
