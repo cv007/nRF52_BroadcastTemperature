@@ -76,9 +76,7 @@ will enable DCDCEN for REG1
 -----------------------------------------------------------------------------*/
 int main() {
 
-    // Debug( RGBfg(255,0,150) "color " RED "red " GREEN "green " BLUE "blue " 
-    //        YELLOW "yellow " MAGENTA "magenta " CYAN "cyan " WHITE "white\n" );
-    Debug( "{R/}red {G|}green {B/}blue {Y|}yellow {M/}magenta {C|}cyan {W}white\n" );
+    Debug( "{!HC}\nStarting...{W}\n\n" );
 
     board.init();           //init board pins
     board.alive();          //blink led's to show boot
@@ -94,7 +92,8 @@ int main() {
 
     adv.init();             //advertising init
 
-    while( true ) {  
+    while( true ) { 
+        Debug("{R}nrf_pwr_mgmt_run{W}\n");
         nrf_pwr_mgmt_run();  
     }
 
