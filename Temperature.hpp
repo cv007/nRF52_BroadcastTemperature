@@ -73,7 +73,7 @@ SA  read            () {
                         f = (t*10*9/5+320*4)/4; // Fx10
                         f = Temperature<HistSiz_>::addHistory( f );
                         DebugFuncHeader();
-                        Debug("\traw: %d\n\t  F: %02d.%d\n", t, f/10, f%10);
+                        Debug("{W}  raw: %d\n    F: %02d.%d{|}\n", t, f/10, f%10);
                         return f;
                     }
 };

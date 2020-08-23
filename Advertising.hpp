@@ -331,12 +331,12 @@ SA  update          (void* pcontext = nullptr) -> void {
 
                         //=== Debug ===
                         DebugFuncHeader();
-                        Debug( "\t{C}[advertising packet]{W}\n" );
+                        Debug( "{C}  -advertising packet-{W}\n" );
                         auto i = 0;
                         while( buffer_[i] ){
                             auto len = buffer_[i++];
                             auto typ = buffer_[i++];
-                            Debug( "\tlen: %2u  type: %02x  data: ", len--, typ );
+                            Debug( "  len: %2u  type: %02x  data: ", len--, typ );
                              if( typ == 9 ){ //name
                                 Debug( "%.*s ", len, &buffer_[i] ); 
                                 i += len;

@@ -38,6 +38,8 @@ struct DevRtt {
     Debug( "{G}the count is {Rw/}%d{|Wk}", count);
         G = green forground, R = red foreground, w = white background, 
         / = italics, | = normal, W = white forground, k = black background
+
+    the markup codes are decoded at runtime
 ------------------------------------------------------------------------------*/
 using markupCodeT = struct {
     const char key;     //embedded char
@@ -56,8 +58,9 @@ inline const markupCodeT markupCodes[]{
     { 'W', "\033[38;2;255;255;255m" },
     { 'O', "\033[38;2;255;150;0m" },
     //control
-    { '!', "\033[2J" }, //cls
-    { 'H', "\033[1;1H" }, //home
+    { '*', "\033[2J" }, //cls
+    { '^', "\033[1;1H" }, //home
+    { '!', "\033[2J\033[1;1H\033[0m" }, //cls+home+normal
     //attributes
     { '/', "\033[3m" }, //italic
     { '|', "\033[0m" }, //normal
@@ -117,6 +120,11 @@ int Markup(Dev_ dev, const char* str){
 template<typename Dev, typename...Ts>
 int Print(Dev dev, const char* fmt, Ts...ts){
     char buf[256];
-    snprintf( buf, 256, fmt, ts... );
-    return Markup( dev, buf ); 
+    int n = snprintf( buf, 256, fmt, ts... );
+    if( n < 256 or not markupON ) return Markup( dev, buf ); 
+    //markup is on and all buffer used, so turn off markup and print what we have
+    markupON = false;
+    n = Markup( dev, buf );
+    markupON = true;
+    return n;
 }

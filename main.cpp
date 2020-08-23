@@ -76,24 +76,28 @@ will enable DCDCEN for REG1
 -----------------------------------------------------------------------------*/
 int main() {
 
-    Debug( "{!HC}\nStarting...{W}\n\n" );
-
+    Debug( "{!G}\nBoot...{Y}\n" );
+    Debug( "board.init()...\n" );
     board.init();           //init board pins
     board.alive();          //blink led's to show boot
 
                             //start power management
+    Debug( "nrf_pwr_mgmt_init()...\n" );
     error.check( nrf_pwr_mgmt_init() );
                             //enable REG1 Dc-Dc (instead of LDO, for 1.8v system)
     nrf_power_dcdcen_set( true );
 
+    Debug( "ble.init()...\n" );
     ble.init();             //ble stack init
 
     ////// now can use sd_* functions //////
 
+    Debug( "adv.init()...\n" );
     adv.init();             //advertising init
 
     while( true ) { 
-        Debug("{R}nrf_pwr_mgmt_run{W}\n");
+        DebugFuncHeader();
+        Debug("{R}  nrf_pwr_mgmt_run()...{W}\n");
         nrf_pwr_mgmt_run();  
     }
 
