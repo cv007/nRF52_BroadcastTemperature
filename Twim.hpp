@@ -253,12 +253,12 @@ SA  init            (uint8_t addr, FREQ f = K400) {
 
 SA  deinit          () { 
                         disable();
-                        //twi pins back to default so pullups not driving anything external
-                        Gpio<Sda_>::init();
-                        Gpio<Scl_>::init();
                         //if a power pin specified, turn off power to twi slave
                         if constexpr( Pwr_ != -1 ){
                             Gpio<Pwr_>::off();
+                            //and twi pins back to default so pullups not driving anything external
+                            Gpio<Sda_>::init();
+                            Gpio<Scl_>::init();
                         }
                     }
 

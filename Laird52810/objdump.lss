@@ -3413,11 +3413,11 @@ Disassembly of section .text:
    1b288:	2200      	movs	r2, #0
    1b28a:	f8c3 2500 	str.w	r2, [r3, #1280]	; 0x500
    1b28e:	f04f 43a0 	mov.w	r3, #1342177280	; 0x50000000
-   1b292:	2102      	movs	r1, #2
-   1b294:	f8c3 1734 	str.w	r1, [r3, #1844]	; 0x734
-   1b298:	f8c3 173c 	str.w	r1, [r3, #1852]	; 0x73c
-   1b29c:	f44f 3100 	mov.w	r1, #131072	; 0x20000
-   1b2a0:	f8c3 150c 	str.w	r1, [r3, #1292]	; 0x50c
+   1b292:	f44f 3100 	mov.w	r1, #131072	; 0x20000
+   1b296:	f8c3 150c 	str.w	r1, [r3, #1292]	; 0x50c
+   1b29a:	2102      	movs	r1, #2
+   1b29c:	f8c3 1734 	str.w	r1, [r3, #1844]	; 0x734
+   1b2a0:	f8c3 173c 	str.w	r1, [r3, #1852]	; 0x73c
    1b2a4:	4b17      	ldr	r3, [pc, #92]	; (1b304 <TemperatureTmp117<(unsigned char)5>::read()+0xec>)
    1b2a6:	701a      	strb	r2, [r3, #0]
    1b2a8:	f7fe f936 	bl	19518 <app_timer_cnt_get>
