@@ -220,6 +220,7 @@ template<typename Dev, typename...Ts>
 int Print(Dev dev, const char* fmt, Ts...ts){
     char buf[512];
     int n = snprintf( buf, 512, fmt, ts... );
+    if( n == 0 ) return 0;
     if( n < 512 or not markupON ) return Markup( dev, buf ); 
     //markup is on and all buffer used, so turn off markup and print 
     //what we have without ansi codes so we are not left with an incomplete

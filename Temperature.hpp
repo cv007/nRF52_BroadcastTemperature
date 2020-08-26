@@ -89,32 +89,29 @@ using twi_ = Twim0< board.sda.pinNumber(),
 
 static inline Tmp117< twi_ > tmp117;
 
+                    // -999 = failed (and is not added to history)
 SA  read            () {
-                        DebugFuncHeader();
-                        int16_t f = -999; //-99.9 = failed to get
+                        int16_t f = -999;
                         int16_t t = -32768;
                         //get temp Fx10 into f
  
                         if( tmp117.oneShot() ){
-                            nrf_delay_ms( 125 ); //15.5ms x8
-                            auto i = 50; //give time to get a read
-                            for( ; i; i-- ){
+                            nrf_delay_ms( 125 ); //15.5ms x8samples
+                            auto i = 10; //give time to get a read
+                            while( i-- ){
                                 if( tmp117.tempRaw(t) ) break;
-                                 nrf_delay_ms(1);
+                                nrf_delay_ms(1);
                             }
-                            tmp117.deinit();
-                            if( i ){
-                                f = tmp117.x10F( t );
-                                 Debug("  tmp117 raw: %d  F: %d  i: %d\n", t, f, i); 
-                            } else Debug("  tmp117 timeout\n");
-                            if( t == -32768 ) return f;
-                        } else {
-                            tmp117.deinit();
-                            Debug("  tmp117 failed\n");
+                        }
+                        tmp117.deinit();
+                        DebugFuncHeader();
+                        if( t == -32768 ){
+                            Debug("  failed to read, or returned default temp value\n");
                             return f;
                         }
-                        
+                        f = tmp117.x10F( t );
                         f = Temperature<HistSiz_>::addHistory( f );
+                        Debug("  tmp117 raw: %d  F: %d\n", t, f);
                         return f;
                     }
 };

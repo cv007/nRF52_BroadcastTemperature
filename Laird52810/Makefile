@@ -198,7 +198,7 @@ INC_FOLDERS += \
 LIB_FILES += \
 
 # Optimization flags
-OPT = -O3 -g3
+OPT = -Os # -g3
 # Uncomment the line below to enable link time optimization
 #OPT += -flto
 
@@ -227,7 +227,7 @@ CFLAGS += -fno-builtin -fshort-enums
 CXXFLAGS += $(OPT)
 CXXFLAGS += -std=c++17
 # Assembler flags common to all targets
-ASMFLAGS += -g3
+#ASMFLAGS += -g3
 ASMFLAGS += -mcpu=cortex-m4
 ASMFLAGS += -mthumb -mabi=aapcs
 ASMFLAGS += -mfloat-abi=soft

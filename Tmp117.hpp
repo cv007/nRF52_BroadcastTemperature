@@ -48,7 +48,7 @@ struct Tmp117 {
 
 SA  init        () {
                     twi_.init( Addr_ ); //K100
-                    nrf_delay_ms( 2 );
+                    nrf_delay_ms( 3 );
                     isInit_ = true;
                 }
 
@@ -63,8 +63,8 @@ SA  read        (const U8 r, T& v) {
                         tf = true;
                     }
 DebugFuncHeader();
-Debug("  read reg: %d -> %s  ", r, tf ? "ok" : "failed");
-if( tf ) Debug("  v: 0x%04X", v ); 
+Debug("  read reg: %d %s", r, tf ? "" : "[failed]");
+if( tf ) Debug(" [0x%04X]", v ); 
 Debug("\n");
                     return tf;
                 }
@@ -77,7 +77,7 @@ SA  write       (const U8 r, const T& v) {
                     U8 buf[3] = { r, vH, vL };
                     bool tf = twi_.write( buf );
 DebugFuncHeader();
-Debug("  write reg: %d (0x%04X) -> %s\n", r, v, tf ? "ok" : "failed");
+Debug("  write reg: %d [0x%04X] %s\n", r, v, tf ? "ok" : "failed");
                     return tf;
                 }
 
@@ -121,9 +121,10 @@ SA  eeLock      ()              { return write( EEUNLOCK, 1<<EUN ); }
 SA  id          (U16& v)        { return read( DEVICEID, v ); }
 SA  highLimit   (U16& v)        { return write( HIGHLIMIT, v ); }
 SA  lowLimit    (U16& v)        { return write( LOWLIMIT, v ); }
-SA  tempRaw     (I16& v)        { U16 s = 0; //check if ready, return false if cannot read or is not ready
-                                  if( not configR( s ) and ( s bitand (1<<DATAREADY) ) ) return false;
-                                  return read( TEMP, v ); 
+SA  tempRaw     (I16& v)        { U16 s = -1; //check if ready, return false if cannot read or is not ready
+                                  if( configR(s) and
+                                      (s bitand (1<<DATAREADY)) ) return read( TEMP, v ); 
+                                  return false;
                                 }
 
 

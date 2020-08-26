@@ -138,8 +138,7 @@ SA  txBufferSet     (uint32_t addr, uint16_t len) {
                     }
                     template<unsigned N>
 SA  txBufferSet     (uint8_t (&addr)[N]) {
-                        reg.TXD.PTR = (uint32_t)addr;
-                        reg.TXD.MAXCNT = N;
+                        txBufferSet( (uint32_t)addr, N );
                     }
 SA  rxBufferSet     (uint32_t addr, uint16_t len) {
                         reg.RXD.PTR = addr;
@@ -147,8 +146,7 @@ SA  rxBufferSet     (uint32_t addr, uint16_t len) {
                     }
                     template<unsigned N>
 SA  rxBufferSet     (uint8_t (&addr)[N]) {
-                        reg.RXD.PTR = (uint32_t)addr;
-                        reg.RXD.MAXCNT = N;
+                        rxBufferSet( (uint32_t)addr, N );
                     }
 
 SA  txSentCount     () { return reg.TXD.AMOUNT; }
@@ -162,13 +160,13 @@ SA  pinSdaConnect   ()          { reg.PSEL_SDA and_eq compl (1<<31); }
 SA  pinSclDisconnect()          { reg.PSEL_SCL or_eq (1<<31); } 
 SA  pinSdaDisconnect()          { reg.PSEL_SDA or_eq (1<<31); }
 
+
+                    //set pins only when disabled
 SA  pinScl          (PIN e, bool on = true) { 
-                        disable(); 
                         reg.PSEL_SCL = e;
                         if( not on ) pinSclDisconnect();
                     } 
 SA  pinSda          (PIN e, bool on = true) {
-                        disable(); 
                         reg.PSEL_SDA = e;
                         if( not on ) pinSdaDisconnect();
                     }
@@ -204,8 +202,8 @@ SA  isLastTx        ()          { return reg.EVENTS.LASTTX; }
 //--------------------
 //  tasks
 //--------------------
-SA  startRx         ()          { enable(); reg.TASKS.STARTRX = 1; } 
-SA  startTx         ()          { enable(); reg.TASKS.STARTTX = 1; } 
+SA  startRx         ()          { reg.TASKS.STARTRX = 1; } 
+SA  startTx         ()          { reg.TASKS.STARTTX = 1; } 
 SA  stop            ()          { reg.TASKS.STOP = 1; } //cannot stop while suspended
 SA  suspend         ()          { reg.TASKS.SUSPEND = 1; }
 SA  resume          ()          { reg.TASKS.RESUME = 1; }
@@ -236,7 +234,7 @@ SA  clearDataNack   ()          { reg.ERRORSRC = 2; }
 //--------------------
 //  init/constructors
 //--------------------
-SA  init            (uint8_t addr, FREQ f = K100) { 
+SA  init            (uint8_t addr, FREQ f = K400) { 
                         address( addr );
                         frequency( f );  
                         //when twi not enabled, puts pins in a twi like state
@@ -250,6 +248,7 @@ SA  init            (uint8_t addr, FREQ f = K100) {
                             Gpio<Pwr_>::init( OUTPUT, S0H1 );
                             Gpio<Pwr_>::on();
                         }
+                        enable(); 
                     }
 
 SA  deinit          () { 
@@ -260,7 +259,6 @@ SA  deinit          () {
                         //if a power pin specified, turn off power to twi slave
                         if constexpr( Pwr_ != -1 ){
                             Gpio<Pwr_>::off();
-                            Gpio<Pwr_>::init();
                         }
                     }
 
@@ -273,29 +271,29 @@ SA  deinit          () {
 //--------------------
                     template<unsigned TN, unsigned RN>
 SA  xfer            (uint8_t (&txbuf)[TN], uint8_t (&rxbuf)[RN]) {
-DebugFuncHeader();
                         txBufferSet( txbuf );
                         rxBufferSet( rxbuf );
                         clearEvents();
                         shortsDisableAll();
                         shortsEnable( LASTTX_STARTRX ); //tx -> rx    
                         shortsEnable( LASTRX_STOP ); //rx -> stop
-                        startTx(); //also enables if not already
-                        while( not isError() and not isStopped() );
-Debug("  {Forange}twim xfer done{Fwhite} 0x%08X\n", reg.ERRORSRC);
+                        startTx();
+                        while( not isError() and not isStopped() );                       
+                        // DebugFuncHeader();
+                        // Debug("  {Forange}twim xfer{Fwhite} 0x%08X\n", reg.ERRORSRC);
                         return txSentCount() == TN and rxReceivedCount() == RN;
                     }
 
                     template<unsigned N>
 SA  write           (uint8_t (&txbuf)[N]) {
-DebugFuncHeader();
                         txBufferSet( txbuf );
                         clearEvents();
                         shortsDisableAll();
-                        shortsEnable( LASTTX_STOP ); //tx -> stop    
+                        shortsEnable( LASTTX_STOP ); //tx -> stop 
                         startTx(); //also enables if not already
                         while( not isError() and not isStopped() );
-Debug("  {Forange}twim write done{Fwhite} 0x%08X\n", reg.ERRORSRC );
+                        // DebugFuncHeader();
+                        // Debug("  {Forange}twim write{Fwhite} 0x%08X\n", reg.ERRORSRC );
                         return txSentCount() == N;
                     }
 };
@@ -309,49 +307,8 @@ Debug("  {Forange}twim write done{Fwhite} 0x%08X\n", reg.ERRORSRC );
 
 template<PIN Sda_, PIN Scl_, PIN Pwr_ = PIN(-1)>
 using Twim0 = Twim<0x40003000, Sda_, Scl_, Pwr_>; //all
+
 #ifdef  NRF52840 
 template<PIN Sda_, PIN Scl_, PIN Pwr_ = PIN(-1)>
 using Twim1 = Twim<0x40004000, Sda_, Scl_, Pwr_>; //nRF52840
 #endif
-
-
-
-/*------------------------------------------------------------------------------
-
-write sequence -
-
-    txBufferSet( buf, 2 ); //set TX.PTR and TX.MAXCNT
-    startTx();  // -> start, address:0 
-                // if ACK'd, tx byte(s) from TX.PTR for TX.MAXCNT
-
-    while( not isError() and not isLastTx() );
-    stop();
-    while( not isStopped() );
-    if( isError() ){}
-    txSentCount()
-
-read sequence -
-
-    rxBufferSet( buf, 2 ); //set RX.PTR and RX.MAXCNT
-    startRx();  // -> start, address:1 
-                // if ACK'd, rx byte(s) from RX.PTR for RX.MAXCNT
-
-    while( not isError() and not isLastRx() );
-    stop();
-    while( not isStopped() );
-    if( isError() ){}
-    rxSentCount()
-
-                template<unsigned TN, unsigned RN>
-SA  xfer        (uint8_t (&txbuf)[TN], uint8_t (&rxbuf)[RN]) {
-                    txBufferSet( txbuf );
-                    rxBufferSet( rxbuf );
-                    shortsDisableAll();
-                    shortsEnable( LASTTX_STARTRX ); //tx -> rx    
-                    shortsEnable( LASTRX_STOP ); //rx -> stop
-                    startTx();
-                    while( not isError() and not isStopped() );
-                    return txSentCount() == TN and rxReceivedCount() == RN;
-                }
-
-------------------------------------------------------------------------------*/
