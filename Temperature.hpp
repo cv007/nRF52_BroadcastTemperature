@@ -4,8 +4,10 @@
 #include <cstdbool>
 
 #include "nrf_sdh.h"
+#include "nrf_delay.h"
 
 #include "Print.hpp"
+#include "Tmp117.hpp"
 
 #define SA [[gnu::noinline]] static auto
 #define SCA static constexpr auto
@@ -73,7 +75,7 @@ SA  read            () {
                         f = (t*10*9/5+320*4)/4; // Fx10
                         f = Temperature<HistSiz_>::addHistory( f );
                         DebugFuncHeader();
-                        Debug("{W}  raw: %d\n    F: %02d.%d{|}\n", t, f/10, f%10);
+                        Debug("{Fwhite}  raw: %d\n    F: %02d.%d\n", t, f/10, f%10);
                         return f;
                     }
 };
@@ -81,16 +83,38 @@ SA  read            () {
 template<uint8_t HistSiz_>
 struct TemperatureTmp117 : Temperature<HistSiz_> {
 
+using twi_ = Twim0< board.sda.pinNumber(),   
+                    board.scl.pinNumber(), 
+                    board.i2cDevicePwr.pinNumber() >;
+
+static inline Tmp117< twi_ > tmp117;
+
 SA  read            () {
-                        int16_t f = -999; //-99.9 = failed to get
-                        int32_t t;
-
-                        //get temp Fx10 into f
-
-
-                        f = Temperature<HistSiz_>::addHistory( f );
                         DebugFuncHeader();
-                        Debug("\traw: %d\n\tF: %02d.%d\n", t, f/10, f%10);
+                        int16_t f = -999; //-99.9 = failed to get
+                        int16_t t = -32768;
+                        //get temp Fx10 into f
+ 
+                        if( tmp117.oneShot() ){
+                            nrf_delay_ms( 125 ); //15.5ms x8
+                            auto i = 50; //give time to get a read
+                            for( ; i; i-- ){
+                                if( tmp117.tempRaw(t) ) break;
+                                 nrf_delay_ms(1);
+                            }
+                            tmp117.deinit();
+                            if( i ){
+                                f = tmp117.x10F( t );
+                                 Debug("  tmp117 raw: %d  F: %d  i: %d\n", t, f, i); 
+                            } else Debug("  tmp117 timeout\n");
+                            if( t == -32768 ) return f;
+                        } else {
+                            tmp117.deinit();
+                            Debug("  tmp117 failed\n");
+                            return f;
+                        }
+                        
+                        f = Temperature<HistSiz_>::addHistory( f );
                         return f;
                     }
 };

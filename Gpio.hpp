@@ -217,7 +217,7 @@ SA  clearLatch  ()          { reg.LATCH = 1; }
                 //the GPIO::PIN numbers in use match the pin number scheme used
                 //in places that sets a peripheral pin
                 //  PSEL.SCA = board.sca.pinNumber();
-SA  pinNumber   ()          { return (U32)Pin_; }
+SCA pinNumber   ()          { return Pin_; }
 
 SA  blinkN      (uint16_t n, uint32_t mson, uint32_t msoff = 0, uint32_t lastdelayms = 0) {
                     if( not isOutput() ) return;

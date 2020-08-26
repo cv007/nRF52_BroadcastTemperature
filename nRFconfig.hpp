@@ -44,7 +44,7 @@ inline bool markupON{true};
 #define Debug(...)              Print( DEBUG_DEVICE, __VA_ARGS__ )
 //using app timer rtc1 as system time, is /2 so 16384 per sec
 #define DebugFuncHeader()       do { uint32_t t = app_timer_cnt_get(); \
-                                Debug("{G}[%04d.%06d][%s:%d ::%s]{W}\n", \
+                                Debug("{Fgreen}[%04d.%06d][%s:%d ::%s]{Fwhite}\n", \
                                 t/16384, (t%16384) * 61, \
                                 __FILE__, __LINE__, __func__); } while(0)
 #else

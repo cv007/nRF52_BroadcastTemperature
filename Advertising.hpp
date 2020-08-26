@@ -331,7 +331,7 @@ SA  update          (void* pcontext = nullptr) -> void {
 
                         //=== Debug ===
                         DebugFuncHeader();
-                        Debug( "{C}  -advertising packet-{W}\n" );
+                        Debug( "{Fcyan}  -advertising packet-{Fwhite}\n" );
                         auto i = 0;
                         while( buffer_[i] ){
                             auto len = buffer_[i++];
@@ -414,7 +414,7 @@ void advInitCB(); //called from adv.init()
 #ifdef TEMPERTURE_INTERNAL
     inline Advertising< MyTemperatureAD<TemperatureInternal<5> >, 3000, advInitCB > adv; 
 #elif defined TEMPERATURE_TMP117
-    inline Advertising< MyTemperatureAD<TemperatureInternal<5> >, 3000, advInitCB > adv; 
+    inline Advertising< MyTemperatureAD<TemperatureTmp117<5> >, 3000, advInitCB > adv; 
 #elif defined TEMPERATURE_SI7051
     inline Advertising< MyTemperatureAD<TemperatureInternal<5> >, 3000, advInitCB > adv;
 #else

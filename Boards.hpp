@@ -93,16 +93,17 @@ struct BL651tempBoard {
     SI Gpio<P0_15>  scl;
     SI Gpio<P0_17>  i2cDevicePwr; 
 
-SA  i2cInit () {
-                sda.init( INPUT, S0D1, PULLUP );
-                scl.init( INPUT, S0D1, PULLUP );
-                i2cDevicePwr.init( OUTPUT, S0H1 );
-            }
-SA  i2cDeinit () {
-                sda.init(); //all default values
-                scl.init();
-                i2cDevicePwr.init();
-            }
+//taken care of in Twim
+// SA  i2cInit () {
+//                 sda.init( INPUT, S0D1, PULLUP );
+//                 scl.init( INPUT, S0D1, PULLUP );
+//                 i2cDevicePwr.init( OUTPUT, S0H1 );
+//             }
+// SA  i2cDeinit () {
+//                 sda.init(); //all default values
+//                 scl.init();
+//                 i2cDevicePwr.init();
+//             }
 
     //these pins are not init until init() is run
     SI Gpio<P0_7>  ledRed; //board label 1

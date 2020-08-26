@@ -76,7 +76,7 @@ will enable DCDCEN for REG1
 -----------------------------------------------------------------------------*/
 int main() {
 
-    Debug( "{!G}\nBoot...{Y}\n" );
+    Debug( "{normal}{Fgreen}\nBoot...{Fmagenta}\n" );
     Debug( "board.init()...\n" );
     board.init();           //init board pins
     board.alive();          //blink led's to show boot
@@ -97,7 +97,7 @@ int main() {
 
     while( true ) { 
         DebugFuncHeader();
-        Debug("{R}  nrf_pwr_mgmt_run()...{W}\n");
+        Debug("{Forange}  low power...{Fwhite} \n");
         nrf_pwr_mgmt_run();  
     }
 
