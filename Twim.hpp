@@ -11,6 +11,7 @@
 #define U32 uint32_t
 #define U16 uint16_t
 #define I16 int16_t
+#define U8 uint8_t
 // #define SA [[gnu::always_inline]] static auto
 // #define SA [[gnu::noinline]] static auto
 #define SA static auto
@@ -31,7 +32,7 @@
     Easy-DMA) using ENABLE = 5, that the nRF52810 does not show, but they
     most likely both will work with the code below (only tested on a nRF52810)
 ------------------------------------------------------------------------------*/
-template<uint32_t BaseAddr_, PIN Sda_, PIN Scl_, PIN Pwr_>
+template<U32 BaseAddr_, PIN Sda_, PIN Scl_, PIN Pwr_>
 struct Twim {
 
 //============
@@ -135,7 +136,7 @@ SA  enable          ()          { reg.ENABLE = 6; }
 SA  disable         ()          { reg.ENABLE = 0; }
 SA  isEnabled       ()          { return reg.ENABLE; }
 SA  frequency       (FREQ e)    { reg.FREQUENCY = e; }
-SA  address         (uint8_t v) { reg.ADDRESS = v; } //0-127
+SA  address         (U8 v)      { reg.ADDRESS = v; } //0-127
 
 //--------------------
 //  Easy-DMA buffers
@@ -143,28 +144,28 @@ SA  address         (uint8_t v) { reg.ADDRESS = v; } //0-127
                     //nRF52840 max len = 0xFFFF, nRF52810 = 0x3FFF
                     //caller will have to know what is max, and len
                     //is used as-is
-SA  txBufferSet     (uint32_t addr, uint16_t len) {
+SA  txBufferSet     (U32 addr, U16 len) {
                         reg.TXD.PTR = addr;
                         reg.TXD.MAXCNT = len;
                     }
 
                     template<unsigned N>
-SA  txBufferSet     (uint8_t (&addr)[N]) {
-                        txBufferSet( (uint32_t)addr, N );
+SA  txBufferSet     (U8 (&addr)[N]) {
+                        txBufferSet( (U32)addr, N );
                     }
 
-SA  rxBufferSet     (uint32_t addr, uint16_t len) {
+SA  rxBufferSet     (U32 addr, U16 len) {
                         reg.RXD.PTR = addr;
                         reg.RXD.MAXCNT = len;
                     }
 
                     template<unsigned N>
-SA  rxBufferSet     (uint8_t (&addr)[N]) {
-                        rxBufferSet( (uint32_t)addr, N );
+SA  rxBufferSet     (U8 (&addr)[N]) {
+                        rxBufferSet( (U32)addr, N );
                     }
 
-SA  txSentCount     () { return reg.TXD.AMOUNT; }
-SA  rxReceivedCount () { return reg.RXD.AMOUNT; }
+SA  txAmount        ()          { return reg.TXD.AMOUNT; }
+SA  rxAmount        ()          { return reg.RXD.AMOUNT; }
 
 //--------------------
 //  pins (uses GPIO::PIN)
@@ -246,7 +247,7 @@ SA  isDataNack      ()          { return reg.ERRORSRC bitand 4; }
 //--------------------
 //  init/constructors
 //--------------------
-SA  init            (uint8_t addr, FREQ f = K400) { 
+SA  init            (U8 addr, FREQ f = K400) { 
                         address( addr );
                         frequency( f );  
                         //when twi not enabled, set pins gpio state like twi
@@ -274,7 +275,7 @@ SA  deinit          () {
                         }
                     }
 
-    Twim            (uint8_t addr, FREQ f = K100) { init( addr, f ); }
+    Twim            (U8 addr, FREQ f = K100) { init( addr, f ); }
     Twim            (){} //call init manually
 
 
@@ -288,38 +289,49 @@ SA  deinit          () {
 //are blocking functions anyway
 //should also add timeouts so if something wrong we don't block forever
 
+SA  waitForStop     () {
+                        bool ok = false;
+                        while(true){
+                            if( isError() ) { 
+                                stop();
+                                break; 
+                            }
+                            if( isStopped() ){ ok = true; break; }
+                        }
+                        // if( not ok ){
+                        //      DebugFuncHeader();
+                        //      Debug("  {Forange}twim xfer ERRORSRC:{Fwhite} 0x%08X\n", reg.ERRORSRC);
+                        //  }
+                        return ok;
+                    }
+
                     //write,read
                     template<unsigned NT, unsigned NR>
-SA  xfer            (uint8_t (&txbuf)[NT], uint8_t (&rxbuf)[NR]) {
+SA  xfer            (U8 (&txbuf)[NT], U8 (&rxbuf)[NR]) {
 asm("nop");
                         txBufferSet( txbuf );
-                        rxBufferSet( rxbuf );
+                        rxBufferSet( rxbuf );  
                         clearEvents();
                         shortsSetup( LASTTX_STARTRX_STOP ); //tx -> rx -> stop    
                         startTx();
-                        while( not isError() and not isStopped() );                       
-                        // DebugFuncHeader();
-                        // Debug("  {Forange}twim xfer ERRORSRC:{Fwhite} 0x%08X\n", reg.ERRORSRC);
-                        return not isError() and (txSentCount() == NT) and (rxReceivedCount() == NR);
+                        return waitForStop() and (txAmount() == NT) and (rxAmount() == NR);
                     }
 
                     //write only
                     template<unsigned N>
-SA  write           (uint8_t (&txbuf)[N]) {
+SA  write           (U8 (&txbuf)[N]) {
                         txBufferSet( txbuf );
                         clearEvents();
                         shortsSetup( LASTTX_STOP ); //tx -> stop 
                         startTx(); //also enables if not already
-                        while( not isError() and not isStopped() );
-                        // DebugFuncHeader();
-                        // Debug("  {Forange}twim write{Fwhite} 0x%08X\n", reg.ERRORSRC );
-                        return not isError() and txSentCount() == N;
+                        return waitForStop() and (txAmount() == N);
                     }
 };
 
 #undef U32
 #undef U16
 #undef I16
+#undef U8
 #undef SA 
 #undef SI
 #undef SCA

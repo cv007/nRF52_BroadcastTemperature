@@ -3767,9 +3767,9 @@ Disassembly of section .text:
 
 0001b68c <TemperatureTmp117<(unsigned char)5>::read()>:
    1b68c:	e92d 4ff0 	stmdb	sp!, {r4, r5, r6, r7, r8, r9, sl, fp, lr}
-   1b690:	4bc7      	ldr	r3, [pc, #796]	; (1b9b0 <TemperatureTmp117<(unsigned char)5>::read()+0x324>)
-   1b692:	4ec8      	ldr	r6, [pc, #800]	; (1b9b4 <TemperatureTmp117<(unsigned char)5>::read()+0x328>)
-   1b694:	f8df 9340 	ldr.w	r9, [pc, #832]	; 1b9d8 <TemperatureTmp117<(unsigned char)5>::read()+0x34c>
+   1b690:	4bae      	ldr	r3, [pc, #696]	; (1b94c <TemperatureTmp117<(unsigned char)5>::read()+0x2c0>)
+   1b692:	4eaf      	ldr	r6, [pc, #700]	; (1b950 <TemperatureTmp117<(unsigned char)5>::read()+0x2c4>)
+   1b694:	f8df 92dc 	ldr.w	r9, [pc, #732]	; 1b974 <TemperatureTmp117<(unsigned char)5>::read()+0x2e8>
    1b698:	f04f 42a0 	mov.w	r2, #1342177280	; 0x50000000
    1b69c:	2148      	movs	r1, #72	; 0x48
    1b69e:	f04f 60c8 	mov.w	r0, #104857600	; 0x6400000
@@ -3803,12 +3803,12 @@ Disassembly of section .text:
    1b6fc:	3c01      	subs	r4, #1
    1b6fe:	d1fa      	bne.n	1b6f6 <TemperatureTmp117<(unsigned char)5>::read()+0x6a>
    1b700:	f899 3000 	ldrb.w	r3, [r9]
-   1b704:	4caa      	ldr	r4, [pc, #680]	; (1b9b0 <TemperatureTmp117<(unsigned char)5>::read()+0x324>)
-   1b706:	f8df b2c0 	ldr.w	fp, [pc, #704]	; 1b9c8 <TemperatureTmp117<(unsigned char)5>::read()+0x33c>
+   1b704:	4c91      	ldr	r4, [pc, #580]	; (1b94c <TemperatureTmp117<(unsigned char)5>::read()+0x2c0>)
+   1b706:	f8df b25c 	ldr.w	fp, [pc, #604]	; 1b964 <TemperatureTmp117<(unsigned char)5>::read()+0x2d8>
    1b70a:	270b      	movs	r7, #11
    1b70c:	2501      	movs	r5, #1
    1b70e:	2b00      	cmp	r3, #0
-   1b710:	d055      	beq.n	1b7be <TemperatureTmp117<(unsigned char)5>::read()+0x132>
+   1b710:	d04f      	beq.n	1b7b2 <TemperatureTmp117<(unsigned char)5>::read()+0x126>
    1b712:	2300      	movs	r3, #0
    1b714:	f88d 5008 	strb.w	r5, [sp, #8]
    1b718:	f8ad 300c 	strh.w	r3, [sp, #12]
@@ -3832,97 +3832,97 @@ Disassembly of section .text:
    1b756:	f8c4 3160 	str.w	r3, [r4, #352]	; 0x160
    1b75a:	f8c4 c200 	str.w	ip, [r4, #512]	; 0x200
    1b75e:	60a5      	str	r5, [r4, #8]
-   1b760:	e002      	b.n	1b768 <TemperatureTmp117<(unsigned char)5>::read()+0xdc>
+   1b760:	e003      	b.n	1b76a <TemperatureTmp117<(unsigned char)5>::read()+0xde>
    1b762:	f8d4 3104 	ldr.w	r3, [r4, #260]	; 0x104
-   1b766:	b91b      	cbnz	r3, 1b770 <TemperatureTmp117<(unsigned char)5>::read()+0xe4>
-   1b768:	f8d4 3124 	ldr.w	r3, [r4, #292]	; 0x124
-   1b76c:	2b00      	cmp	r3, #0
-   1b76e:	d0f8      	beq.n	1b762 <TemperatureTmp117<(unsigned char)5>::read()+0xd6>
-   1b770:	f8d4 3124 	ldr.w	r3, [r4, #292]	; 0x124
-   1b774:	b923      	cbnz	r3, 1b780 <TemperatureTmp117<(unsigned char)5>::read()+0xf4>
-   1b776:	f8d4 a54c 	ldr.w	sl, [r4, #1356]	; 0x54c
-   1b77a:	f1ba 0f01 	cmp.w	sl, #1
-   1b77e:	d049      	beq.n	1b814 <TemperatureTmp117<(unsigned char)5>::read()+0x188>
-   1b780:	f7fe f818 	bl	197b4 <app_timer_cnt_get>
-   1b784:	f3c0 030d 	ubfx	r3, r0, #0, #14
-   1b788:	4a8b      	ldr	r2, [pc, #556]	; (1b9b8 <TemperatureTmp117<(unsigned char)5>::read()+0x32c>)
-   1b78a:	9200      	str	r2, [sp, #0]
-   1b78c:	ebc3 1103 	rsb	r1, r3, r3, lsl #4
-   1b790:	eb03 0181 	add.w	r1, r3, r1, lsl #2
-   1b794:	465a      	mov	r2, fp
-   1b796:	233b      	movs	r3, #59	; 0x3b
-   1b798:	0b80      	lsrs	r0, r0, #14
-   1b79a:	f7ff ff49 	bl	1b630 <int Print<DevRtt<0>, unsigned long, unsigned long, char const*, int, char const*>(DevRtt<0>, char const*, unsigned long, unsigned long, char const*, int, char const*) [clone .constprop.0]>
-   1b79e:	4987      	ldr	r1, [pc, #540]	; (1b9bc <TemperatureTmp117<(unsigned char)5>::read()+0x330>)
-   1b7a0:	2001      	movs	r0, #1
-   1b7a2:	f7ff fec9 	bl	1b538 <int Print<DevRtt<0>, unsigned char, char const*>(DevRtt<0>, char const*, unsigned char, char const*) [clone .isra.0] [clone .constprop.0]>
-   1b7a6:	4886      	ldr	r0, [pc, #536]	; (1b9c0 <TemperatureTmp117<(unsigned char)5>::read()+0x334>)
-   1b7a8:	f7ff fe78 	bl	1b49c <int Print<DevRtt<0>>(DevRtt<0>, char const*) [clone .isra.0]>
-   1b7ac:	3f01      	subs	r7, #1
-   1b7ae:	d057      	beq.n	1b860 <TemperatureTmp117<(unsigned char)5>::read()+0x1d4>
-   1b7b0:	f44f 40fa 	mov.w	r0, #32000	; 0x7d00
-   1b7b4:	47b0      	blx	r6
-   1b7b6:	f899 3000 	ldrb.w	r3, [r9]
-   1b7ba:	2b00      	cmp	r3, #0
-   1b7bc:	d1a9      	bne.n	1b712 <TemperatureTmp117<(unsigned char)5>::read()+0x86>
-   1b7be:	f04f 43a0 	mov.w	r3, #1342177280	; 0x50000000
-   1b7c2:	2048      	movs	r0, #72	; 0x48
-   1b7c4:	f04f 61c8 	mov.w	r1, #104857600	; 0x6400000
-   1b7c8:	f8c4 0588 	str.w	r0, [r4, #1416]	; 0x588
-   1b7cc:	f240 620c 	movw	r2, #1548	; 0x60c
-   1b7d0:	f8c4 1524 	str.w	r1, [r4, #1316]	; 0x524
-   1b7d4:	200d      	movs	r0, #13
-   1b7d6:	210f      	movs	r1, #15
-   1b7d8:	f8c3 2734 	str.w	r2, [r3, #1844]	; 0x734
-   1b7dc:	f8c3 273c 	str.w	r2, [r3, #1852]	; 0x73c
-   1b7e0:	f8c4 050c 	str.w	r0, [r4, #1292]	; 0x50c
-   1b7e4:	f44f 3200 	mov.w	r2, #131072	; 0x20000
-   1b7e8:	f8c4 1508 	str.w	r1, [r4, #1288]	; 0x508
-   1b7ec:	f240 2001 	movw	r0, #513	; 0x201
-   1b7f0:	2106      	movs	r1, #6
-   1b7f2:	f8c3 250c 	str.w	r2, [r3, #1292]	; 0x50c
-   1b7f6:	f8c3 0744 	str.w	r0, [r3, #1860]	; 0x744
-   1b7fa:	f8c3 2508 	str.w	r2, [r3, #1288]	; 0x508
-   1b7fe:	f44f 407a 	mov.w	r0, #64000	; 0xfa00
-   1b802:	f8c4 1500 	str.w	r1, [r4, #1280]	; 0x500
-   1b806:	47b0      	blx	r6
-   1b808:	f44f 407a 	mov.w	r0, #64000	; 0xfa00
-   1b80c:	47b0      	blx	r6
-   1b80e:	f889 5000 	strb.w	r5, [r9]
-   1b812:	e77e      	b.n	1b712 <TemperatureTmp117<(unsigned char)5>::read()+0x86>
-   1b814:	f8d4 353c 	ldr.w	r3, [r4, #1340]	; 0x53c
-   1b818:	2b02      	cmp	r3, #2
-   1b81a:	d1b1      	bne.n	1b780 <TemperatureTmp117<(unsigned char)5>::read()+0xf4>
-   1b81c:	f89d 300c 	ldrb.w	r3, [sp, #12]
-   1b820:	f89d 800d 	ldrb.w	r8, [sp, #13]
-   1b824:	ea48 2803 	orr.w	r8, r8, r3, lsl #8
-   1b828:	f7fd ffc4 	bl	197b4 <app_timer_cnt_get>
-   1b82c:	f3c0 030d 	ubfx	r3, r0, #0, #14
-   1b830:	4a61      	ldr	r2, [pc, #388]	; (1b9b8 <TemperatureTmp117<(unsigned char)5>::read()+0x32c>)
-   1b832:	9200      	str	r2, [sp, #0]
-   1b834:	ebc3 1103 	rsb	r1, r3, r3, lsl #4
-   1b838:	465a      	mov	r2, fp
-   1b83a:	eb03 0181 	add.w	r1, r3, r1, lsl #2
-   1b83e:	0b80      	lsrs	r0, r0, #14
-   1b840:	233b      	movs	r3, #59	; 0x3b
-   1b842:	f7ff fef5 	bl	1b630 <int Print<DevRtt<0>, unsigned long, unsigned long, char const*, int, char const*>(DevRtt<0>, char const*, unsigned long, unsigned long, char const*, int, char const*) [clone .constprop.0]>
-   1b846:	495f      	ldr	r1, [pc, #380]	; (1b9c4 <TemperatureTmp117<(unsigned char)5>::read()+0x338>)
-   1b848:	4650      	mov	r0, sl
-   1b84a:	f7ff fe75 	bl	1b538 <int Print<DevRtt<0>, unsigned char, char const*>(DevRtt<0>, char const*, unsigned char, char const*) [clone .isra.0] [clone .constprop.0]>
-   1b84e:	4640      	mov	r0, r8
-   1b850:	f7ff fe4a 	bl	1b4e8 <int Print<DevRtt<0>, unsigned short>(DevRtt<0>, char const*, unsigned short) [clone .isra.0] [clone .constprop.0]>
-   1b854:	485a      	ldr	r0, [pc, #360]	; (1b9c0 <TemperatureTmp117<(unsigned char)5>::read()+0x334>)
-   1b856:	f7ff fe21 	bl	1b49c <int Print<DevRtt<0>>(DevRtt<0>, char const*) [clone .isra.0]>
-   1b85a:	f418 5f00 	tst.w	r8, #8192	; 0x2000
-   1b85e:	d0a5      	beq.n	1b7ac <TemperatureTmp117<(unsigned char)5>::read()+0x120>
-   1b860:	f899 3000 	ldrb.w	r3, [r9]
-   1b864:	2b00      	cmp	r3, #0
-   1b866:	d076      	beq.n	1b956 <TemperatureTmp117<(unsigned char)5>::read()+0x2ca>
+   1b766:	2b00      	cmp	r3, #0
+   1b768:	d14e      	bne.n	1b808 <TemperatureTmp117<(unsigned char)5>::read()+0x17c>
+   1b76a:	f8d4 3124 	ldr.w	r3, [r4, #292]	; 0x124
+   1b76e:	2b00      	cmp	r3, #0
+   1b770:	d0f7      	beq.n	1b762 <TemperatureTmp117<(unsigned char)5>::read()+0xd6>
+   1b772:	6165      	str	r5, [r4, #20]
+   1b774:	f7fe f81e 	bl	197b4 <app_timer_cnt_get>
+   1b778:	f3c0 030d 	ubfx	r3, r0, #0, #14
+   1b77c:	4a75      	ldr	r2, [pc, #468]	; (1b954 <TemperatureTmp117<(unsigned char)5>::read()+0x2c8>)
+   1b77e:	9200      	str	r2, [sp, #0]
+   1b780:	ebc3 1103 	rsb	r1, r3, r3, lsl #4
+   1b784:	eb03 0181 	add.w	r1, r3, r1, lsl #2
+   1b788:	465a      	mov	r2, fp
+   1b78a:	233b      	movs	r3, #59	; 0x3b
+   1b78c:	0b80      	lsrs	r0, r0, #14
+   1b78e:	f7ff ff4f 	bl	1b630 <int Print<DevRtt<0>, unsigned long, unsigned long, char const*, int, char const*>(DevRtt<0>, char const*, unsigned long, unsigned long, char const*, int, char const*) [clone .constprop.0]>
+   1b792:	4971      	ldr	r1, [pc, #452]	; (1b958 <TemperatureTmp117<(unsigned char)5>::read()+0x2cc>)
+   1b794:	2001      	movs	r0, #1
+   1b796:	f7ff fecf 	bl	1b538 <int Print<DevRtt<0>, unsigned char, char const*>(DevRtt<0>, char const*, unsigned char, char const*) [clone .isra.0] [clone .constprop.0]>
+   1b79a:	4870      	ldr	r0, [pc, #448]	; (1b95c <TemperatureTmp117<(unsigned char)5>::read()+0x2d0>)
+   1b79c:	f7ff fe7e 	bl	1b49c <int Print<DevRtt<0>>(DevRtt<0>, char const*) [clone .isra.0]>
+   1b7a0:	3f01      	subs	r7, #1
+   1b7a2:	d05c      	beq.n	1b85e <TemperatureTmp117<(unsigned char)5>::read()+0x1d2>
+   1b7a4:	f44f 40fa 	mov.w	r0, #32000	; 0x7d00
+   1b7a8:	47b0      	blx	r6
+   1b7aa:	f899 3000 	ldrb.w	r3, [r9]
+   1b7ae:	2b00      	cmp	r3, #0
+   1b7b0:	d1af      	bne.n	1b712 <TemperatureTmp117<(unsigned char)5>::read()+0x86>
+   1b7b2:	f04f 43a0 	mov.w	r3, #1342177280	; 0x50000000
+   1b7b6:	2048      	movs	r0, #72	; 0x48
+   1b7b8:	f04f 61c8 	mov.w	r1, #104857600	; 0x6400000
+   1b7bc:	f8c4 0588 	str.w	r0, [r4, #1416]	; 0x588
+   1b7c0:	f240 620c 	movw	r2, #1548	; 0x60c
+   1b7c4:	f8c4 1524 	str.w	r1, [r4, #1316]	; 0x524
+   1b7c8:	200d      	movs	r0, #13
+   1b7ca:	210f      	movs	r1, #15
+   1b7cc:	f8c3 2734 	str.w	r2, [r3, #1844]	; 0x734
+   1b7d0:	f8c3 273c 	str.w	r2, [r3, #1852]	; 0x73c
+   1b7d4:	f8c4 050c 	str.w	r0, [r4, #1292]	; 0x50c
+   1b7d8:	f44f 3200 	mov.w	r2, #131072	; 0x20000
+   1b7dc:	f8c4 1508 	str.w	r1, [r4, #1288]	; 0x508
+   1b7e0:	f240 2001 	movw	r0, #513	; 0x201
+   1b7e4:	2106      	movs	r1, #6
+   1b7e6:	f8c3 250c 	str.w	r2, [r3, #1292]	; 0x50c
+   1b7ea:	f8c3 0744 	str.w	r0, [r3, #1860]	; 0x744
+   1b7ee:	f8c3 2508 	str.w	r2, [r3, #1288]	; 0x508
+   1b7f2:	f44f 407a 	mov.w	r0, #64000	; 0xfa00
+   1b7f6:	f8c4 1500 	str.w	r1, [r4, #1280]	; 0x500
+   1b7fa:	47b0      	blx	r6
+   1b7fc:	f44f 407a 	mov.w	r0, #64000	; 0xfa00
+   1b800:	47b0      	blx	r6
+   1b802:	f889 5000 	strb.w	r5, [r9]
+   1b806:	e784      	b.n	1b712 <TemperatureTmp117<(unsigned char)5>::read()+0x86>
+   1b808:	f8d4 a54c 	ldr.w	sl, [r4, #1356]	; 0x54c
+   1b80c:	f1ba 0f01 	cmp.w	sl, #1
+   1b810:	d1b0      	bne.n	1b774 <TemperatureTmp117<(unsigned char)5>::read()+0xe8>
+   1b812:	f8d4 353c 	ldr.w	r3, [r4, #1340]	; 0x53c
+   1b816:	2b02      	cmp	r3, #2
+   1b818:	d1ac      	bne.n	1b774 <TemperatureTmp117<(unsigned char)5>::read()+0xe8>
+   1b81a:	f89d 300c 	ldrb.w	r3, [sp, #12]
+   1b81e:	f89d 800d 	ldrb.w	r8, [sp, #13]
+   1b822:	ea48 2803 	orr.w	r8, r8, r3, lsl #8
+   1b826:	f7fd ffc5 	bl	197b4 <app_timer_cnt_get>
+   1b82a:	f3c0 030d 	ubfx	r3, r0, #0, #14
+   1b82e:	4a49      	ldr	r2, [pc, #292]	; (1b954 <TemperatureTmp117<(unsigned char)5>::read()+0x2c8>)
+   1b830:	9200      	str	r2, [sp, #0]
+   1b832:	ebc3 1103 	rsb	r1, r3, r3, lsl #4
+   1b836:	465a      	mov	r2, fp
+   1b838:	eb03 0181 	add.w	r1, r3, r1, lsl #2
+   1b83c:	0b80      	lsrs	r0, r0, #14
+   1b83e:	233b      	movs	r3, #59	; 0x3b
+   1b840:	f7ff fef6 	bl	1b630 <int Print<DevRtt<0>, unsigned long, unsigned long, char const*, int, char const*>(DevRtt<0>, char const*, unsigned long, unsigned long, char const*, int, char const*) [clone .constprop.0]>
+   1b844:	4946      	ldr	r1, [pc, #280]	; (1b960 <TemperatureTmp117<(unsigned char)5>::read()+0x2d4>)
+   1b846:	4650      	mov	r0, sl
+   1b848:	f7ff fe76 	bl	1b538 <int Print<DevRtt<0>, unsigned char, char const*>(DevRtt<0>, char const*, unsigned char, char const*) [clone .isra.0] [clone .constprop.0]>
+   1b84c:	4640      	mov	r0, r8
+   1b84e:	f7ff fe4b 	bl	1b4e8 <int Print<DevRtt<0>, unsigned short>(DevRtt<0>, char const*, unsigned short) [clone .isra.0] [clone .constprop.0]>
+   1b852:	4842      	ldr	r0, [pc, #264]	; (1b95c <TemperatureTmp117<(unsigned char)5>::read()+0x2d0>)
+   1b854:	f7ff fe22 	bl	1b49c <int Print<DevRtt<0>>(DevRtt<0>, char const*) [clone .isra.0]>
+   1b858:	f418 5f00 	tst.w	r8, #8192	; 0x2000
+   1b85c:	d0a0      	beq.n	1b7a0 <TemperatureTmp117<(unsigned char)5>::read()+0x114>
+   1b85e:	f899 3000 	ldrb.w	r3, [r9]
+   1b862:	2b00      	cmp	r3, #0
+   1b864:	f000 80e0 	beq.w	1ba28 <TemperatureTmp117<(unsigned char)5>::read()+0x39c>
    1b868:	2200      	movs	r2, #0
    1b86a:	f8ad 200c 	strh.w	r2, [sp, #12]
    1b86e:	f88d 2008 	strb.w	r2, [sp, #8]
    1b872:	bf00      	nop
-   1b874:	4b4e      	ldr	r3, [pc, #312]	; (1b9b0 <TemperatureTmp117<(unsigned char)5>::read()+0x324>)
+   1b874:	4b35      	ldr	r3, [pc, #212]	; (1b94c <TemperatureTmp117<(unsigned char)5>::read()+0x2c0>)
    1b876:	a802      	add	r0, sp, #8
    1b878:	f8c3 0544 	str.w	r0, [r3, #1348]	; 0x544
    1b87c:	2101      	movs	r1, #1
@@ -3936,163 +3936,165 @@ Disassembly of section .text:
    1b894:	f8c3 2104 	str.w	r2, [r3, #260]	; 0x104
    1b898:	f8c3 44c4 	str.w	r4, [r3, #1220]	; 0x4c4
    1b89c:	f8c3 2124 	str.w	r2, [r3, #292]	; 0x124
-   1b8a0:	f8c3 2148 	str.w	r2, [r3, #328]	; 0x148
-   1b8a4:	f8c3 214c 	str.w	r2, [r3, #332]	; 0x14c
-   1b8a8:	f8c3 2150 	str.w	r2, [r3, #336]	; 0x150
-   1b8ac:	f8c3 215c 	str.w	r2, [r3, #348]	; 0x15c
-   1b8b0:	f8c3 2160 	str.w	r2, [r3, #352]	; 0x160
-   1b8b4:	f8c3 0200 	str.w	r0, [r3, #512]	; 0x200
-   1b8b8:	461a      	mov	r2, r3
+   1b8a0:	461c      	mov	r4, r3
+   1b8a2:	f8c3 2148 	str.w	r2, [r3, #328]	; 0x148
+   1b8a6:	f8c3 214c 	str.w	r2, [r3, #332]	; 0x14c
+   1b8aa:	f8c3 2150 	str.w	r2, [r3, #336]	; 0x150
+   1b8ae:	f8c3 215c 	str.w	r2, [r3, #348]	; 0x15c
+   1b8b2:	f8c3 2160 	str.w	r2, [r3, #352]	; 0x160
+   1b8b6:	f8c3 0200 	str.w	r0, [r3, #512]	; 0x200
    1b8ba:	6099      	str	r1, [r3, #8]
-   1b8bc:	e002      	b.n	1b8c4 <TemperatureTmp117<(unsigned char)5>::read()+0x238>
-   1b8be:	f8d2 3104 	ldr.w	r3, [r2, #260]	; 0x104
-   1b8c2:	b91b      	cbnz	r3, 1b8cc <TemperatureTmp117<(unsigned char)5>::read()+0x240>
-   1b8c4:	f8d2 3124 	ldr.w	r3, [r2, #292]	; 0x124
-   1b8c8:	2b00      	cmp	r3, #0
-   1b8ca:	d0f8      	beq.n	1b8be <TemperatureTmp117<(unsigned char)5>::read()+0x232>
-   1b8cc:	4e38      	ldr	r6, [pc, #224]	; (1b9b0 <TemperatureTmp117<(unsigned char)5>::read()+0x324>)
-   1b8ce:	f8d6 5124 	ldr.w	r5, [r6, #292]	; 0x124
-   1b8d2:	b91d      	cbnz	r5, 1b8dc <TemperatureTmp117<(unsigned char)5>::read()+0x250>
-   1b8d4:	f8d6 354c 	ldr.w	r3, [r6, #1356]	; 0x54c
-   1b8d8:	2b01      	cmp	r3, #1
-   1b8da:	d07f      	beq.n	1b9dc <TemperatureTmp117<(unsigned char)5>::read()+0x350>
-   1b8dc:	f7fd ff6a 	bl	197b4 <app_timer_cnt_get>
-   1b8e0:	f3c0 030d 	ubfx	r3, r0, #0, #14
-   1b8e4:	4d34      	ldr	r5, [pc, #208]	; (1b9b8 <TemperatureTmp117<(unsigned char)5>::read()+0x32c>)
-   1b8e6:	4a38      	ldr	r2, [pc, #224]	; (1b9c8 <TemperatureTmp117<(unsigned char)5>::read()+0x33c>)
-   1b8e8:	9500      	str	r5, [sp, #0]
-   1b8ea:	ebc3 1103 	rsb	r1, r3, r3, lsl #4
-   1b8ee:	eb03 0181 	add.w	r1, r3, r1, lsl #2
-   1b8f2:	0b80      	lsrs	r0, r0, #14
-   1b8f4:	233b      	movs	r3, #59	; 0x3b
-   1b8f6:	f7ff fe9b 	bl	1b630 <int Print<DevRtt<0>, unsigned long, unsigned long, char const*, int, char const*>(DevRtt<0>, char const*, unsigned long, unsigned long, char const*, int, char const*) [clone .constprop.0]>
-   1b8fa:	4930      	ldr	r1, [pc, #192]	; (1b9bc <TemperatureTmp117<(unsigned char)5>::read()+0x330>)
-   1b8fc:	4c2c      	ldr	r4, [pc, #176]	; (1b9b0 <TemperatureTmp117<(unsigned char)5>::read()+0x324>)
-   1b8fe:	2000      	movs	r0, #0
-   1b900:	f7ff fe1a 	bl	1b538 <int Print<DevRtt<0>, unsigned char, char const*>(DevRtt<0>, char const*, unsigned char, char const*) [clone .isra.0] [clone .constprop.0]>
-   1b904:	482e      	ldr	r0, [pc, #184]	; (1b9c0 <TemperatureTmp117<(unsigned char)5>::read()+0x334>)
-   1b906:	f7ff fdc9 	bl	1b49c <int Print<DevRtt<0>>(DevRtt<0>, char const*) [clone .isra.0]>
-   1b90a:	f04f 43a0 	mov.w	r3, #1342177280	; 0x50000000
-   1b90e:	2200      	movs	r2, #0
-   1b910:	2102      	movs	r1, #2
-   1b912:	f44f 3000 	mov.w	r0, #131072	; 0x20000
-   1b916:	f8c4 2500 	str.w	r2, [r4, #1280]	; 0x500
-   1b91a:	f8c3 050c 	str.w	r0, [r3, #1292]	; 0x50c
-   1b91e:	f8c3 1734 	str.w	r1, [r3, #1844]	; 0x734
-   1b922:	f8c3 173c 	str.w	r1, [r3, #1852]	; 0x73c
-   1b926:	f889 2000 	strb.w	r2, [r9]
-   1b92a:	f7fd ff43 	bl	197b4 <app_timer_cnt_get>
-   1b92e:	f3c0 030d 	ubfx	r3, r0, #0, #14
-   1b932:	ebc3 1103 	rsb	r1, r3, r3, lsl #4
-   1b936:	eb03 0181 	add.w	r1, r3, r1, lsl #2
-   1b93a:	4a24      	ldr	r2, [pc, #144]	; (1b9cc <TemperatureTmp117<(unsigned char)5>::read()+0x340>)
-   1b93c:	9500      	str	r5, [sp, #0]
-   1b93e:	0b80      	lsrs	r0, r0, #14
-   1b940:	236c      	movs	r3, #108	; 0x6c
-   1b942:	f7ff fe75 	bl	1b630 <int Print<DevRtt<0>, unsigned long, unsigned long, char const*, int, char const*>(DevRtt<0>, char const*, unsigned long, unsigned long, char const*, int, char const*) [clone .constprop.0]>
-   1b946:	4822      	ldr	r0, [pc, #136]	; (1b9d0 <TemperatureTmp117<(unsigned char)5>::read()+0x344>)
-   1b948:	4d22      	ldr	r5, [pc, #136]	; (1b9d4 <TemperatureTmp117<(unsigned char)5>::read()+0x348>)
-   1b94a:	f7ff fda7 	bl	1b49c <int Print<DevRtt<0>>(DevRtt<0>, char const*) [clone .isra.0]>
-   1b94e:	4628      	mov	r0, r5
-   1b950:	b005      	add	sp, #20
-   1b952:	e8bd 8ff0 	ldmia.w	sp!, {r4, r5, r6, r7, r8, r9, sl, fp, pc}
-   1b956:	4b16      	ldr	r3, [pc, #88]	; (1b9b0 <TemperatureTmp117<(unsigned char)5>::read()+0x324>)
-   1b958:	f04f 42a0 	mov.w	r2, #1342177280	; 0x50000000
-   1b95c:	2048      	movs	r0, #72	; 0x48
-   1b95e:	f04f 64c8 	mov.w	r4, #104857600	; 0x6400000
-   1b962:	f8c3 0588 	str.w	r0, [r3, #1416]	; 0x588
-   1b966:	f240 610c 	movw	r1, #1548	; 0x60c
-   1b96a:	f8c3 4524 	str.w	r4, [r3, #1316]	; 0x524
-   1b96e:	200d      	movs	r0, #13
-   1b970:	240f      	movs	r4, #15
-   1b972:	f8c2 1734 	str.w	r1, [r2, #1844]	; 0x734
-   1b976:	f8c2 173c 	str.w	r1, [r2, #1852]	; 0x73c
-   1b97a:	f8c3 050c 	str.w	r0, [r3, #1292]	; 0x50c
-   1b97e:	f44f 3100 	mov.w	r1, #131072	; 0x20000
-   1b982:	f8c3 4508 	str.w	r4, [r3, #1288]	; 0x508
-   1b986:	f240 2001 	movw	r0, #513	; 0x201
-   1b98a:	2406      	movs	r4, #6
-   1b98c:	f8c2 150c 	str.w	r1, [r2, #1292]	; 0x50c
-   1b990:	f8c2 0744 	str.w	r0, [r2, #1860]	; 0x744
-   1b994:	f8c2 1508 	str.w	r1, [r2, #1288]	; 0x508
-   1b998:	f44f 407a 	mov.w	r0, #64000	; 0xfa00
-   1b99c:	f8c3 4500 	str.w	r4, [r3, #1280]	; 0x500
-   1b9a0:	47b0      	blx	r6
-   1b9a2:	f44f 407a 	mov.w	r0, #64000	; 0xfa00
-   1b9a6:	47b0      	blx	r6
-   1b9a8:	2301      	movs	r3, #1
-   1b9aa:	f889 3000 	strb.w	r3, [r9]
-   1b9ae:	e75b      	b.n	1b868 <TemperatureTmp117<(unsigned char)5>::read()+0x1dc>
-   1b9b0:	40003000 	.word	0x40003000
-   1b9b4:	0001e300 	.word	0x0001e300
-   1b9b8:	0001e0d0 	.word	0x0001e0d0
-   1b9bc:	0001e120 	.word	0x0001e120
-   1b9c0:	0001e254 	.word	0x0001e254
-   1b9c4:	0001e1e4 	.word	0x0001e1e4
-   1b9c8:	0001e0c0 	.word	0x0001e0c0
-   1b9cc:	0001e0d8 	.word	0x0001e0d8
-   1b9d0:	0001e0ec 	.word	0x0001e0ec
-   1b9d4:	fffffc19 	.word	0xfffffc19
-   1b9d8:	20001398 	.word	0x20001398
-   1b9dc:	f8d6 753c 	ldr.w	r7, [r6, #1340]	; 0x53c
-   1b9e0:	2f02      	cmp	r7, #2
-   1b9e2:	f47f af7b 	bne.w	1b8dc <TemperatureTmp117<(unsigned char)5>::read()+0x250>
-   1b9e6:	f89d 300c 	ldrb.w	r3, [sp, #12]
-   1b9ea:	f89d 400d 	ldrb.w	r4, [sp, #13]
-   1b9ee:	ea44 2403 	orr.w	r4, r4, r3, lsl #8
-   1b9f2:	f7fd fedf 	bl	197b4 <app_timer_cnt_get>
-   1b9f6:	f3c0 030d 	ubfx	r3, r0, #0, #14
-   1b9fa:	4a23      	ldr	r2, [pc, #140]	; (1ba88 <TemperatureTmp117<(unsigned char)5>::read()+0x3fc>)
-   1b9fc:	9200      	str	r2, [sp, #0]
-   1b9fe:	ebc3 1103 	rsb	r1, r3, r3, lsl #4
-   1ba02:	4a22      	ldr	r2, [pc, #136]	; (1ba8c <TemperatureTmp117<(unsigned char)5>::read()+0x400>)
-   1ba04:	eb03 0181 	add.w	r1, r3, r1, lsl #2
-   1ba08:	0b80      	lsrs	r0, r0, #14
-   1ba0a:	233b      	movs	r3, #59	; 0x3b
-   1ba0c:	f7ff fe10 	bl	1b630 <int Print<DevRtt<0>, unsigned long, unsigned long, char const*, int, char const*>(DevRtt<0>, char const*, unsigned long, unsigned long, char const*, int, char const*) [clone .constprop.0]>
-   1ba10:	b224      	sxth	r4, r4
-   1ba12:	491f      	ldr	r1, [pc, #124]	; (1ba90 <TemperatureTmp117<(unsigned char)5>::read()+0x404>)
-   1ba14:	4628      	mov	r0, r5
-   1ba16:	f7ff fd8f 	bl	1b538 <int Print<DevRtt<0>, unsigned char, char const*>(DevRtt<0>, char const*, unsigned char, char const*) [clone .isra.0] [clone .constprop.0]>
-   1ba1a:	4620      	mov	r0, r4
-   1ba1c:	f7ff fdb6 	bl	1b58c <int Print<DevRtt<0>, short>(DevRtt<0>, char const*, short) [clone .isra.0] [clone .constprop.0]>
-   1ba20:	481c      	ldr	r0, [pc, #112]	; (1ba94 <TemperatureTmp117<(unsigned char)5>::read()+0x408>)
-   1ba22:	f7ff fd3b 	bl	1b49c <int Print<DevRtt<0>>(DevRtt<0>, char const*) [clone .isra.0]>
-   1ba26:	f04f 43a0 	mov.w	r3, #1342177280	; 0x50000000
-   1ba2a:	f44f 3200 	mov.w	r2, #131072	; 0x20000
-   1ba2e:	f8c6 5500 	str.w	r5, [r6, #1280]	; 0x500
-   1ba32:	f8c3 250c 	str.w	r2, [r3, #1292]	; 0x50c
-   1ba36:	f8c3 7734 	str.w	r7, [r3, #1844]	; 0x734
-   1ba3a:	f8c3 773c 	str.w	r7, [r3, #1852]	; 0x73c
-   1ba3e:	f889 5000 	strb.w	r5, [r9]
-   1ba42:	f7fd feb7 	bl	197b4 <app_timer_cnt_get>
-   1ba46:	f3c0 030d 	ubfx	r3, r0, #0, #14
-   1ba4a:	4a0f      	ldr	r2, [pc, #60]	; (1ba88 <TemperatureTmp117<(unsigned char)5>::read()+0x3fc>)
-   1ba4c:	9200      	str	r2, [sp, #0]
-   1ba4e:	ebc3 1103 	rsb	r1, r3, r3, lsl #4
-   1ba52:	eb03 0181 	add.w	r1, r3, r1, lsl #2
-   1ba56:	4a10      	ldr	r2, [pc, #64]	; (1ba98 <TemperatureTmp117<(unsigned char)5>::read()+0x40c>)
-   1ba58:	0b80      	lsrs	r0, r0, #14
-   1ba5a:	236c      	movs	r3, #108	; 0x6c
-   1ba5c:	f7ff fde8 	bl	1b630 <int Print<DevRtt<0>, unsigned long, unsigned long, char const*, int, char const*>(DevRtt<0>, char const*, unsigned long, unsigned long, char const*, int, char const*) [clone .constprop.0]>
-   1ba60:	f514 4f00 	cmn.w	r4, #32768	; 0x8000
-   1ba64:	f43f af6f 	beq.w	1b946 <TemperatureTmp117<(unsigned char)5>::read()+0x2ba>
-   1ba68:	eb04 00c4 	add.w	r0, r4, r4, lsl #3
-   1ba6c:	1180      	asrs	r0, r0, #6
-   1ba6e:	f500 70a0 	add.w	r0, r0, #320	; 0x140
-   1ba72:	f7ff fafd 	bl	1b070 <Temperature<(unsigned char)5>::addHistory(short)>
-   1ba76:	4605      	mov	r5, r0
-   1ba78:	4629      	mov	r1, r5
-   1ba7a:	4620      	mov	r0, r4
-   1ba7c:	f7ff fdae 	bl	1b5dc <int Print<DevRtt<0>, short, short>(DevRtt<0>, char const*, short, short) [clone .isra.0] [clone .constprop.0]>
-   1ba80:	4628      	mov	r0, r5
-   1ba82:	b005      	add	sp, #20
-   1ba84:	e8bd 8ff0 	ldmia.w	sp!, {r4, r5, r6, r7, r8, r9, sl, fp, pc}
-   1ba88:	0001e0d0 	.word	0x0001e0d0
-   1ba8c:	0001e0c0 	.word	0x0001e0c0
-   1ba90:	0001e1e4 	.word	0x0001e1e4
-   1ba94:	0001e254 	.word	0x0001e254
-   1ba98:	0001e0d8 	.word	0x0001e0d8
+   1b8bc:	e003      	b.n	1b8c6 <TemperatureTmp117<(unsigned char)5>::read()+0x23a>
+   1b8be:	f8d4 3104 	ldr.w	r3, [r4, #260]	; 0x104
+   1b8c2:	2b00      	cmp	r3, #0
+   1b8c4:	d158      	bne.n	1b978 <TemperatureTmp117<(unsigned char)5>::read()+0x2ec>
+   1b8c6:	f8d4 5124 	ldr.w	r5, [r4, #292]	; 0x124
+   1b8ca:	2d00      	cmp	r5, #0
+   1b8cc:	d0f7      	beq.n	1b8be <TemperatureTmp117<(unsigned char)5>::read()+0x232>
+   1b8ce:	2301      	movs	r3, #1
+   1b8d0:	6163      	str	r3, [r4, #20]
+   1b8d2:	f7fd ff6f 	bl	197b4 <app_timer_cnt_get>
+   1b8d6:	f3c0 030d 	ubfx	r3, r0, #0, #14
+   1b8da:	4d1e      	ldr	r5, [pc, #120]	; (1b954 <TemperatureTmp117<(unsigned char)5>::read()+0x2c8>)
+   1b8dc:	4a21      	ldr	r2, [pc, #132]	; (1b964 <TemperatureTmp117<(unsigned char)5>::read()+0x2d8>)
+   1b8de:	9500      	str	r5, [sp, #0]
+   1b8e0:	ebc3 1103 	rsb	r1, r3, r3, lsl #4
+   1b8e4:	eb03 0181 	add.w	r1, r3, r1, lsl #2
+   1b8e8:	0b80      	lsrs	r0, r0, #14
+   1b8ea:	233b      	movs	r3, #59	; 0x3b
+   1b8ec:	f7ff fea0 	bl	1b630 <int Print<DevRtt<0>, unsigned long, unsigned long, char const*, int, char const*>(DevRtt<0>, char const*, unsigned long, unsigned long, char const*, int, char const*) [clone .constprop.0]>
+   1b8f0:	4919      	ldr	r1, [pc, #100]	; (1b958 <TemperatureTmp117<(unsigned char)5>::read()+0x2cc>)
+   1b8f2:	4c16      	ldr	r4, [pc, #88]	; (1b94c <TemperatureTmp117<(unsigned char)5>::read()+0x2c0>)
+   1b8f4:	2000      	movs	r0, #0
+   1b8f6:	f7ff fe1f 	bl	1b538 <int Print<DevRtt<0>, unsigned char, char const*>(DevRtt<0>, char const*, unsigned char, char const*) [clone .isra.0] [clone .constprop.0]>
+   1b8fa:	4818      	ldr	r0, [pc, #96]	; (1b95c <TemperatureTmp117<(unsigned char)5>::read()+0x2d0>)
+   1b8fc:	f7ff fdce 	bl	1b49c <int Print<DevRtt<0>>(DevRtt<0>, char const*) [clone .isra.0]>
+   1b900:	f04f 43a0 	mov.w	r3, #1342177280	; 0x50000000
+   1b904:	2200      	movs	r2, #0
+   1b906:	2102      	movs	r1, #2
+   1b908:	f44f 3000 	mov.w	r0, #131072	; 0x20000
+   1b90c:	f8c4 2500 	str.w	r2, [r4, #1280]	; 0x500
+   1b910:	f8c3 050c 	str.w	r0, [r3, #1292]	; 0x50c
+   1b914:	f8c3 1734 	str.w	r1, [r3, #1844]	; 0x734
+   1b918:	f8c3 173c 	str.w	r1, [r3, #1852]	; 0x73c
+   1b91c:	f889 2000 	strb.w	r2, [r9]
+   1b920:	f7fd ff48 	bl	197b4 <app_timer_cnt_get>
+   1b924:	f3c0 030d 	ubfx	r3, r0, #0, #14
+   1b928:	ebc3 1103 	rsb	r1, r3, r3, lsl #4
+   1b92c:	eb03 0181 	add.w	r1, r3, r1, lsl #2
+   1b930:	4a0d      	ldr	r2, [pc, #52]	; (1b968 <TemperatureTmp117<(unsigned char)5>::read()+0x2dc>)
+   1b932:	9500      	str	r5, [sp, #0]
+   1b934:	0b80      	lsrs	r0, r0, #14
+   1b936:	236c      	movs	r3, #108	; 0x6c
+   1b938:	f7ff fe7a 	bl	1b630 <int Print<DevRtt<0>, unsigned long, unsigned long, char const*, int, char const*>(DevRtt<0>, char const*, unsigned long, unsigned long, char const*, int, char const*) [clone .constprop.0]>
+   1b93c:	480b      	ldr	r0, [pc, #44]	; (1b96c <TemperatureTmp117<(unsigned char)5>::read()+0x2e0>)
+   1b93e:	4c0c      	ldr	r4, [pc, #48]	; (1b970 <TemperatureTmp117<(unsigned char)5>::read()+0x2e4>)
+   1b940:	f7ff fdac 	bl	1b49c <int Print<DevRtt<0>>(DevRtt<0>, char const*) [clone .isra.0]>
+   1b944:	4620      	mov	r0, r4
+   1b946:	b005      	add	sp, #20
+   1b948:	e8bd 8ff0 	ldmia.w	sp!, {r4, r5, r6, r7, r8, r9, sl, fp, pc}
+   1b94c:	40003000 	.word	0x40003000
+   1b950:	0001e300 	.word	0x0001e300
+   1b954:	0001e0d0 	.word	0x0001e0d0
+   1b958:	0001e120 	.word	0x0001e120
+   1b95c:	0001e254 	.word	0x0001e254
+   1b960:	0001e1e4 	.word	0x0001e1e4
+   1b964:	0001e0c0 	.word	0x0001e0c0
+   1b968:	0001e0d8 	.word	0x0001e0d8
+   1b96c:	0001e0ec 	.word	0x0001e0ec
+   1b970:	fffffc19 	.word	0xfffffc19
+   1b974:	20001398 	.word	0x20001398
+   1b978:	f8d4 354c 	ldr.w	r3, [r4, #1356]	; 0x54c
+   1b97c:	2b01      	cmp	r3, #1
+   1b97e:	d1a8      	bne.n	1b8d2 <TemperatureTmp117<(unsigned char)5>::read()+0x246>
+   1b980:	f8d4 753c 	ldr.w	r7, [r4, #1340]	; 0x53c
+   1b984:	2f02      	cmp	r7, #2
+   1b986:	d1a4      	bne.n	1b8d2 <TemperatureTmp117<(unsigned char)5>::read()+0x246>
+   1b988:	f89d 300c 	ldrb.w	r3, [sp, #12]
+   1b98c:	f89d 600d 	ldrb.w	r6, [sp, #13]
+   1b990:	ea46 2603 	orr.w	r6, r6, r3, lsl #8
+   1b994:	f7fd ff0e 	bl	197b4 <app_timer_cnt_get>
+   1b998:	f3c0 030d 	ubfx	r3, r0, #0, #14
+   1b99c:	4a39      	ldr	r2, [pc, #228]	; (1ba84 <TemperatureTmp117<(unsigned char)5>::read()+0x3f8>)
+   1b99e:	9200      	str	r2, [sp, #0]
+   1b9a0:	ebc3 1103 	rsb	r1, r3, r3, lsl #4
+   1b9a4:	4a38      	ldr	r2, [pc, #224]	; (1ba88 <TemperatureTmp117<(unsigned char)5>::read()+0x3fc>)
+   1b9a6:	eb03 0181 	add.w	r1, r3, r1, lsl #2
+   1b9aa:	0b80      	lsrs	r0, r0, #14
+   1b9ac:	233b      	movs	r3, #59	; 0x3b
+   1b9ae:	f7ff fe3f 	bl	1b630 <int Print<DevRtt<0>, unsigned long, unsigned long, char const*, int, char const*>(DevRtt<0>, char const*, unsigned long, unsigned long, char const*, int, char const*) [clone .constprop.0]>
+   1b9b2:	b236      	sxth	r6, r6
+   1b9b4:	4935      	ldr	r1, [pc, #212]	; (1ba8c <TemperatureTmp117<(unsigned char)5>::read()+0x400>)
+   1b9b6:	4628      	mov	r0, r5
+   1b9b8:	f7ff fdbe 	bl	1b538 <int Print<DevRtt<0>, unsigned char, char const*>(DevRtt<0>, char const*, unsigned char, char const*) [clone .isra.0] [clone .constprop.0]>
+   1b9bc:	4630      	mov	r0, r6
+   1b9be:	f7ff fde5 	bl	1b58c <int Print<DevRtt<0>, short>(DevRtt<0>, char const*, short) [clone .isra.0] [clone .constprop.0]>
+   1b9c2:	4833      	ldr	r0, [pc, #204]	; (1ba90 <TemperatureTmp117<(unsigned char)5>::read()+0x404>)
+   1b9c4:	f7ff fd6a 	bl	1b49c <int Print<DevRtt<0>>(DevRtt<0>, char const*) [clone .isra.0]>
+   1b9c8:	f04f 43a0 	mov.w	r3, #1342177280	; 0x50000000
+   1b9cc:	f44f 3200 	mov.w	r2, #131072	; 0x20000
+   1b9d0:	f8c4 5500 	str.w	r5, [r4, #1280]	; 0x500
+   1b9d4:	f8c3 250c 	str.w	r2, [r3, #1292]	; 0x50c
+   1b9d8:	f8c3 7734 	str.w	r7, [r3, #1844]	; 0x734
+   1b9dc:	f8c3 773c 	str.w	r7, [r3, #1852]	; 0x73c
+   1b9e0:	f889 5000 	strb.w	r5, [r9]
+   1b9e4:	f7fd fee6 	bl	197b4 <app_timer_cnt_get>
+   1b9e8:	f3c0 030d 	ubfx	r3, r0, #0, #14
+   1b9ec:	4a25      	ldr	r2, [pc, #148]	; (1ba84 <TemperatureTmp117<(unsigned char)5>::read()+0x3f8>)
+   1b9ee:	9200      	str	r2, [sp, #0]
+   1b9f0:	ebc3 1103 	rsb	r1, r3, r3, lsl #4
+   1b9f4:	eb03 0181 	add.w	r1, r3, r1, lsl #2
+   1b9f8:	4a26      	ldr	r2, [pc, #152]	; (1ba94 <TemperatureTmp117<(unsigned char)5>::read()+0x408>)
+   1b9fa:	0b80      	lsrs	r0, r0, #14
+   1b9fc:	236c      	movs	r3, #108	; 0x6c
+   1b9fe:	f7ff fe17 	bl	1b630 <int Print<DevRtt<0>, unsigned long, unsigned long, char const*, int, char const*>(DevRtt<0>, char const*, unsigned long, unsigned long, char const*, int, char const*) [clone .constprop.0]>
+   1ba02:	f516 4f00 	cmn.w	r6, #32768	; 0x8000
+   1ba06:	d099      	beq.n	1b93c <TemperatureTmp117<(unsigned char)5>::read()+0x2b0>
+   1ba08:	eb06 00c6 	add.w	r0, r6, r6, lsl #3
+   1ba0c:	1180      	asrs	r0, r0, #6
+   1ba0e:	f500 70a0 	add.w	r0, r0, #320	; 0x140
+   1ba12:	f7ff fb2d 	bl	1b070 <Temperature<(unsigned char)5>::addHistory(short)>
+   1ba16:	4604      	mov	r4, r0
+   1ba18:	4621      	mov	r1, r4
+   1ba1a:	4630      	mov	r0, r6
+   1ba1c:	f7ff fdde 	bl	1b5dc <int Print<DevRtt<0>, short, short>(DevRtt<0>, char const*, short, short) [clone .isra.0] [clone .constprop.0]>
+   1ba20:	4620      	mov	r0, r4
+   1ba22:	b005      	add	sp, #20
+   1ba24:	e8bd 8ff0 	ldmia.w	sp!, {r4, r5, r6, r7, r8, r9, sl, fp, pc}
+   1ba28:	4b1b      	ldr	r3, [pc, #108]	; (1ba98 <TemperatureTmp117<(unsigned char)5>::read()+0x40c>)
+   1ba2a:	f04f 42a0 	mov.w	r2, #1342177280	; 0x50000000
+   1ba2e:	2048      	movs	r0, #72	; 0x48
+   1ba30:	f04f 64c8 	mov.w	r4, #104857600	; 0x6400000
+   1ba34:	f8c3 0588 	str.w	r0, [r3, #1416]	; 0x588
+   1ba38:	f240 610c 	movw	r1, #1548	; 0x60c
+   1ba3c:	f8c3 4524 	str.w	r4, [r3, #1316]	; 0x524
+   1ba40:	200d      	movs	r0, #13
+   1ba42:	240f      	movs	r4, #15
+   1ba44:	f8c2 1734 	str.w	r1, [r2, #1844]	; 0x734
+   1ba48:	f8c2 173c 	str.w	r1, [r2, #1852]	; 0x73c
+   1ba4c:	f8c3 050c 	str.w	r0, [r3, #1292]	; 0x50c
+   1ba50:	f44f 3100 	mov.w	r1, #131072	; 0x20000
+   1ba54:	f8c3 4508 	str.w	r4, [r3, #1288]	; 0x508
+   1ba58:	f240 2001 	movw	r0, #513	; 0x201
+   1ba5c:	2406      	movs	r4, #6
+   1ba5e:	f8c2 150c 	str.w	r1, [r2, #1292]	; 0x50c
+   1ba62:	f8c2 0744 	str.w	r0, [r2, #1860]	; 0x744
+   1ba66:	f8c2 1508 	str.w	r1, [r2, #1288]	; 0x508
+   1ba6a:	f44f 407a 	mov.w	r0, #64000	; 0xfa00
+   1ba6e:	f8c3 4500 	str.w	r4, [r3, #1280]	; 0x500
+   1ba72:	47b0      	blx	r6
+   1ba74:	f44f 407a 	mov.w	r0, #64000	; 0xfa00
+   1ba78:	47b0      	blx	r6
+   1ba7a:	2301      	movs	r3, #1
+   1ba7c:	f889 3000 	strb.w	r3, [r9]
+   1ba80:	e6f2      	b.n	1b868 <TemperatureTmp117<(unsigned char)5>::read()+0x1dc>
+   1ba82:	bf00      	nop
+   1ba84:	0001e0d0 	.word	0x0001e0d0
+   1ba88:	0001e0c0 	.word	0x0001e0c0
+   1ba8c:	0001e1e4 	.word	0x0001e1e4
+   1ba90:	0001e254 	.word	0x0001e254
+   1ba94:	0001e0d8 	.word	0x0001e0d8
+   1ba98:	40003000 	.word	0x40003000
 
 0001ba9c <MyTemperatureAD<TemperatureTmp117<(unsigned char)5> >::update(unsigned char (&) [31])>:
    1ba9c:	b5f0      	push	{r4, r5, r6, r7, lr}
