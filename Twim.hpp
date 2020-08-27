@@ -123,7 +123,6 @@ struct Twim {
                   ALL_OFF = 0
                  }; 
     enum INT    { STOPPED, ERROR, SUSPENDED, RXSTARTED, TXSTARTED, LASTRX, LASTTX };
-    enum ERRORS { OVERRUN, ADDR_NACK, DATA_NACK };
     enum FREQ   { K100 = 0x01980000, K250 = 0x04000000, K400 = 0x06400000 };
 
     //give public access to registers
@@ -192,7 +191,7 @@ SA  pinSda          (PIN e, bool on = true) {
 //  events
 //--------------------
 SA  clearStopped    ()          { reg.EVENTS.STOPPED = 0; }
-SA  clearError      ()          { clearNacks(); reg.EVENTS.ERROR = 0; }
+SA  clearError      ()          { reg.ERRORSRC = 7; reg.EVENTS.ERROR = 0; }
 SA  clearSuspended  ()          { reg.EVENTS.SUSPENDED = 0; }
 SA  clearRxStarted  ()          { reg.EVENTS.RXSTARTED = 0; }
 SA  clearTxStarted  ()          { reg.EVENTS.TXSTARTED = 0; }
@@ -243,9 +242,6 @@ SA  isIrqOn         (INT e)     { return reg.INTEN bitand (1<<e); }
 SA  isOverrun       ()          { return reg.ERRORSRC bitand 1; }
 SA  isAddrNack      ()          { return reg.ERRORSRC bitand 2; }
 SA  isDataNack      ()          { return reg.ERRORSRC bitand 4; }
-SA  clearAddrNack   ()          { reg.ERRORSRC = 1; }
-SA  clearDataNack   ()          { reg.ERRORSRC = 2; }
-SA  clearNacks      ()          { reg.ERRORSRC = 3; }
 
 //--------------------
 //  init/constructors
@@ -253,10 +249,10 @@ SA  clearNacks      ()          { reg.ERRORSRC = 3; }
 SA  init            (uint8_t addr, FREQ f = K400) { 
                         address( addr );
                         frequency( f );  
-                        //when twi not enabled, puts pins in a twi like state
+                        //when twi not enabled, set pins gpio state like twi
                         Gpio<Sda_>::init( INPUT, S0D1, PULLUP );
                         Gpio<Scl_>::init( INPUT, S0D1, PULLUP );
-                        //set twi pins, connected (when enabled)
+                        //set twi pins, (default is connected when enabled)
                         pinSda( Sda_ );
                         pinScl( Scl_ ); 
                         //if a power pin specified, turn on to power twi slave
@@ -272,7 +268,7 @@ SA  deinit          () {
                         //if a power pin specified, turn off power to twi slave
                         if constexpr( Pwr_ != -1 ){
                             Gpio<Pwr_>::off();
-                            //and twi pins back to default so pullups not driving anything external
+                            //and twi pins back to default so no pullups driving anything
                             Gpio<Sda_>::init();
                             Gpio<Scl_>::init();
                         }
@@ -304,7 +300,7 @@ asm("nop");
                         while( not isError() and not isStopped() );                       
                         // DebugFuncHeader();
                         // Debug("  {Forange}twim xfer ERRORSRC:{Fwhite} 0x%08X\n", reg.ERRORSRC);
-                        return (txSentCount() == NT) and (rxReceivedCount() == NR);
+                        return not isError() and (txSentCount() == NT) and (rxReceivedCount() == NR);
                     }
 
                     //write only
@@ -317,7 +313,7 @@ SA  write           (uint8_t (&txbuf)[N]) {
                         while( not isError() and not isStopped() );
                         // DebugFuncHeader();
                         // Debug("  {Forange}twim write{Fwhite} 0x%08X\n", reg.ERRORSRC );
-                        return txSentCount() == N;
+                        return not isError() and txSentCount() == N;
                     }
 };
 
