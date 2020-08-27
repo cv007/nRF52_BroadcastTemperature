@@ -25,7 +25,7 @@
     Pwr_ = pwr pin (from GPIO::PIN) - optional, if power the slave from a pin
 
     NOTE
-    this was created from the nTF52810 product specification (datasheet)
+    this was created from the nRF52810 product specification (datasheet)
     and the nRF52840 may have some differences, like an additional SHORTS
     option (see enum), the nRF52840 also has a 'simple' Twi chapter (no 
     Easy-DMA) using ENABLE = 5, that the nRF52810 does not show, but they
