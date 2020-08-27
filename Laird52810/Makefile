@@ -198,9 +198,9 @@ INC_FOLDERS += \
 LIB_FILES += \
 
 # Optimization flags
-OPT = -Os # -g3
+OPT = -O3 #-g3
 # Uncomment the line below to enable link time optimization
-#OPT += -flto
+# OPT += -flto
 
 # C flags common to all targets
 CFLAGS += $(OPT)
@@ -223,9 +223,9 @@ CFLAGS += -mfloat-abi=soft
 CFLAGS += -ffunction-sections -fdata-sections -fno-strict-aliasing
 CFLAGS += -fno-builtin -fshort-enums
 
-# C++ flags common to all targets
-CXXFLAGS += $(OPT)
+# C++ flags (makefile.common also uses CFLAGS for .cpp files)
 CXXFLAGS += -std=c++17
+
 # Assembler flags common to all targets
 #ASMFLAGS += -g3
 ASMFLAGS += -mcpu=cortex-m4
@@ -253,10 +253,10 @@ LDFLAGS += -Wl,--gc-sections
 # use newlib in nano version
 LDFLAGS += --specs=nano.specs
 
-nrf52810_xxaa: CFLAGS += -D__HEAP_SIZE=2048
-nrf52810_xxaa: CFLAGS += -D__STACK_SIZE=2048
-nrf52810_xxaa: ASMFLAGS += -D__HEAP_SIZE=2048
-nrf52810_xxaa: ASMFLAGS += -D__STACK_SIZE=2048
+nrf52810_xxaa: CFLAGS += -D__HEAP_SIZE=4096
+nrf52810_xxaa: CFLAGS += -D__STACK_SIZE=4096
+nrf52810_xxaa: ASMFLAGS += -D__HEAP_SIZE=4096
+nrf52810_xxaa: ASMFLAGS += -D__STACK_SIZE=4096
 
 # Add standard libraries at the very end of the linker input, after all objects
 # that may need symbols provided by these libraries.

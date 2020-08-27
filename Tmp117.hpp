@@ -55,8 +55,8 @@ SA  init        () {
                 template<typename T> //T = U16 or I16
 SA  read        (const U8 r, T& v) {
                     if( not isInit_ ) init();
-                    U8 rbuf[2] = { 0, 0 };
-                    U8 tbuf[1] = { r };
+                    U8 rbuf[2] = { 0, 0 }; //value
+                    U8 tbuf[1] = { r }; //register
                     bool tf = false;
                     if( twi_.xfer( tbuf, rbuf) ){
                         v = (rbuf[0]<<8) bitor rbuf[1];

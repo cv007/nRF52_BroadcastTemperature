@@ -23,6 +23,13 @@
     Sda_ = sda pin (from GPIO::PIN)
     Scl_ = scl pin (from GPIO::PIN)
     Pwr_ = pwr pin (from GPIO::PIN) - optional, if power the slave from a pin
+
+    NOTE
+    this was created from the nTF52810 production specification (datasheet)
+    and the nRF52840 may have some differences, like an additional SHORTS
+    option (see enum), the nRF52840 also has a 'simple' Twi chapter (no 
+    Easy-DMA) using ENABLE = 5, that the nRF52810 does not show, but they
+    most likely both will work with the code below (only tested on a nRF52810)
 ------------------------------------------------------------------------------*/
 template<uint32_t BaseAddr_, PIN Sda_, PIN Scl_, PIN Pwr_>
 struct Twim {
@@ -87,13 +94,13 @@ struct Twim {
         struct {
                 U32 PTR;        //0x534
                 U32 MAXCNT;
-                U32 AMOUNT;
+                U32 AMOUNT;     //RO
                 U32 LIST;
         }   RXD;
         struct {
                 U32 PTR;        //0x544
                 U32 MAXCNT;
-                U32 AMOUNT;
+                U32 AMOUNT;     //RO
                 U32 LIST;
         }   TXD;
 
@@ -107,15 +114,15 @@ struct Twim {
 //============
 
     // enums
+                //TODO NOTE the nRF52840 also has LASTRX_SUSPEND (11)
     enum SHORTS { LASTTX_STARTRX = 7, LASTTX_SUSPEND, LASTTX_STOP, LASTRX_STARTTX,
-                  LASTRX_STOP = 12 };
+                  LASTRX_STOP = 12 }; 
     enum INT    { STOPPED, ERROR, SUSPENDED, RXSTARTED, TXSTARTED, LASTRX, LASTTX };
     enum ERRORS { OVERRUN, ADDR_NACK, DATA_NACK };
     enum FREQ   { K100 = 0x01980000, K250 = 0x04000000, K400 = 0x06400000 };
 
     //give public access to registers
-    static inline volatile Twim_&
-    reg { *(reinterpret_cast<Twim_*>(BaseAddr_)) };
+    static inline volatile Twim_& reg { *(reinterpret_cast<Twim_*>(BaseAddr_)) };
 
 //--------------------
 //  control
@@ -136,14 +143,17 @@ SA  txBufferSet     (uint32_t addr, uint16_t len) {
                         reg.TXD.PTR = addr;
                         reg.TXD.MAXCNT = len;
                     }
+
                     template<unsigned N>
 SA  txBufferSet     (uint8_t (&addr)[N]) {
                         txBufferSet( (uint32_t)addr, N );
                     }
+
 SA  rxBufferSet     (uint32_t addr, uint16_t len) {
                         reg.RXD.PTR = addr;
                         reg.RXD.MAXCNT = len;
                     }
+
                     template<unsigned N>
 SA  rxBufferSet     (uint8_t (&addr)[N]) {
                         rxBufferSet( (uint32_t)addr, N );
@@ -166,6 +176,7 @@ SA  pinScl          (PIN e, bool on = true) {
                         reg.PSEL_SCL = e;
                         if( not on ) pinSclDisconnect();
                     } 
+
 SA  pinSda          (PIN e, bool on = true) {
                         reg.PSEL_SDA = e;
                         if( not on ) pinSdaDisconnect();
@@ -230,6 +241,7 @@ SA  isAddrNack      ()          { return reg.ERRORSRC bitand 2; }
 SA  isDataNack      ()          { return reg.ERRORSRC bitand 4; }
 SA  clearAddrNack   ()          { reg.ERRORSRC = 1; }
 SA  clearDataNack   ()          { reg.ERRORSRC = 2; }
+SA  clearNacks      ()          { reg.ERRORSRC = 3; }
 
 //--------------------
 //  init/constructors
@@ -271,23 +283,31 @@ SA  deinit          () {
 //--------------------
                     template<unsigned TN, unsigned RN>
 SA  xfer            (uint8_t (&txbuf)[TN], uint8_t (&rxbuf)[RN]) {
+//when in -Os, or making this function noinline, it works correctly
+//when in -O1,2,3 (without noinline), the function will return true
+//  but the value in rxbuf is 0 
+//  (should be tmp117 status register value which is not 0)
+//if a nop is placed anywhere, or the debug lines enabled, it will work ok
+asm("nop");
                         txBufferSet( txbuf );
                         rxBufferSet( rxbuf );
                         clearEvents();
+                        clearNacks();
                         shortsDisableAll();
                         shortsEnable( LASTTX_STARTRX ); //tx -> rx    
-                        shortsEnable( LASTRX_STOP ); //rx -> stop
+                        shortsEnable( LASTRX_STOP );    //rx -> stop
                         startTx();
                         while( not isError() and not isStopped() );                       
                         // DebugFuncHeader();
                         // Debug("  {Forange}twim xfer{Fwhite} 0x%08X\n", reg.ERRORSRC);
-                        return txSentCount() == TN and rxReceivedCount() == RN;
+                        return (txSentCount() == TN) and (rxReceivedCount() == RN);
                     }
 
                     template<unsigned N>
 SA  write           (uint8_t (&txbuf)[N]) {
                         txBufferSet( txbuf );
                         clearEvents();
+                        clearNacks();
                         shortsDisableAll();
                         shortsEnable( LASTTX_STOP ); //tx -> stop 
                         startTx(); //also enables if not already
@@ -310,5 +330,5 @@ using Twim0 = Twim<0x40003000, Sda_, Scl_, Pwr_>; //all
 
 #ifdef  NRF52840 
 template<PIN Sda_, PIN Scl_, PIN Pwr_ = PIN(-1)>
-using Twim1 = Twim<0x40004000, Sda_, Scl_, Pwr_>; //nRF52840
+using Twim1 = Twim<0x40004000, Sda_, Scl_, Pwr_>; //nRF52840 has 2 twi instances
 #endif
