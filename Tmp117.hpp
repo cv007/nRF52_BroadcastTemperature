@@ -46,12 +46,6 @@ struct Tmp117 {
                     CONVCYCLE = 7, CONVMODE = 10, EEBUSY = 12, DATAREADY, LOWALERT,  HIGHALERT };
     enum EEUNLOCK_OFFSETS { EEBUSYu = 14, EUN = 15 };
 
-SA  init        () {
-                    twi_.init( Addr_ ); //K100
-                    nrf_delay_ms( 3 );
-                    isInit_ = true;
-                }
-
                 template<typename T> //T = U16 or I16
 SA  read        (const U8 r, T& v) {
                     if( not isInit_ ) init();
@@ -95,6 +89,11 @@ SA  configWbm   (U16 bm, U16 nvm){
         public:
     //============
 
+SA  init        ()              { twi_.init( Addr_ ); //K100
+                                  nrf_delay_ms( 2 ); //startup time is 2ms
+                                  isInit_ = true;
+                                }
+
 SA  deinit      ()              { twi_.deinit(); isInit_ = false; }
 
                                 //these most likely end up in loops, so make it so it breaks
@@ -103,6 +102,7 @@ SA  deinit      ()              { twi_.deinit(); isInit_ = false; }
                                 //can read and busy flag set = true,
                                 //cannot read or flag clear = false
 SA  isEEbusy    () -> bool      { U16 v; return configR( v ) ? v bitand (1<<EEBUSY) : false ; }
+SA  isDataReady () -> bool      { U16 s = 0; return configR(s) and (s bitand (1<<DATAREADY)); } 
 
 SA  reset       ()              { configW( 1<<SOFTRESET ); }
 
@@ -121,11 +121,7 @@ SA  eeLock      ()              { return write( EEUNLOCK, 1<<EUN ); }
 SA  id          (U16& v)        { return read( DEVICEID, v ); }
 SA  highLimit   (U16& v)        { return write( HIGHLIMIT, v ); }
 SA  lowLimit    (U16& v)        { return write( LOWLIMIT, v ); }
-SA  tempRaw     (I16& v)        { U16 s = -1; //check if ready, return false if cannot read or is not ready
-                                  if( configR(s) and
-                                      (s bitand (1<<DATAREADY)) ) return read( TEMP, v ); 
-                                  return false;
-                                }
+SA  tempRaw     (I16& v)        { return read( TEMP, v ); }
 
 
     /*

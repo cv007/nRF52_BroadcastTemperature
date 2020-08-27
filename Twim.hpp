@@ -115,8 +115,13 @@ struct Twim {
 
     // enums
                 //TODO NOTE the nRF52840 also has LASTRX_SUSPEND (11)
-    enum SHORTS { LASTTX_STARTRX = 7, LASTTX_SUSPEND, LASTTX_STOP, LASTRX_STARTTX,
-                  LASTRX_STOP = 12 }; 
+                //these are bitmasks
+    enum SHORTS { LASTTX_STARTRX = 1<<7, LASTTX_SUSPEND = 1<<8, LASTTX_STOP = 1<<9,
+                  LASTRX_STARTTX = 1<<10, LASTRX_STOP = 1<<12,
+                  //added these
+                  LASTTX_STARTRX_STOP = LASTTX_STARTRX|LASTRX_STOP,
+                  ALL_OFF = 0
+                 }; 
     enum INT    { STOPPED, ERROR, SUSPENDED, RXSTARTED, TXSTARTED, LASTRX, LASTTX };
     enum ERRORS { OVERRUN, ADDR_NACK, DATA_NACK };
     enum FREQ   { K100 = 0x01980000, K250 = 0x04000000, K400 = 0x06400000 };
@@ -187,7 +192,7 @@ SA  pinSda          (PIN e, bool on = true) {
 //  events
 //--------------------
 SA  clearStopped    ()          { reg.EVENTS.STOPPED = 0; }
-SA  clearError      ()          { reg.EVENTS.ERROR = 0; }
+SA  clearError      ()          { clearNacks(); reg.EVENTS.ERROR = 0; }
 SA  clearSuspended  ()          { reg.EVENTS.SUSPENDED = 0; }
 SA  clearRxStarted  ()          { reg.EVENTS.RXSTARTED = 0; }
 SA  clearTxStarted  ()          { reg.EVENTS.TXSTARTED = 0; }
@@ -199,7 +204,7 @@ SA  clearEvents     ()          { clearStopped();
                                   clearRxStarted();
                                   clearTxStarted();
                                   clearLastRx();
-                                  clearLastTx();
+                                  clearLastTx();                                  
                                 }
 
 SA  isError         ()          { return reg.EVENTS.ERROR; }
@@ -222,8 +227,7 @@ SA  resume          ()          { reg.TASKS.RESUME = 1; }
 //--------------------
 //  shorts
 //--------------------
-SA  shortsEnable    (SHORTS e)  { reg.SHORTS or_eq (1<<e); }
-SA  shortsDisableAll()          { reg.SHORTS = 0; }
+SA  shortsSetup     (SHORTS e)  { reg.SHORTS = e; }
 
 //--------------------
 //  interrupts
@@ -281,35 +285,34 @@ SA  deinit          () {
 //--------------------
 //  tx/rx functions
 //--------------------
-                    template<unsigned TN, unsigned RN>
-SA  xfer            (uint8_t (&txbuf)[TN], uint8_t (&rxbuf)[RN]) {
-//when in -Os, or making this function noinline, it works correctly
-//when in -O1,2,3 (without noinline), the function will return true
-//  but the value in rxbuf is 0 
-//  (should be tmp117 status register value which is not 0)
-//if a nop is placed anywhere, or the debug lines enabled, it will work ok
+
+//TODO - add ability to specify if STOP is wanted (and have default as true)
+//so can do repeated starts
+//just do STOP manually instead of using shorts, since these
+//are blocking functions anyway
+//should also add timeouts so if something wrong we don't block forever
+
+                    //write,read
+                    template<unsigned NT, unsigned NR>
+SA  xfer            (uint8_t (&txbuf)[NT], uint8_t (&rxbuf)[NR]) {
 asm("nop");
                         txBufferSet( txbuf );
                         rxBufferSet( rxbuf );
                         clearEvents();
-                        clearNacks();
-                        shortsDisableAll();
-                        shortsEnable( LASTTX_STARTRX ); //tx -> rx    
-                        shortsEnable( LASTRX_STOP );    //rx -> stop
+                        shortsSetup( LASTTX_STARTRX_STOP ); //tx -> rx -> stop    
                         startTx();
                         while( not isError() and not isStopped() );                       
                         // DebugFuncHeader();
-                        // Debug("  {Forange}twim xfer{Fwhite} 0x%08X\n", reg.ERRORSRC);
-                        return (txSentCount() == TN) and (rxReceivedCount() == RN);
+                        // Debug("  {Forange}twim xfer ERRORSRC:{Fwhite} 0x%08X\n", reg.ERRORSRC);
+                        return (txSentCount() == NT) and (rxReceivedCount() == NR);
                     }
 
+                    //write only
                     template<unsigned N>
 SA  write           (uint8_t (&txbuf)[N]) {
                         txBufferSet( txbuf );
                         clearEvents();
-                        clearNacks();
-                        shortsDisableAll();
-                        shortsEnable( LASTTX_STOP ); //tx -> stop 
+                        shortsSetup( LASTTX_STOP ); //tx -> stop 
                         startTx(); //also enables if not already
                         while( not isError() and not isStopped() );
                         // DebugFuncHeader();
