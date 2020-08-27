@@ -223,6 +223,8 @@ SA  startTx         ()          { reg.TASKS.STARTTX = 1; }
 SA  stop            ()          { reg.TASKS.STOP = 1; } //cannot stop while suspended
 SA  suspend         ()          { reg.TASKS.SUSPEND = 1; }
 SA  resume          ()          { reg.TASKS.RESUME = 1; }
+SA  startTxRxStop   ()          { clearEvents(); shortsSetup(LASTTX_STARTRX_STOP); startTx(); }
+SA  startTxStop     ()          { clearEvents(); shortsSetup(LASTTX_STOP); startTx(); }
 
 //--------------------
 //  shorts
@@ -308,12 +310,10 @@ SA  waitForStop     () {
                     //write,read
                     template<unsigned NT, unsigned NR>
 SA  xfer            (U8 (&txbuf)[NT], U8 (&rxbuf)[NR]) {
-asm("nop");
+// asm("nop");
                         txBufferSet( txbuf );
                         rxBufferSet( rxbuf );  
-                        clearEvents();
-                        shortsSetup( LASTTX_STARTRX_STOP ); //tx -> rx -> stop    
-                        startTx();
+                        startTxRxStop();
                         return waitForStop() and (txAmount() == NT) and (rxAmount() == NR);
                     }
 
@@ -321,9 +321,7 @@ asm("nop");
                     template<unsigned N>
 SA  write           (U8 (&txbuf)[N]) {
                         txBufferSet( txbuf );
-                        clearEvents();
-                        shortsSetup( LASTTX_STOP ); //tx -> stop 
-                        startTx(); //also enables if not already
+                        startTxStop();
                         return waitForStop() and (txAmount() == N);
                     }
 };
