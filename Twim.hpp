@@ -287,18 +287,14 @@ SA  deinit          () {
 //  tx/rx functions
 //--------------------
 
-//TODO - add ability to specify if STOP is wanted (and have default as true)
-//so can do repeated starts
-//just do STOP manually instead of using shorts, since these
-//are blocking functions anyway
-//should also add timeouts so if something wrong we don't block forever
+//TODO - add timeouts so if something wrong we don't block forever
 
 SA  waitForStop     () {
                         while( not isStopped() ){
                             if( isError() ){
                                 //need to do something? stop?
-                                // DebugFuncHeader();
-                                // Debug("  {Forange}twim xfer ERRORSRC:{Fwhite} 0x%08X\n", reg.ERRORSRC);
+                                //DebugFuncHeader();
+                                //Debug("  {Forange}twim xfer ERRORSRC:{Fwhite} 0x%08X\n", reg.ERRORSRC);
                                 return false;
                             }
                         }
@@ -308,7 +304,12 @@ SA  waitForStop     () {
                     //write,read
                     template<unsigned NT, unsigned NR>
 SA  writeRead       (U8 (&txbuf)[NT], U8 (&rxbuf)[NR]) {
-//asm("nop");
+                        asm("nop"); //sorry, don't know why
+                        //in -O1,-O2,-O3, without the nop anywhere in this
+                        //function the rxbuf will always end up unused even
+                        //though the twi data seen via LA is correct (not 0)
+                        //tried to figure out the reason, but cannot
+                        //the nop disrupts generated code in some way
                         txBufferSet( txbuf );
                         rxBufferSet( rxbuf );
                         startTxRxStop(); 
@@ -324,7 +325,11 @@ SA  writeRead       (U8 (&txbuf)[NT], U8 (&rxbuf)[NR]) {
 SA  write           (U8 (&txbuf)[N]) {
                         txBufferSet( txbuf );
                         startTxStop();
-                        return waitForStop() and (txAmount() == N);
+                        if( not waitForStop() ) return false;
+                        if( txAmount() == N ) return true;
+                        //unknown error, reset twi
+                        reEnable();
+                        return false;
                     }
 
                     //read only
@@ -332,7 +337,11 @@ SA  write           (U8 (&txbuf)[N]) {
 SA  read            (U8 (&rxbuf)[N]) {
                         rxBufferSet( rxbuf );
                         startRxStop();
-                        return waitForStop() and (rxAmount() == N);
+                        if( not waitForStop() ) return false;
+                        if( rxAmount() == N ) return true;
+                        //unknown error, reset twi
+                        reEnable();
+                        return false;
                     }
 };
 
