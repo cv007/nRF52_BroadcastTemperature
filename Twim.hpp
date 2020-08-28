@@ -134,7 +134,7 @@ struct Twim {
 //--------------------
 SA  enable          ()          { reg.ENABLE = 6; }
 SA  disable         ()          { reg.ENABLE = 0; }
-SA  reEnable        ()          { disable(); enable(); }
+SA  reEnable        ()          { disable(); clearError(); shortsSetup(ALL_OFF); enable(); }
 SA  isEnabled       ()          { return reg.ENABLE; }
 SA  frequency       (FREQ e)    { reg.FREQUENCY = e; }
 SA  address         (U8 v)      { reg.ADDRESS = v; } //0-127
@@ -147,7 +147,6 @@ SA  address         (U8 v)      { reg.ADDRESS = v; } //0-127
                     //is used as-is
 SA  txBufferSet     (U32 addr, U16 len) {
                         reg.TXD.MAXCNT = len;
-                        // asm("nop");
                         reg.TXD.PTR = addr;
                     }
 
@@ -158,7 +157,6 @@ SA  txBufferSet     (U8 (&addr)[N]) {
 
 SA  rxBufferSet     (U32 addr, U16 len) {
                         reg.RXD.MAXCNT = len;
-                        // asm("nop");
                         reg.RXD.PTR = addr;
                     }
 

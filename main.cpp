@@ -1,6 +1,7 @@
 /*-----------------------------------------------------------------------------
     
-nRF52840 Dongle    
+nRF52840 Dongle   
+and now a BL651 module (nRF52810) 
 
 advertise temperature, with the bluetooth name showing a letter A-Z followed
 by the value in degrees F to the tenth degree
@@ -50,6 +51,15 @@ if DCDCEN is on, then REG1 DCDC converter is used to supply system power (1.3v)
 
 will enable DCDCEN for REG1
 
+
+BL651 module (nRF52810) 
+
+uses a CR2 battery
+2 led's- green and red
+2 push button switches- 1 for reset, the other a user button
+a tmp117 temperature ic
+a si7051 temperature ic
+
 -----------------------------------------------------------------------------*/
 
 
@@ -81,16 +91,64 @@ int main() {
     board.init();           //init board pins
     board.alive();          //blink led's to show boot
 
-
 #if 1
-//========================
-//test 2 - deal with twi directly, no Tmp117
-//testing twi problem, test with no bluetooth, 
+/*========================
+test 3 - deal with twi directly, no Tmp117 - also test separate read/write
+testing twi problem, test with no bluetooth, 
 
-//result - similar problem - now rbuf[0] (the upper byte) will be the same
-//as the previous rbuf[0] status read value, and rbuf[1] will be a valid byte
-//the LA shows the correct values on the line
-//also adding a nop to Twim::writeRead will also 'fix' the problem
+result - similar problem if use writeRead- now rbuf[0] (the upper byte) 
+will be the same as the previous rbuf[0] status read value, and rbuf[1] 
+will be a valid byte, the LA shows the correct values on the line
+also adding a nop to Twim::writeRead will also 'fix' the problem
+
+if change to write, then read (which it is now), it will work
+so is only a problem when using writeRead it seems
+*/
+
+Twim0< board.sda.pinNumber(),   
+       board.scl.pinNumber(), 
+       board.i2cDevicePwr.pinNumber() > twi{ 0x48 }; //tmp117 address, default 100kHz
+
+//tmp117 is now powered up, with a 2ms delay
+
+//just check status 1/sec, get temp if ready
+//default is continuous, 8samples (125ms), repeat 1/sec
+
+uint8_t tbuf[1]; //1 = status register, 0 = temperature
+uint8_t rbuf[2]; //status value read
+for(;;){
+    nrf_delay_ms(1000);
+    tbuf[0] = 1; //status register address
+
+    //read status to get ready bit
+    if( twi.write(tbuf) and twi.read(rbuf) ){   //if no error
+        int16_t v = (rbuf[0]<<8)|rbuf[1];       //big endian-> little endian
+        Debug("{Fgreen} status: 0x%04X\n", v );
+        if( not (rbuf[0] bitand 0x20) ) continue; //not ready
+
+        //ready, read temp register
+        tbuf[0] = 0; //temp register address
+        if( twi.write(tbuf) and twi.read(rbuf) ){ //read temp
+            v = (rbuf[0]<<8)|rbuf[1];
+            // v = ((v * 9L)>>6) + 320; //convert to Fx10
+            Debug("{Forange} temp: 0x%04X\n", v );
+        }
+    }
+
+}
+//========================
+#endif
+
+#if 0
+/*========================
+test 2 - deal with twi directly, no Tmp117
+testing twi problem, test with no bluetooth, 
+
+result - similar problem - now rbuf[0] (the upper byte) will be the same
+as the previous rbuf[0] status read value, and rbuf[1] will be a valid byte
+the LA shows the correct values on the line
+also adding a nop to Twim::writeRead will also 'fix' the problem
+*/
 
 Twim0< board.sda.pinNumber(),   
        board.scl.pinNumber(), 
