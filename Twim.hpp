@@ -134,6 +134,7 @@ struct Twim {
 //--------------------
 SA  enable          ()          { reg.ENABLE = 6; }
 SA  disable         ()          { reg.ENABLE = 0; }
+SA  reEnable        ()          { disable(); enable(); }
 SA  isEnabled       ()          { return reg.ENABLE; }
 SA  frequency       (FREQ e)    { reg.FREQUENCY = e; }
 SA  address         (U8 v)      { reg.ADDRESS = v; } //0-127
@@ -146,6 +147,7 @@ SA  address         (U8 v)      { reg.ADDRESS = v; } //0-127
                     //is used as-is
 SA  txBufferSet     (U32 addr, U16 len) {
                         reg.TXD.MAXCNT = len;
+                        // asm("nop");
                         reg.TXD.PTR = addr;
                     }
 
@@ -156,6 +158,7 @@ SA  txBufferSet     (U8 (&addr)[N]) {
 
 SA  rxBufferSet     (U32 addr, U16 len) {
                         reg.RXD.MAXCNT = len;
+                        // asm("nop");
                         reg.RXD.PTR = addr;
                     }
 
@@ -293,25 +296,29 @@ SA  deinit          () {
 //should also add timeouts so if something wrong we don't block forever
 
 SA  waitForStop     () {
-                        bool err;
-                        while( err = isError(), not err and not isStopped() ){}
-                        if( err ){
-                            stop();
-                            // DebugFuncHeader();
-                            // Debug("  {Forange}twim xfer ERRORSRC:{Fwhite} 0x%08X\n", reg.ERRORSRC);
+                        while( not isStopped() ){
+                            if( isError() ){
+                                //need to do something? stop?
+                                // DebugFuncHeader();
+                                // Debug("  {Forange}twim xfer ERRORSRC:{Fwhite} 0x%08X\n", reg.ERRORSRC);
+                                return false;
+                            }
                         }
-                        return not err;
+                        return true;
                     }
 
                     //write,read
                     template<unsigned NT, unsigned NR>
 SA  writeRead       (U8 (&txbuf)[NT], U8 (&rxbuf)[NR]) {
+//asm("nop");
                         txBufferSet( txbuf );
                         rxBufferSet( rxbuf );
-                        startTxRxStop();  
-asm("nop");
-                        return waitForStop() and (txAmount() == NT) and (rxAmount() == NR);
-
+                        startTxRxStop(); 
+                        if( not waitForStop() ) return false;
+                        if( (txAmount() == NT) and (rxAmount() == NR) ) return true;
+                        //unknown error, reset twi
+                        reEnable();
+                        return false;
                     }
 
                     //write only

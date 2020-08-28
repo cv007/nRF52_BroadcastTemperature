@@ -132,8 +132,8 @@ for(;;){
 //test 1
 //testing twi problem, test with no bluetooth, 
 
-//result- same- timeout because reading status register as 0
-//although the LA shows a valid status register value
+//result- same - timeout because reading status register as 0
+//although the LA shows a valid status register value (0x0220, or 0x2220)
 //but if add a nop to Twim::writeRead then works ok
 
 using twi_ = Twim0< board.sda.pinNumber(),   
