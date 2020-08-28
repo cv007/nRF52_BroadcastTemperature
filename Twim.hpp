@@ -145,8 +145,8 @@ SA  address         (U8 v)      { reg.ADDRESS = v; } //0-127
                     //caller will have to know what is max, and len
                     //is used as-is
 SA  txBufferSet     (U32 addr, U16 len) {
-                        reg.TXD.PTR = addr;
                         reg.TXD.MAXCNT = len;
+                        reg.TXD.PTR = addr;
                     }
 
                     template<unsigned N>
@@ -155,8 +155,8 @@ SA  txBufferSet     (U8 (&addr)[N]) {
                     }
 
 SA  rxBufferSet     (U32 addr, U16 len) {
-                        reg.RXD.PTR = addr;
                         reg.RXD.MAXCNT = len;
+                        reg.RXD.PTR = addr;
                     }
 
                     template<unsigned N>
@@ -306,11 +306,12 @@ SA  waitForStop     () {
                     //write,read
                     template<unsigned NT, unsigned NR>
 SA  writeRead       (U8 (&txbuf)[NT], U8 (&rxbuf)[NR]) {
-asm("nop");
                         txBufferSet( txbuf );
                         rxBufferSet( rxbuf );
                         startTxRxStop();  
+asm("nop");
                         return waitForStop() and (txAmount() == NT) and (rxAmount() == NR);
+
                     }
 
                     //write only

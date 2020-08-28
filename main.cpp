@@ -76,14 +76,66 @@ will enable DCDCEN for REG1
 -----------------------------------------------------------------------------*/
 int main() {
 
-    Debug( "{normal}{Fgreen}\nBoot...{Fmagenta}\n" );
-    Debug( "board.init()...\n" );
+    Debug( "{normal}{Fgreen}\nBoot...\n" );
+    Debug( "{Fmagenta}board.init()...\n" );
     board.init();           //init board pins
     board.alive();          //blink led's to show boot
 
+
+#if 1
 //========================
+//test 2 - deal with twi directly, no Tmp117
 //testing twi problem, test with no bluetooth, 
-//just run this code in a loop
+
+//result - similar problem - now rbuf[0] (the upper byte) will be the same
+//as the previous rbuf[0] status read value, and rbuf[1] will be a valid byte
+//the LA shows the correct values on the line
+//also adding a nop to Twim::writeRead will also 'fix' the problem
+
+Twim0< board.sda.pinNumber(),   
+       board.scl.pinNumber(), 
+       board.i2cDevicePwr.pinNumber() > twi{ 0x48 }; //tmp117 address, default 100kHz
+
+//tmp117 is now powered up, with a 2ms delay
+
+//just check status 1/sec, get temp if ready
+//default is continuous, 8samples (125ms), repeat 1/sec
+
+uint8_t tbuf[1]; //1 = status register, 0 = temperature
+uint8_t rbuf[2]; //status value read
+for(;;){
+    nrf_delay_ms(1000);
+    tbuf[0] = 1; //status register address
+
+    //read status to get ready bit
+    if( twi.writeRead(tbuf, rbuf) ){        //if no error
+        int16_t v = (rbuf[0]<<8)|rbuf[1];   //big endian-> little endian
+        Debug("{Fgreen} status: 0x%04X\n", v );
+        if( not (rbuf[0] bitand 0x20) ) continue; //not ready
+
+        //ready, read temp register
+        tbuf[0] = 0; //temp register address
+        if( twi.writeRead(tbuf, rbuf) ){ //read temp
+            v = (rbuf[0]<<8)|rbuf[1];
+            // v = ((v * 9L)>>6) + 320; //convert to Fx10
+            Debug("{Forange} temp: 0x%04X\n", v );
+        }
+    }
+
+}
+//========================
+#endif
+
+
+#if 0
+//========================
+//test 1
+//testing twi problem, test with no bluetooth, 
+
+//result- same- timeout because reading status register as 0
+//although the LA shows a valid status register value
+//but if add a nop to Twim::writeRead then works ok
+
 using twi_ = Twim0< board.sda.pinNumber(),   
                     board.scl.pinNumber(), 
                     board.i2cDevicePwr.pinNumber() >;
@@ -95,23 +147,27 @@ for(;; nrf_delay_ms(5000) ){
     tmp.init();
     //default is continuous conversion, 8 samples, 15.5ms*8 = 124ms
     nrf_delay_ms(130);
-    //poll for data ready (up to a point)
+    //poll for data ready (up to 5ms)
     auto i = 10; //500us * 10 = 5ms timeout
-    while( not tmp.isDataReady() and i-- ){ nrf_delay_us(500); }
-    int16_t t = -32768;
-    tmp.tempRaw(t); //return not checked, but value checked below
+    for( ; i; i-- ){
+        if( tmp.isDataReady() ) break;
+        nrf_delay_us(500); 
+    }
+    int16_t t = 0;
+    if( i and not tmp.tempRaw(t) ) t = -32768;
     tmp.deinit(); //turn off power to ic
 
     DebugFuncHeader();
-    if( t == -32768 ){
+    if( i == 0 ) {
+        Debug("  timeout\n");
+    } else if( t == -32768) {
         Debug("  failed to read, or returned default temp value\n");
     } else {
         Debug("  tmp117 raw: %d  F: %d\n", t, tmp.x10F( t ) );
     }
 }
 //========================
-
-
+#endif
                             //start power management
     Debug( "nrf_pwr_mgmt_init()...\n" );
     error.check( nrf_pwr_mgmt_init() );

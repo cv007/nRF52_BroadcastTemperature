@@ -57,10 +57,10 @@ SA  read        (const U8 r, T& v) {
                         v = (rbuf[0]<<8) bitor rbuf[1];
                         tf = true;
                     }
-// DebugFuncHeader();
-// Debug("  read reg: %d %s", r, tf ? "" : "[failed]");
-// if( tf ) Debug(" [0x%04X]", v ); 
-// Debug("\n");
+DebugFuncHeader();
+Debug("  read reg: %d %s", r, tf ? "" : "[failed]");
+if( tf ) Debug(" [0x%04X]", v ); 
+Debug("\n");
                     return tf;
                 }
 
@@ -103,7 +103,10 @@ SA  deinit      ()              { twi_.deinit(); isInit_ = false; }
                                 //can read and busy flag set = true,
                                 //cannot read or flag clear = false
 SA  isEEbusy    () -> bool      { U16 v; return configR( v ) ? v bitand (1<<EEBUSY) : false ; }
-SA  isDataReady () -> bool      { U16 s = 0; return configR(s) and (s bitand (1<<DATAREADY)); } 
+SA  isDataReady () -> bool      { U16 s = 0; 
+                                  if( not configR(s) ) return false;
+                                  return (s bitand (1<<DATAREADY));
+                                } 
 
 SA  reset       ()              { configW( 1<<SOFTRESET ); }
 
