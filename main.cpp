@@ -81,6 +81,37 @@ int main() {
     board.init();           //init board pins
     board.alive();          //blink led's to show boot
 
+//========================
+//testing twi problem, test with no bluetooth, 
+//just run this code in a loop
+using twi_ = Twim0< board.sda.pinNumber(),   
+                    board.scl.pinNumber(), 
+                    board.i2cDevicePwr.pinNumber() >;
+
+Tmp117< twi_ > tmp;
+
+for(;; nrf_delay_ms(5000) ){
+    //init will power on, w/2ms delay time for startup
+    tmp.init();
+    //default is continuous conversion, 8 samples, 15.5ms*8 = 124ms
+    nrf_delay_ms(130);
+    //poll for data ready (up to a point)
+    auto i = 10; //500us * 10 = 5ms timeout
+    while( not tmp.isDataReady() and i-- ){ nrf_delay_us(500); }
+    int16_t t = -32768;
+    tmp.tempRaw(t); //return not checked, but value checked below
+    tmp.deinit(); //turn off power to ic
+
+    DebugFuncHeader();
+    if( t == -32768 ){
+        Debug("  failed to read, or returned default temp value\n");
+    } else {
+        Debug("  tmp117 raw: %d  F: %d\n", t, tmp.x10F( t ) );
+    }
+}
+//========================
+
+
                             //start power management
     Debug( "nrf_pwr_mgmt_init()...\n" );
     error.check( nrf_pwr_mgmt_init() );

@@ -46,20 +46,21 @@ struct Tmp117 {
                     CONVCYCLE = 7, CONVMODE = 10, EEBUSY = 12, DATAREADY, LOWALERT,  HIGHALERT };
     enum EEUNLOCK_OFFSETS { EEBUSYu = 14, EUN = 15 };
 
+
                 template<typename T> //T = U16 or I16
 SA  read        (const U8 r, T& v) {
                     if( not isInit_ ) init();
                     U8 rbuf[2] = { 0, 0 }; //value
                     U8 tbuf[1] = { r }; //register
                     bool tf = false;
-                    if( twi_.xfer( tbuf, rbuf) ){
+                    if( twi_.writeRead( tbuf, rbuf) ){
                         v = (rbuf[0]<<8) bitor rbuf[1];
                         tf = true;
                     }
-DebugFuncHeader();
-Debug("  read reg: %d %s", r, tf ? "" : "[failed]");
-if( tf ) Debug(" [0x%04X]", v ); 
-Debug("\n");
+// DebugFuncHeader();
+// Debug("  read reg: %d %s", r, tf ? "" : "[failed]");
+// if( tf ) Debug(" [0x%04X]", v ); 
+// Debug("\n");
                     return tf;
                 }
 
@@ -70,8 +71,8 @@ SA  write       (const U8 r, const T& v) {
                     U8 vL = v;      //  error in array init
                     U8 buf[3] = { r, vH, vL };
                     bool tf = twi_.write( buf );
-DebugFuncHeader();
-Debug("  write reg: %d [0x%04X] %s\n", r, v, tf ? "ok" : "failed");
+// DebugFuncHeader();
+// Debug("  write reg: %d [0x%04X] %s\n", r, v, tf ? "ok" : "failed");
                     return tf;
                 }
 

@@ -198,8 +198,8 @@ SA  clearRxStarted  ()          { reg.EVENTS.RXSTARTED = 0; }
 SA  clearTxStarted  ()          { reg.EVENTS.TXSTARTED = 0; }
 SA  clearLastRx     ()          { reg.EVENTS.LASTRX = 0; }
 SA  clearLastTx     ()          { reg.EVENTS.LASTTX = 0; }
-SA  clearEvents     ()          { clearStopped();
-                                  clearError();
+SA  clearEvents     ()          { clearError();
+                                  clearStopped();                                
                                   clearSuspended();
                                   clearRxStarted();
                                   clearTxStarted();
@@ -225,6 +225,7 @@ SA  suspend         ()          { reg.TASKS.SUSPEND = 1; }
 SA  resume          ()          { reg.TASKS.RESUME = 1; }
 SA  startTxRxStop   ()          { clearEvents(); shortsSetup(LASTTX_STARTRX_STOP); startTx(); }
 SA  startTxStop     ()          { clearEvents(); shortsSetup(LASTTX_STOP); startTx(); }
+SA  startRxStop     ()          { clearEvents(); shortsSetup(LASTRX_STOP); startRx(); }
 
 //--------------------
 //  shorts
@@ -292,28 +293,23 @@ SA  deinit          () {
 //should also add timeouts so if something wrong we don't block forever
 
 SA  waitForStop     () {
-                        bool ok = false;
-                        while(true){
-                            if( isError() ) { 
-                                stop();
-                                break; 
-                            }
-                            if( isStopped() ){ ok = true; break; }
+                        bool err;
+                        while( err = isError(), not err and not isStopped() ){}
+                        if( err ){
+                            stop();
+                            // DebugFuncHeader();
+                            // Debug("  {Forange}twim xfer ERRORSRC:{Fwhite} 0x%08X\n", reg.ERRORSRC);
                         }
-                        // if( not ok ){
-                        //      DebugFuncHeader();
-                        //      Debug("  {Forange}twim xfer ERRORSRC:{Fwhite} 0x%08X\n", reg.ERRORSRC);
-                        //  }
-                        return ok;
+                        return not err;
                     }
 
                     //write,read
                     template<unsigned NT, unsigned NR>
-SA  xfer            (U8 (&txbuf)[NT], U8 (&rxbuf)[NR]) {
-// asm("nop");
+SA  writeRead       (U8 (&txbuf)[NT], U8 (&rxbuf)[NR]) {
+asm("nop");
                         txBufferSet( txbuf );
-                        rxBufferSet( rxbuf );  
-                        startTxRxStop();
+                        rxBufferSet( rxbuf );
+                        startTxRxStop();  
                         return waitForStop() and (txAmount() == NT) and (rxAmount() == NR);
                     }
 
@@ -323,6 +319,14 @@ SA  write           (U8 (&txbuf)[N]) {
                         txBufferSet( txbuf );
                         startTxStop();
                         return waitForStop() and (txAmount() == N);
+                    }
+
+                    //read only
+                    template<unsigned N>
+SA  read            (U8 (&rxbuf)[N]) {
+                        rxBufferSet( rxbuf );
+                        startRxStop();
+                        return waitForStop() and (rxAmount() == N);
                     }
 };
 
