@@ -3862,7 +3862,7 @@ Disassembly of section .text:
    1b7ae:	ebc3 1103 	rsb	r1, r3, r3, lsl #4
    1b7b2:	eb03 0181 	add.w	r1, r3, r1, lsl #2
    1b7b6:	465a      	mov	r2, fp
-   1b7b8:	233b      	movs	r3, #59	; 0x3b
+   1b7b8:	233a      	movs	r3, #58	; 0x3a
    1b7ba:	0b80      	lsrs	r0, r0, #14
    1b7bc:	f7ff ff3e 	bl	1b63c <int Print<DevRtt<0>, unsigned long, unsigned long, char const*, int, char const*>(DevRtt<0>, char const*, unsigned long, unsigned long, char const*, int, char const*) [clone .constprop.0]>
    1b7c0:	4978      	ldr	r1, [pc, #480]	; (1b9a4 <TemperatureTmp117<(unsigned char)5>::read()+0x30c>)
@@ -3917,7 +3917,7 @@ Disassembly of section .text:
    1b85c:	465a      	mov	r2, fp
    1b85e:	eb03 0181 	add.w	r1, r3, r1, lsl #2
    1b862:	0b80      	lsrs	r0, r0, #14
-   1b864:	233b      	movs	r3, #59	; 0x3b
+   1b864:	233a      	movs	r3, #58	; 0x3a
    1b866:	f7ff fee9 	bl	1b63c <int Print<DevRtt<0>, unsigned long, unsigned long, char const*, int, char const*>(DevRtt<0>, char const*, unsigned long, unsigned long, char const*, int, char const*) [clone .constprop.0]>
    1b86a:	4950      	ldr	r1, [pc, #320]	; (1b9ac <TemperatureTmp117<(unsigned char)5>::read()+0x314>)
    1b86c:	4648      	mov	r0, r9
@@ -3984,7 +3984,7 @@ Disassembly of section .text:
    1b922:	ebc3 1103 	rsb	r1, r3, r3, lsl #4
    1b926:	eb03 0181 	add.w	r1, r3, r1, lsl #2
    1b92a:	0b80      	lsrs	r0, r0, #14
-   1b92c:	233b      	movs	r3, #59	; 0x3b
+   1b92c:	233a      	movs	r3, #58	; 0x3a
    1b92e:	f7ff fe85 	bl	1b63c <int Print<DevRtt<0>, unsigned long, unsigned long, char const*, int, char const*>(DevRtt<0>, char const*, unsigned long, unsigned long, char const*, int, char const*) [clone .constprop.0]>
    1b932:	491c      	ldr	r1, [pc, #112]	; (1b9a4 <TemperatureTmp117<(unsigned char)5>::read()+0x30c>)
    1b934:	4c18      	ldr	r4, [pc, #96]	; (1b998 <TemperatureTmp117<(unsigned char)5>::read()+0x300>)
@@ -4044,7 +4044,7 @@ Disassembly of section .text:
    1b9e8:	9700      	str	r7, [sp, #0]
    1b9ea:	eb03 0181 	add.w	r1, r3, r1, lsl #2
    1b9ee:	0b80      	lsrs	r0, r0, #14
-   1b9f0:	233b      	movs	r3, #59	; 0x3b
+   1b9f0:	233a      	movs	r3, #58	; 0x3a
    1b9f2:	f7ff fe23 	bl	1b63c <int Print<DevRtt<0>, unsigned long, unsigned long, char const*, int, char const*>(DevRtt<0>, char const*, unsigned long, unsigned long, char const*, int, char const*) [clone .constprop.0]>
    1b9f6:	b22d      	sxth	r5, r5
    1b9f8:	493b      	ldr	r1, [pc, #236]	; (1bae8 <TemperatureTmp117<(unsigned char)5>::read()+0x450>)

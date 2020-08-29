@@ -5,7 +5,6 @@
 
 #include "nrf_delay.h"
 
-#include "Gpio.hpp"
 #include "Twim.hpp"
 #include "Print.hpp"
 
