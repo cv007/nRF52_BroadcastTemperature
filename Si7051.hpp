@@ -18,8 +18,7 @@
 #define SI static inline
 #define SCA static constexpr auto
 
-// !!!!! in progress - using Tmp117 as a starting point
-
+//untested - sda/scl pins routed wrong :(
 
 /*------------------------------------------------------------------------------
     Si7051 struct
@@ -38,113 +37,79 @@ struct Si7051 {
     SCA Addr_{ 0x40 }; //only one address
     static Twi_& twi_;
     static inline bool isInit_{ false };
+    static inline bool isConverting_{ false };
 
-    enum REGISTERS { TEMP, CONFIG, HIGHLIMIT, LOWLIMIT, EEUNLOCK, EEPROM1,
-                    EEPROM2, TEMPOFFSET, EEPROM3, DEVICEID = 15 };
-    enum CONFIG_OFFSETS { SOFTRESET = 1, ALERTSEL, ALERTPOL, TAMODE, AVERAGE,
-                    CONVCYCLE = 7, CONVMODE = 10, EEBUSY = 12, DATAREADY, LOWALERT,  HIGHALERT };
-    enum EEUNLOCK_OFFSETS { EEBUSYu = 14, EUN = 15 };
-
-
-                template<typename T> //T = U16 or I16
-SA  read        (const U8 r, T& v) {
-                    if( not isInit_ ) init();
-                    volatile U8 rbuf[2] = { 0, 0 }; //value
-                    U8 tbuf[1] = { r }; //register
-                    bool tf = false;
-                    if( twi_.writeRead( tbuf, rbuf) ){
-                        v = (rbuf[0]<<8) bitor rbuf[1];
-                        tf = true;
-                    }
-DebugFuncHeader();
-Debug("  read reg: %d %s", r, tf ? "" : "[failed]");
-if( tf ) Debug(" [0x%04X]", v ); 
-Debug("\n");
-                    return tf;
-                }
-
-                template<typename T> //T = U16 or I16
-SA  write       (const U8 r, const T& v) {
-                    if( not isInit_ ) init();
-                    U8 vH = v>>8;   //avoid narrowing conversion
-                    U8 vL = v;      //  error in array init
-                    U8 buf[3] = { r, vH, vL };
-                    bool tf = twi_.write( buf );
-// DebugFuncHeader();
-// Debug("  write reg: %d [0x%04X] %s\n", r, v, tf ? "ok" : "failed");
-                    return tf;
-                }
-
-SA  configR     (U16& v)        { return read( CONFIG, v ); }
-SA  configW     (U16 v)         { return write( CONFIG, v ); }
-                //bitmask to clear, new value bitmask
-SA  configWbm   (U16 bm, U16 nvm){
-                    U16 v;
-                    if( not configR( v ) ) return false;    //R
-                    v  = (v bitand compl bm) bitor nvm;     //M
-                    return configW( v );                    //W
-                }
+    enum COMMANDS { MEASURE_HOLD = 0xE3, MEASURE_NOHOLD = 0xF3, RESET = 0xFE,
+                    WRITE_USER = 0xE6, READ_USER = 0xE7, READ_ID1 = 0xFA0F, 
+                    READ_ID2 = 0xFCC9, READ_REVID = 0x84B8 };
 
     //============
         public:
     //============
 
+                    //bitmasks
+    enum RESOLUTION { RES_14BIT, RES_12BIT, RES_13BIT = 0x80, RES_11BIT = 0x81 };
+
+
+
+
 SA  init        ()              { twi_.init( Addr_, twi_.K400 );
-                                  nrf_delay_ms( 2 ); //startup time is 2ms
+                                  //startup time 18-25ms, max 80ms
+                                  //let caller deal with startup time
                                   isInit_ = true;
                                 }
 
 SA  deinit      ()              { twi_.deinit(); isInit_ = false; }
 
-                                //these most likely end up in loops, so make it so it breaks
-                                //the loop if a read failure
 
-                                //can read and busy flag set = true,
-                                //cannot read or flag clear = false
-SA  isEEbusy    () -> bool      { U16 v; return configR( v ) ? v bitand (1<<EEBUSY) : false ; }
-SA  isDataReady () -> bool      { U16 s = 0; 
-                                  if( not configR(s) ) return false;
-                                  return (s bitand (1<<DATAREADY));
-                                } 
+SA  reset       ()              { U8 buf[1]{RESET}; return twi_.write(buf); } //5-15ms
 
-SA  reset       ()              { configW( 1<<SOFTRESET ); }
+SA  resolution  (RESOLUTION e)  { U8 tbuf[1]{READ_USER}; U8 rbuf[1];
+                                  if( not twi_.writeRead(tbuf, rbuf) ) return false;
+                                  rbuf[0] and_eq compl 0x81; //clear res bits
+                                  return write(WRITE_USER, rbuf[0] bitor e);
+                                }
 
-SA  continuous  ()              { return configWbm( 3<<CONVMODE, 0<<CONVMODE ); }
-SA  shutdown    ()              { return configWbm( 3<<CONVMODE, 1<<CONVMODE ); }
-SA  oneShot     ()              { return configWbm( 3<<CONVMODE, 3<<CONVMODE ); }
+SA  isPowerOk   ()              { U8 tbuf[1]{READ_USER}; U8 rbuf[1];
+                                  return twi_.writeRead(tbuf, rbuf) and (rbuf[0] bitand 0x40); 
+                                }
 
-SA  averageOff  ()              { return configWbm( 3<<AVERAGE, 0<<AVERAGE ); }
-SA  average8    ()              { return configWbm( 3<<AVERAGE, 1<<AVERAGE ); }
-SA  average32   ()              { return configWbm( 3<<AVERAGE, 2<<AVERAGE ); }
-SA  average64   ()              { return configWbm( 3<<AVERAGE, 3<<AVERAGE ); }
+                                //blocking on clock stretch, up to 10.8ms
+SA  tempWait    (U16& v)        { U8 tbuf[1]{MEASURE_HOLD}; U8 rbuf[2]; 
+                                  if( not twi_.writeRead(tbuf, rbuf) ) return false;
+                                  v = (rbuf[0]<<8) bitor rbuf[1];
+                                  return true; 
+                                }
 
-SA  eeUnlock    ()              { return write( EEUNLOCK, 0<<EUN ); }
-SA  eeLock      ()              { return write( EEUNLOCK, 1<<EUN ); }
+SA  tempStart   ()              {   U8 tbuf[1]{MEASURE_NOHOLD};
+                                    if( twi_.write(tbuf) ){ //start
+                                        isConverting_ = true;
+                                        return true; //started
+                                    } return false;
+                                }
 
-SA  id          (U16& v)        { return read( DEVICEID, v ); }
-SA  highLimit   (U16& v)        { return write( HIGHLIMIT, v ); }
-SA  lowLimit    (U16& v)        { return write( LOWLIMIT, v ); }
-SA  tempRaw     (I16& v)        { return read( TEMP, v ); }
+SA  isConverting()              { return isConverting_; }
+
+SA  tempPoll    (U16& v)        { if( not isConverting() ) return false;
+                                  U8 rbuf[2];
+                                  if( not twi_.read( rbuf ) ) return false; //not ready
+                                  v = rbuf[0]<<8 bitor rbuf[1];
+                                  isConverting_ = false;
+                                  return true; //you now have a value
+                                }
 
 
-    /*
-    conversion from raw to C or F x10,x100,x1000
 
-    0.0078125*1.8 (0.0140625) degree F per count (without 32 degree offset)
-    x10 = 9/64 = .140625, x100 = 45/32 = 1.40625, x1000 = 225/16 = 14.0625
+/*
+temp code = XXXXXXXX XXXXXX00
+temp C = (175.72 * temp code / 65536) - 46.85
+26796 = 25C = 77C
+*/
 
-    0.0078125 degree C per count (1/128 degree)
-    x10 = 5/64 = .078125, x100 = 25/32 = 0.78125, x1000 = 125/16 = 7.8125
-
-    normal mul/div- x100C -> v*78125/100000, x100F -> v*140625/100000 + 3200
-    */
-
-SA  x10F    (I16 v) -> I16      { return ((v * 9L)>>6) + 320; }
-SA  x100F   (I16 v) -> I16      { return ((v * 45L)>>5) + 3200; }
-SA  x1000F  (I16 v) -> int32_t  { return ((v * 225L)>>4) + 32000; }
-SA  x10C    (I16 v) -> I16      { return (v * 5L)>>6; }
-SA  x100C   (I16 v) -> I16      { return (v * 25L)>>5; }
-SA  x1000C  (I16 v) -> int32_t  { return (v * 125L)>>4; }
+SA  x100C   (U16 v) -> I16      { return ((v * 17572L)>>16) - 4685; }
+SA  x10C    (U16 v) -> I16      { return x100C(v) / 10; }
+SA  x100F   (U16 v) -> I16      { return x100C(v) * 9L / 5 + 3200; }
+SA  x10F    (U16 v) -> I16      { return x100F(v) / 10; }
 
 };
 

@@ -8,6 +8,7 @@
 
 #include "Print.hpp"
 #include "Tmp117.hpp"
+#include "Si7051.hpp"
 
 #define SA [[gnu::noinline]] static auto
 #define SCA static constexpr auto
@@ -120,13 +121,25 @@ SA  read            () {
 template<uint8_t HistSiz_>
 struct TemperatureSi7051 : Temperature<HistSiz_> {
 
+using twi_ = Twim0< board.sda.pinNumber(),   
+                    board.scl.pinNumber(), 
+                    board.i2cDevicePwr.pinNumber() >;
+
+static inline Si7051< twi_ > si7051;
+
 SA  read            () {
                         int16_t f = -999; //-99.9 = failed to get
-                        int32_t t;
+                        uint16_t t;
 
                         //TODO 
                         //get temp Fx10 into f
-
+                        si7051.init();
+                        nrf_delay_ms(80); //max power up time
+                        bool ok = si7051.tempWait(t); //10ms
+                        si7051.deinit();
+                        if( not ok ) return f;
+                        f = si7051.x10F(t);
+                        
                         f = Temperature<HistSiz_>::addHistory( f );
                         DebugFuncHeader();
                         Debug("\traw: %d\n\tF: %02d.%d\n", t, f/10, f%10);

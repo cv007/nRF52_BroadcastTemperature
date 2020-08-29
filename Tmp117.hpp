@@ -38,27 +38,30 @@ struct Tmp117 {
     static Twi_& twi_;
     static inline bool isInit_{ false };
 
-    enum REGISTERS { TEMP, CONFIG, HIGHLIMIT, LOWLIMIT, EEUNLOCK, EEPROM1,
-                    EEPROM2, TEMPOFFSET, EEPROM3, DEVICEID = 15 };
-    enum CONFIG_OFFSETS { SOFTRESET = 1, ALERTSEL, ALERTPOL, TAMODE, AVERAGE,
-                    CONVCYCLE = 7, CONVMODE = 10, EEBUSY = 12, DATAREADY, LOWALERT,  HIGHALERT };
-    enum EEUNLOCK_OFFSETS { EEBUSYu = 14, EUN = 15 };
+            //registers
+    enum    { TEMP, CONFIG, HIGHLIMIT, LOWLIMIT, EEUNLOCK, EEPROM1,
+              EEPROM2, TEMPOFFSET, EEPROM3, DEVICEID = 15 };
+            //bit positions in CONFIG
+    enum    { SOFTRESET = 1, ALERTSEL, ALERTPOL, TAMODE, AVERAGE,
+              CONVCYCLE = 7, CONVMODE = 10, EEBUSY = 12, DATAREADY, LOWALERT,  HIGHALERT };
+            //eeunlock bits
+    enum    { EEBUSYu = 14, EUN = 15 };
 
 
                 template<typename T> //T = U16 or I16
 SA  read        (const U8 r, T& v) {
                     if( not isInit_ ) init();
-                    U8 rbuf[2];
+                    U8 rbuf[2]; //if want to init this for some reason, make it volatile
                     U8 tbuf[1] = { r }; //register
                     bool tf = false;
                     if( twi_.writeRead( tbuf, rbuf) ){
                         v = (rbuf[0]<<8) bitor rbuf[1];
                         tf = true;
                     }
-DebugFuncHeader();
-Debug("  read reg: %d %s", r, tf ? "" : "[failed]");
-if( tf ) Debug(" [0x%04X]", v ); 
-Debug("\n");
+                    // DebugFuncHeader();
+                    // Debug("  read reg: %d %s", r, tf ? "" : "[failed]");
+                    // if( tf ) Debug(" [0x%04X]", v ); 
+                    // Debug("\n");
                     return tf;
                 }
 
@@ -69,8 +72,8 @@ SA  write       (const U8 r, const T& v) {
                     U8 vL = v;      //  error in array init
                     U8 buf[3] = { r, vH, vL };
                     bool tf = twi_.write( buf );
-// DebugFuncHeader();
-// Debug("  write reg: %d [0x%04X] %s\n", r, v, tf ? "ok" : "failed");
+                    // DebugFuncHeader();
+                    // Debug("  write reg: %d [0x%04X] %s\n", r, v, tf ? "ok" : "failed");
                     return tf;
                 }
 

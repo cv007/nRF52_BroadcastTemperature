@@ -416,7 +416,7 @@ void advInitCB(); //called from adv.init()
 #elif defined TEMPERATURE_TMP117
     inline Advertising< MyTemperatureAD<TemperatureTmp117<5> >, 3000, advInitCB > adv; 
 #elif defined TEMPERATURE_SI7051
-    inline Advertising< MyTemperatureAD<TemperatureInternal<5> >, 3000, advInitCB > adv;
+    inline Advertising< MyTemperatureAD<TemperatureSi7051<5> >, 3000, advInitCB > adv;
 #else
     #error "Temperature source not defined in nRFconfig.hpp" 
 #endif

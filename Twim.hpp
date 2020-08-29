@@ -298,7 +298,8 @@ SA  deinit          () {
 SA  waitForStop     () {
                         while( not isStopped() ){
                             if( isError() ){
-                                //need to do something? stop?
+                                stop();
+                                while( not isStopped() ){}
                                 //DebugFuncHeader();
                                 //Debug("  {Forange}twim xfer ERRORSRC:{Fwhite} 0x%08X\n", reg.ERRORSRC);
                                 return false;
