@@ -123,8 +123,8 @@ SA  init    () {
 
             //signal board is alive
 SA  alive   () {
-                ledGreen.blinkN(1,25,25,200);
-                ledRed.blinkN(1,25,25,200);
+                ledGreen.blinkN(2,50,50,200);
+                ledRed.blinkN(2,50,50,200);
             }
 
             //show error code via led's, skip leading 0's

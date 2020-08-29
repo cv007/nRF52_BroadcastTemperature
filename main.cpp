@@ -118,6 +118,9 @@ terminal print-
     status: 0x2220
     temp: 0x0D64
 
+    also makes no difference if Debug is disabled (uses RTT), the led's will
+    still indicate an error
+
 */
 
 Twim0< board.sda.pinNumber(),   
@@ -125,6 +128,9 @@ Twim0< board.sda.pinNumber(),
        board.i2cDevicePwr.pinNumber() >twi;
 
 int main(){
+
+    board.init();           //init board pins
+    board.alive();          //blink led's to show boot
 
     Debug("{normal}\n\n");
 
@@ -144,6 +150,7 @@ int main(){
 
         if( not twi.writeRead( tbuf, rbuf ) ){
             Debug("writeRead failed\n");
+            board.ledRed.on();
             continue;
         }
         //no errors and write/read amounts match requested amounts
@@ -155,6 +162,7 @@ asm("nop"); //#1
         //check ready bit
         if( not (rbuf[0] bitand 0x20) ){
             Debug("status ready bit not set\n");
+            board.ledRed.on();
             continue;
         }
 
@@ -163,12 +171,17 @@ asm("nop"); //#1
 
         if( not twi.writeRead( tbuf, rbuf ) ){
             Debug("writeRead failed\n");
+            board.ledRed.on();
             continue;
         }
 
 asm("nop"); //#2
 
         Debug("temp: 0x%02X%02X\n", rbuf[0], rbuf[1]); //big endian
+
+        //assume not 0 is ok
+        if( (rbuf[0] != 0) and (rbuf[1] != 0) ) board.ledGreen.on(); 
+        else board.ledRed.on();
 
         //run n times
         if( not --n ) for(;;){}
