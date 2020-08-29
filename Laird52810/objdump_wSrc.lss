@@ -6239,7 +6239,7 @@ SA  address         (U8 v)      { reg.ADDRESS = v; } //0-127
         public:
     //============
 
-SA  init        ()              { twi_.init( Addr_ ); //K100
+SA  init        ()              { twi_.init( Addr_, twi_.K400 );
                                   nrf_delay_ms( 2 ); //startup time is 2ms
                                   isInit_ = true;
    1b6a0:	f8df a324 	ldr.w	sl, [pc, #804]	; 1b9c8 <TemperatureTmp117<(unsigned char)5>::read()+0x330>
@@ -6421,7 +6421,7 @@ DebugFuncHeader();
    1b7b2:	ebc3 1103 	rsb	r1, r3, r3, lsl #4
    1b7b6:	eb03 0181 	add.w	r1, r3, r1, lsl #2
    1b7ba:	465a      	mov	r2, fp
-   1b7bc:	233c      	movs	r3, #60	; 0x3c
+   1b7bc:	2339      	movs	r3, #57	; 0x39
    1b7be:	0b80      	lsrs	r0, r0, #14
    1b7c0:	f7ff ff3c 	bl	1b63c <int Print<DevRtt<0>, unsigned long, unsigned long, char const*, int, char const*>(DevRtt<0>, char const*, unsigned long, unsigned long, char const*, int, char const*) [clone .constprop.0]>
 Debug("  read reg: %d %s", r, tf ? "" : "[failed]");
@@ -6503,7 +6503,7 @@ DebugFuncHeader();
    1b860:	465a      	mov	r2, fp
    1b862:	eb03 0181 	add.w	r1, r3, r1, lsl #2
    1b866:	0b80      	lsrs	r0, r0, #14
-   1b868:	233c      	movs	r3, #60	; 0x3c
+   1b868:	2339      	movs	r3, #57	; 0x39
    1b86a:	f7ff fee7 	bl	1b63c <int Print<DevRtt<0>, unsigned long, unsigned long, char const*, int, char const*>(DevRtt<0>, char const*, unsigned long, unsigned long, char const*, int, char const*) [clone .constprop.0]>
 Debug("  read reg: %d %s", r, tf ? "" : "[failed]");
    1b86e:	4951      	ldr	r1, [pc, #324]	; (1b9b4 <TemperatureTmp117<(unsigned char)5>::read()+0x31c>)
@@ -6613,7 +6613,7 @@ DebugFuncHeader();
    1b92a:	ebc3 1103 	rsb	r1, r3, r3, lsl #4
    1b92e:	eb03 0181 	add.w	r1, r3, r1, lsl #2
    1b932:	0b80      	lsrs	r0, r0, #14
-   1b934:	233c      	movs	r3, #60	; 0x3c
+   1b934:	2339      	movs	r3, #57	; 0x39
    1b936:	f7ff fe81 	bl	1b63c <int Print<DevRtt<0>, unsigned long, unsigned long, char const*, int, char const*>(DevRtt<0>, char const*, unsigned long, unsigned long, char const*, int, char const*) [clone .constprop.0]>
 Debug("  read reg: %d %s", r, tf ? "" : "[failed]");
    1b93a:	491c      	ldr	r1, [pc, #112]	; (1b9ac <TemperatureTmp117<(unsigned char)5>::read()+0x314>)
@@ -6699,7 +6699,7 @@ DebugFuncHeader();
    1b9f0:	9700      	str	r7, [sp, #0]
    1b9f2:	eb03 0181 	add.w	r1, r3, r1, lsl #2
    1b9f6:	0b80      	lsrs	r0, r0, #14
-   1b9f8:	233c      	movs	r3, #60	; 0x3c
+   1b9f8:	2339      	movs	r3, #57	; 0x39
    1b9fa:	f7ff fe1f 	bl	1b63c <int Print<DevRtt<0>, unsigned long, unsigned long, char const*, int, char const*>(DevRtt<0>, char const*, unsigned long, unsigned long, char const*, int, char const*) [clone .constprop.0]>
                         v = (rbuf[0]<<8) bitor rbuf[1];
    1b9fe:	b22d      	sxth	r5, r5

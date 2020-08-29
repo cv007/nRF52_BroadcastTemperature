@@ -87,7 +87,7 @@ SA  configWbm   (U16 bm, U16 nvm){
         public:
     //============
 
-SA  init        ()              { twi_.init( Addr_ ); //K100
+SA  init        ()              { twi_.init( Addr_, twi_.K400 );
                                   nrf_delay_ms( 2 ); //startup time is 2ms
                                   isInit_ = true;
                                 }
