@@ -77,125 +77,16 @@ a si7051 temperature ic
 #include "Advertising.hpp"  //provides inline class var 'adv'
 #include "Errors.hpp"       //provides inline class var 'error'
 #include "Ble.hpp"          //provides inline class var 'ble'
-
 #include "Print.hpp"
 
 /*-----------------------------------------------------------------------------
     functions
 -----------------------------------------------------------------------------*/
-
-#if 1
-/*
-testing twi - bypass Tmp117 class, use Twi directly, no bluetooth
-
-problem shows up in optimization- -O1,-O2,-O3 
--Os always ok, or if Twi::writeRead is made noinline
-
-run loop 1 time
-
-terminal print-
-    status: 0x0000     (should be 0x2220)
-    temp: 0x0000       (shoud be in 0x0D?? range)
-
-    logic analyzer shows correct data on the twi pins
-
-    Debug prints status as 0x0000, but then passes the (rbuf[0] bitand 0x20) test
-        so value is 0x2220 at some point after the Debug print, then the read
-        of temp works but the rbuf values are still 0 (which were set to 0 before using)
-
-    with status Debug commented out, will not pass the (rbuf[0] bitand 0x20) test
-        so now ready bit is not seen as set
-    status ready bit not set
-
-
-    with adding nop #1 uncommented, passes ready bit test but temp read value is 0x0000
-    status: 0x2220
-    temp: 0x0000
-
-    with adding nop #2 uncommented, prints correct temp value
-
-    so each uncommented nop seems to make reading the rbuf values ok
-    status: 0x2220
-    temp: 0x0D64
-
-    also makes no difference if Debug is disabled (uses RTT), the led's will
-    still indicate an error
-
-*/
-
-Twim0< board.sda.pinNumber(),   
-       board.scl.pinNumber(), 
-       board.i2cDevicePwr.pinNumber() >twi;
-
-int main(){
-
-    board.init();           //init board pins
-    board.alive();          //blink led's to show boot
-
-    Debug("{normal}\n\n");
-
-    twi.init( 0x48 ); //tmp117=0x48, default 100kHz
-    //pins now setup, 2ms powerup delay
-
-    //tmp117 default is continuous conversion at 1s interval
-    //8 sample average - first result ready in 124ms
-
-    for(auto n = 1; ;){ //do n times
-
-        nrf_delay_ms(5000);
-
-        //makes no difference if these are global vars or here on the stack
-        uint8_t tbuf[1]{ 1 };   //status register address
-        uint8_t rbuf[2]{ 0,0 }; //status register read value, 2bytes
-
-        if( not twi.writeRead( tbuf, rbuf ) ){
-            Debug("writeRead failed\n");
-            board.ledRed.on();
-            continue;
-        }
-        //no errors and write/read amounts match requested amounts
-
-asm("nop"); //#1
-        
-        Debug("status: 0x%02X%02X\n", rbuf[0], rbuf[1]); //big endian
-
-        //check ready bit
-        if( not (rbuf[0] bitand 0x20) ){
-            Debug("status ready bit not set\n");
-            board.ledRed.on();
-            continue;
-        }
-
-        tbuf[0] = 0; //temp register address 
-        rbuf[0] = 0; rbuf[1] = 0; //clear rbuf (so can easily see if changed)
-
-        if( not twi.writeRead( tbuf, rbuf ) ){
-            Debug("writeRead failed\n");
-            board.ledRed.on();
-            continue;
-        }
-
-asm("nop"); //#2
-
-        Debug("temp: 0x%02X%02X\n", rbuf[0], rbuf[1]); //big endian
-
-        //assume not 0 is ok
-        if( (rbuf[0] != 0) and (rbuf[1] != 0) ) board.ledGreen.on(); 
-        else board.ledRed.on();
-
-        //run n times
-        if( not --n ) for(;;){}
-    }
-
-} //main
-#endif
-
-//normal
-#if 0
 int main() {
 
     Debug( "{normal}{Fgreen}\nBoot...\n" );
     Debug( "{Fmagenta}board.init()...\n" );
+
     board.init();           //init board pins
     board.alive();          //blink led's to show boot
 
@@ -220,4 +111,4 @@ int main() {
     }
 
 }
-#endif
+

@@ -50,7 +50,7 @@ struct Tmp117 {
                 template<typename T> //T = U16 or I16
 SA  read        (const U8 r, T& v) {
                     if( not isInit_ ) init();
-                    U8 rbuf[2] = { 0, 0 }; //value
+                    volatile U8 rbuf[2] = { 0, 0 }; //value
                     U8 tbuf[1] = { r }; //register
                     bool tf = false;
                     if( twi_.writeRead( tbuf, rbuf) ){

@@ -151,7 +151,7 @@ SA  txBufferSet     (U32 addr, U16 len) {
                     }
 
                     template<unsigned N>
-SA  txBufferSet     (U8 (&addr)[N]) {
+SA  txBufferSet     (const U8 (&addr)[N]) {
                         txBufferSet( (U32)addr, N );
                     }
 
@@ -161,7 +161,7 @@ SA  rxBufferSet     (U32 addr, U16 len) {
                     }
 
                     template<unsigned N>
-SA  rxBufferSet     (U8 (&addr)[N]) {
+SA  rxBufferSet     (volatile U8 (&addr)[N]) {
                         rxBufferSet( (U32)addr, N );
                     }
 
@@ -304,8 +304,7 @@ SA  waitForStop     () {
                     //write,read
                     template<unsigned NT, unsigned NR>
                     // [[ gnu::noinline ]]
-SA  writeRead       (U8 (&txbuf)[NT], U8 (&rxbuf)[NR]) {  
-// asm("nop");
+SA  writeRead       (const U8 (&txbuf)[NT], volatile U8 (&rxbuf)[NR]) {  
                         txBufferSet( txbuf );
                         rxBufferSet( rxbuf );
                         startTxRxStop(); 
@@ -318,7 +317,7 @@ SA  writeRead       (U8 (&txbuf)[NT], U8 (&rxbuf)[NR]) {
 
                     //write only
                     template<unsigned N>
-SA  write           (U8 (&txbuf)[N]) {
+SA  write           (const U8 (&txbuf)[N]) {
                         txBufferSet( txbuf );
                         startTxStop();
                         if( not waitForStop() ) return false;
@@ -330,7 +329,7 @@ SA  write           (U8 (&txbuf)[N]) {
 
                     //read only
                     template<unsigned N>
-SA  read            (U8 (&rxbuf)[N]) {
+SA  read            (volatile U8 (&rxbuf)[N]) {
                         rxBufferSet( rxbuf );
                         startRxStop();
                         if( not waitForStop() ) return false;
