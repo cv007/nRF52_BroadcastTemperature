@@ -19,16 +19,13 @@
 #define SI static inline
 #define SCA static constexpr auto
 
-/*------------------------------------------------------------------------------
-    TMP117 - Texas Instruments temperature IC
-------------------------------------------------------------------------------*/
-
 
 /*------------------------------------------------------------------------------
     Tmp117 struct
 
-    Tmp117<Twi0, 0x48, PINS::PC2> tmp117;
-    Twi0 or Twialt, slave address (unshifted), optional power pin
+    Tmp117<Twi, 0x48> tmp117;
+
+    TMP117 - Texas Instruments temperature IC
 ------------------------------------------------------------------------------*/
 template<typename Twi_, U8 Addr_ = 0x48>
 struct Tmp117 {
