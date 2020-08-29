@@ -127,100 +127,263 @@ Disassembly of section .text:
 	...
 
 000192bc <Reset_Handler>:
+
+    /* Workaround for Errata 185 RAM: RAM corruption at extreme corners 
+     * found at the Errata document for your device located
+     * at https://infocenter.nordicsemi.com/index.jsp */
+    
+    LDR     R0, =0x10000130
    192bc:	480e      	ldr	r0, [pc, #56]	; (192f8 <skip+0x1a>)
+    LDR     R0, [R0]
    192be:	6800      	ldr	r0, [r0, #0]
+    LDR     R1, =0x10000134
    192c0:	490e      	ldr	r1, [pc, #56]	; (192fc <skip+0x1e>)
+    LDR     R1, [R1]
    192c2:	6809      	ldr	r1, [r1, #0]
+    
+    CMP     R0, #0xA
    192c4:	280a      	cmp	r0, #10
+    BNE     skip
    192c6:	d10a      	bne.n	192de <skip>
+    CMP     R1, #0x0
    192c8:	2900      	cmp	r1, #0
+    BNE     skip
    192ca:	d108      	bne.n	192de <skip>
+    
+    LDR     R0, =0x40000EE4
    192cc:	480c      	ldr	r0, [pc, #48]	; (19300 <skip+0x22>)
+    LDR     R2, [R0]
    192ce:	6802      	ldr	r2, [r0, #0]
+    LDR     R3, =0xFFFFFF8F
    192d0:	f06f 0370 	mvn.w	r3, #112	; 0x70
+    ANDS    R2, R2, R3
    192d4:	401a      	ands	r2, r3
+    LDR     R3, =0x00000040
    192d6:	f04f 0340 	mov.w	r3, #64	; 0x40
+    ORRS    R2, R2, R3
    192da:	431a      	orrs	r2, r3
+    STR     R2, [R0]
    192dc:	6002      	str	r2, [r0, #0]
 
 000192de <skip>:
+ *      __bss_start__: VMA of end of the section to copy to. Normally __data_end__ is used, but by using __bss_start__
+ *                    the user can add their own initialized data section before BSS section with the INTERT AFTER command.
+ *
+ * All addresses must be aligned to 4 bytes boundary.
+ */
+    ldr r1, =__etext
    192de:	4909      	ldr	r1, [pc, #36]	; (19304 <skip+0x26>)
+    ldr r2, =__data_start__
    192e0:	4a09      	ldr	r2, [pc, #36]	; (19308 <skip+0x2a>)
+    ldr r3, =__bss_start__
    192e2:	4b0a      	ldr	r3, [pc, #40]	; (1930c <skip+0x2e>)
+
+    subs r3, r3, r2
    192e4:	1a9b      	subs	r3, r3, r2
+    ble .L_loop1_done
    192e6:	dd03      	ble.n	192f0 <skip+0x12>
+
+.L_loop1:
+    subs r3, r3, #4
    192e8:	3b04      	subs	r3, #4
+    ldr r0, [r1,r3]
    192ea:	58c8      	ldr	r0, [r1, r3]
+    str r0, [r2,r3]
    192ec:	50d0      	str	r0, [r2, r3]
+    bgt .L_loop1
    192ee:	dcfb      	bgt.n	192e8 <skip+0xa>
+
+.L_loop3_done:
+#endif /* __STARTUP_CLEAR_BSS */
+
+/* Execute SystemInit function. */
+    bl SystemInit
    192f0:	f000 f8a0 	bl	19434 <SystemInit>
+ * If those libraries are not accessible, define __START as your entry point.
+ */
+#ifndef __START
+#define __START _start
+#endif
+    bl __START
    192f4:	f7ff ffa8 	bl	19248 <_mainCRTStartup>
+    LDR     R0, =0x10000130
    192f8:	10000130 	.word	0x10000130
+    LDR     R1, =0x10000134
    192fc:	10000134 	.word	0x10000134
+    LDR     R0, =0x40000EE4
    19300:	40000ee4 	.word	0x40000ee4
+    ldr r1, =__etext
    19304:	0001c3b8 	.word	0x0001c3b8
+    ldr r2, =__data_start__
    19308:	20001118 	.word	0x20001118
+    ldr r3, =__bss_start__
    1930c:	20001190 	.word	0x20001190
 
 00019310 <NMI_Handler>:
+/* Dummy Exception Handlers (infinite loops which can be modified) */
+
+    .weak   NMI_Handler
+    .type   NMI_Handler, %function
+NMI_Handler:
+    b       .
    19310:	e7fe      	b.n	19310 <NMI_Handler>
 
 00019312 <HardFault_Handler>:
+
+
+    .weak   HardFault_Handler
+    .type   HardFault_Handler, %function
+HardFault_Handler:
+    b       .
    19312:	e7fe      	b.n	19312 <HardFault_Handler>
 
 00019314 <MemoryManagement_Handler>:
+
+
+    .weak   MemoryManagement_Handler
+    .type   MemoryManagement_Handler, %function
+MemoryManagement_Handler:
+    b       .
    19314:	e7fe      	b.n	19314 <MemoryManagement_Handler>
 
 00019316 <BusFault_Handler>:
+
+
+    .weak   BusFault_Handler
+    .type   BusFault_Handler, %function
+BusFault_Handler:
+    b       .
    19316:	e7fe      	b.n	19316 <BusFault_Handler>
 
 00019318 <UsageFault_Handler>:
+
+
+    .weak   UsageFault_Handler
+    .type   UsageFault_Handler, %function
+UsageFault_Handler:
+    b       .
    19318:	e7fe      	b.n	19318 <UsageFault_Handler>
 
 0001931a <SVC_Handler>:
+
+
+    .weak   SVC_Handler
+    .type   SVC_Handler, %function
+SVC_Handler:
+    b       .
    1931a:	e7fe      	b.n	1931a <SVC_Handler>
 
 0001931c <DebugMon_Handler>:
+
+
+    .weak   DebugMon_Handler
+    .type   DebugMon_Handler, %function
+DebugMon_Handler:
+    b       .
    1931c:	e7fe      	b.n	1931c <DebugMon_Handler>
 
 0001931e <PendSV_Handler>:
+
+
+    .weak   PendSV_Handler
+    .type   PendSV_Handler, %function
+PendSV_Handler:
+    b       .
    1931e:	e7fe      	b.n	1931e <PendSV_Handler>
 
 00019320 <SysTick_Handler>:
+
+
+    .weak   SysTick_Handler
+    .type   SysTick_Handler, %function
+SysTick_Handler:
+    b       .
    19320:	e7fe      	b.n	19320 <SysTick_Handler>
 
 00019322 <Default_Handler>:
+/* IRQ Handlers */
+
+    .globl  Default_Handler
+    .type   Default_Handler, %function
+Default_Handler:
+    b       .
    19322:	e7fe      	b.n	19322 <Default_Handler>
 
 00019324 <app_error_handler_bare>:
+ * @param[in] error_code  Error code supplied to the handler.
+ * @param[in] line_num    Line number where the handler is called.
+ * @param[in] p_file_name Pointer to the file name.
+ */
+void app_error_handler_bare(ret_code_t error_code)
+{
    19324:	b500      	push	{lr}
    19326:	b085      	sub	sp, #20
    19328:	4603      	mov	r3, r0
+    error_info_t error_info =
    1932a:	2100      	movs	r1, #0
+        .line_num    = 0,
+        .p_file_name = NULL,
+        .err_code    = error_code,
+    };
+
+    app_error_fault_handler(NRF_FAULT_ID_SDK_ERROR, 0, (uint32_t)(&error_info));
    1932c:	aa01      	add	r2, sp, #4
    1932e:	f244 0001 	movw	r0, #16385	; 0x4001
+    error_info_t error_info =
    19332:	e9cd 1101 	strd	r1, r1, [sp, #4]
    19336:	9303      	str	r3, [sp, #12]
+    app_error_fault_handler(NRF_FAULT_ID_SDK_ERROR, 0, (uint32_t)(&error_info));
    19338:	f000 f804 	bl	19344 <app_error_fault_handler>
+
+    UNUSED_VARIABLE(error_info);
+}
    1933c:	b005      	add	sp, #20
    1933e:	f85d fb04 	ldr.w	pc, [sp], #4
    19342:	bf00      	nop
 
 00019344 <app_error_fault_handler>:
+  \details Disables IRQ interrupts by setting the I-bit in the CPSR.
+  Can only be executed in Privileged modes.
+ */
+__attribute__( ( always_inline ) ) __STATIC_INLINE void __disable_irq(void)
+{
+  __ASM volatile ("cpsid i" : : : "memory");
    19344:	b672      	cpsid	i
+            NRF_LOG_ERROR("UNKNOWN FAULT at 0x%08X", pc);
+            break;
+    }
+#endif
+
+    NRF_BREAKPOINT_COND;
    19346:	4b09      	ldr	r3, [pc, #36]	; (1936c <app_error_fault_handler+0x28>)
    19348:	681b      	ldr	r3, [r3, #0]
    1934a:	07db      	lsls	r3, r3, #31
    1934c:	d500      	bpl.n	19350 <app_error_fault_handler+0xc>
    1934e:	be00      	bkpt	0x0000
+  \details Acts as a special kind of Data Memory Barrier.
+           It completes when all explicit memory accesses before this instruction complete.
+ */
+__attribute__((always_inline)) __STATIC_INLINE void __DSB(void)
+{
+  __ASM volatile ("dsb 0xF":::"memory");
    19350:	f3bf 8f4f 	dsb	sy
+__STATIC_INLINE void NVIC_SystemReset(void)
+{
+  __DSB();                                                          /* Ensure all outstanding memory accesses included
+                                                                       buffered write are completed before reset */
+  SCB->AIRCR  = (uint32_t)((0x5FAUL << SCB_AIRCR_VECTKEY_Pos)    |
+                           (SCB->AIRCR & SCB_AIRCR_PRIGROUP_Msk) |
    19354:	4906      	ldr	r1, [pc, #24]	; (19370 <app_error_fault_handler+0x2c>)
+  SCB->AIRCR  = (uint32_t)((0x5FAUL << SCB_AIRCR_VECTKEY_Pos)    |
    19356:	4b07      	ldr	r3, [pc, #28]	; (19374 <app_error_fault_handler+0x30>)
+                           (SCB->AIRCR & SCB_AIRCR_PRIGROUP_Msk) |
    19358:	68ca      	ldr	r2, [r1, #12]
    1935a:	f402 62e0 	and.w	r2, r2, #1792	; 0x700
+  SCB->AIRCR  = (uint32_t)((0x5FAUL << SCB_AIRCR_VECTKEY_Pos)    |
    1935e:	4313      	orrs	r3, r2
    19360:	60cb      	str	r3, [r1, #12]
    19362:	f3bf 8f4f 	dsb	sy
+  __ASM volatile ("nop");
    19366:	bf00      	nop
    19368:	e7fd      	b.n	19366 <app_error_fault_handler+0x22>
    1936a:	bf00      	nop
@@ -229,29 +392,66 @@ Disassembly of section .text:
    19374:	05fa0004 	.word	0x05fa0004
 
 00019378 <app_util_critical_region_enter>:
+        __enable_irq();
+    }
+}
+
+void app_util_critical_region_enter(uint8_t *p_nested)
+{
    19378:	b470      	push	{r4, r5, r6}
+  __ASM volatile ("MRS %0, primask" : "=r" (result) );
    1937a:	f3ef 8410 	mrs	r4, PRIMASK
+  __ASM volatile ("cpsid i" : : : "memory");
    1937e:	b672      	cpsid	i
+}
+
+__STATIC_INLINE uint32_t sd_nvic_critical_region_enter(uint8_t * p_is_nested_critical_region)
+{
+  int was_masked = __sd_nvic_irq_disable();
+  if (!nrf_nvic_state.__cr_flag)
    19380:	4b0d      	ldr	r3, [pc, #52]	; (193b8 <app_util_critical_region_enter+0x40>)
    19382:	689a      	ldr	r2, [r3, #8]
    19384:	b9aa      	cbnz	r2, 193b2 <app_util_critical_region_enter+0x3a>
+  {
+    nrf_nvic_state.__cr_flag = 1;
+    nrf_nvic_state.__irq_masks[0] = ( NVIC->ICER[0] & __NRF_NVIC_APP_IRQS_0 );
    19386:	490d      	ldr	r1, [pc, #52]	; (193bc <app_util_critical_region_enter+0x44>)
    19388:	4e0d      	ldr	r6, [pc, #52]	; (193c0 <app_util_critical_region_enter+0x48>)
+    nrf_nvic_state.__cr_flag = 1;
    1938a:	2501      	movs	r5, #1
    1938c:	609d      	str	r5, [r3, #8]
+    nrf_nvic_state.__irq_masks[0] = ( NVIC->ICER[0] & __NRF_NVIC_APP_IRQS_0 );
    1938e:	f8d1 5080 	ldr.w	r5, [r1, #128]	; 0x80
    19392:	4035      	ands	r5, r6
    19394:	601d      	str	r5, [r3, #0]
+    NVIC->ICER[0] = __NRF_NVIC_APP_IRQS_0;
    19396:	f8c1 6080 	str.w	r6, [r1, #128]	; 0x80
+    nrf_nvic_state.__irq_masks[1] = ( NVIC->ICER[1] & __NRF_NVIC_APP_IRQS_1 );
    1939a:	f8d1 5084 	ldr.w	r5, [r1, #132]	; 0x84
    1939e:	605d      	str	r5, [r3, #4]
+    NVIC->ICER[1] = __NRF_NVIC_APP_IRQS_1;
    193a0:	f04f 33ff 	mov.w	r3, #4294967295	; 0xffffffff
    193a4:	f8c1 3084 	str.w	r3, [r1, #132]	; 0x84
+    *p_is_nested_critical_region = 0;
    193a8:	7002      	strb	r2, [r0, #0]
+  }
+  else
+  {
+    *p_is_nested_critical_region = 1;
+  }
+  if (!was_masked)
    193aa:	b904      	cbnz	r4, 193ae <app_util_critical_region_enter+0x36>
+  __ASM volatile ("cpsie i" : : : "memory");
    193ac:	b662      	cpsie	i
+    /* return value can be safely ignored */
+    (void) sd_nvic_critical_region_enter(p_nested);
+#else
+    app_util_disable_irq();
+#endif
+}
    193ae:	bc70      	pop	{r4, r5, r6}
    193b0:	4770      	bx	lr
+    *p_is_nested_critical_region = 1;
    193b2:	2301      	movs	r3, #1
    193b4:	7003      	strb	r3, [r0, #0]
    193b6:	e7f8      	b.n	193aa <app_util_critical_region_enter+0x32>
@@ -260,21 +460,45 @@ Disassembly of section .text:
    193c0:	bdff06fc 	.word	0xbdff06fc
 
 000193c4 <app_util_critical_region_exit>:
+  return NRF_SUCCESS;
+}
+
+__STATIC_INLINE uint32_t sd_nvic_critical_region_exit(uint8_t is_nested_critical_region)
+{
+  if (nrf_nvic_state.__cr_flag && (is_nested_critical_region == 0))
    193c4:	4b09      	ldr	r3, [pc, #36]	; (193ec <app_util_critical_region_exit+0x28>)
    193c6:	689a      	ldr	r2, [r3, #8]
    193c8:	b172      	cbz	r2, 193e8 <app_util_critical_region_exit+0x24>
    193ca:	b968      	cbnz	r0, 193e8 <app_util_critical_region_exit+0x24>
+
+void app_util_critical_region_exit(uint8_t nested)
+{
    193cc:	b410      	push	{r4}
+  __ASM volatile ("MRS %0, primask" : "=r" (result) );
    193ce:	f3ef 8110 	mrs	r1, PRIMASK
+  __ASM volatile ("cpsid i" : : : "memory");
    193d2:	b672      	cpsid	i
+  {
+    int was_masked = __sd_nvic_irq_disable();
+    NVIC->ISER[0] = nrf_nvic_state.__irq_masks[0];
    193d4:	4a06      	ldr	r2, [pc, #24]	; (193f0 <app_util_critical_region_exit+0x2c>)
    193d6:	681c      	ldr	r4, [r3, #0]
    193d8:	6014      	str	r4, [r2, #0]
+    NVIC->ISER[1] = nrf_nvic_state.__irq_masks[1];
    193da:	685c      	ldr	r4, [r3, #4]
    193dc:	6054      	str	r4, [r2, #4]
+    nrf_nvic_state.__cr_flag = 0;
    193de:	6098      	str	r0, [r3, #8]
+    if (!was_masked)
    193e0:	b901      	cbnz	r1, 193e4 <app_util_critical_region_exit+0x20>
+  __ASM volatile ("cpsie i" : : : "memory");
    193e2:	b662      	cpsie	i
+    /* return value can be safely ignored */
+    (void) sd_nvic_critical_region_exit(nested);
+#else
+    app_util_enable_irq();
+#endif
+}
    193e4:	bc10      	pop	{r4}
    193e6:	4770      	bx	lr
    193e8:	4770      	bx	lr
@@ -283,6 +507,12 @@ Disassembly of section .text:
    193f0:	e000e100 	.word	0xe000e100
 
 000193f4 <RTC1_IRQHandler>:
+#endif
+
+#if defined(APP_TIMER_V2_RTC1_ENABLED)
+void drv_rtc_rtc_1_irq_handler(void)
+{
+    m_handlers[DRV_RTC_RTC1_INST_IDX](m_cb[DRV_RTC_RTC1_INST_IDX].p_instance);
    193f4:	4a02      	ldr	r2, [pc, #8]	; (19400 <RTC1_IRQHandler+0xc>)
    193f6:	4b03      	ldr	r3, [pc, #12]	; (19404 <RTC1_IRQHandler+0x10>)
    193f8:	6810      	ldr	r0, [r2, #0]
@@ -293,158 +523,286 @@ Disassembly of section .text:
    19404:	200011b4 	.word	0x200011b4
 
 00019408 <nrf_section_iter_init>:
+void nrf_section_iter_init(nrf_section_iter_t * p_iter, nrf_section_set_t const * p_set)
+{
+    ASSERT(p_iter != NULL);
+    ASSERT(p_set  != NULL);
+
+    p_iter->p_set = p_set;
    19408:	6001      	str	r1, [r0, #0]
+
+#if defined(__GNUC__)
+    p_iter->p_item = p_iter->p_set->section.p_start;
    1940a:	680b      	ldr	r3, [r1, #0]
    1940c:	6043      	str	r3, [r0, #4]
+    if (p_iter->p_item == p_iter->p_set->section.p_end)
    1940e:	684a      	ldr	r2, [r1, #4]
    19410:	4293      	cmp	r3, r2
+    {
+        p_iter->p_item = NULL;
    19412:	bf04      	itt	eq
    19414:	2300      	moveq	r3, #0
    19416:	6043      	streq	r3, [r0, #4]
+    }
+#else
+    p_iter->p_section = p_set->p_first;
+    nrf_section_iter_item_set(p_iter);
+#endif
+}
    19418:	4770      	bx	lr
    1941a:	bf00      	nop
 
 0001941c <nrf_section_iter_next>:
+void nrf_section_iter_next(nrf_section_iter_t * p_iter)
+{
+    ASSERT(p_iter        != NULL);
+    ASSERT(p_iter->p_set != NULL);
+
+    if (p_iter->p_item == NULL)
    1941c:	6843      	ldr	r3, [r0, #4]
    1941e:	b143      	cbz	r3, 19432 <nrf_section_iter_next+0x16>
+    {
+        return;
+    }
+
+    p_iter->p_item = (void *)((size_t)(p_iter->p_item) + p_iter->p_set->item_size);
    19420:	6802      	ldr	r2, [r0, #0]
    19422:	6891      	ldr	r1, [r2, #8]
    19424:	440b      	add	r3, r1
    19426:	6043      	str	r3, [r0, #4]
+
+#if defined(__GNUC__)
+    if (p_iter->p_item == p_iter->p_set->section.p_end)
    19428:	6852      	ldr	r2, [r2, #4]
    1942a:	4293      	cmp	r3, r2
+    {
+        p_iter->p_item = NULL;
    1942c:	bf04      	itt	eq
    1942e:	2300      	moveq	r3, #0
    19430:	6043      	streq	r3, [r0, #4]
+    {
+        p_iter->p_section++;
+        nrf_section_iter_item_set(p_iter);
+    }
+#endif
+}
    19432:	4770      	bx	lr
 
 00019434 <SystemInit>:
+{
+    SystemCoreClock = __SYSTEM_CLOCK_64M;
+}
+
+void SystemInit(void)
+{
    19434:	b430      	push	{r4, r5}
+    #endif
+    
+    /* Workaround for Errata 31 "CLOCK: Calibration values are not correctly loaded from FICR at reset" found at the Errata document
+       for your device located at https://infocenter.nordicsemi.com/index.jsp */
+    if (errata_31()){
+        *(volatile uint32_t *)0x4000053C = ((*(volatile uint32_t *)0x10000244) & 0x0000E000) >> 13;
    19436:	4b5f      	ldr	r3, [pc, #380]	; (195b4 <SystemInit+0x180>)
    19438:	4d5f      	ldr	r5, [pc, #380]	; (195b8 <SystemInit+0x184>)
    1943a:	681a      	ldr	r2, [r3, #0]
+    #endif
+    
+    /* Workaround for Errata 66 "TEMP: Linearity specification not met with default settings" found at the Errata document
+       for your device located at https://infocenter.nordicsemi.com/index.jsp  */
+    if (errata_66()){
+        NRF_TEMP->A0 = NRF_FICR->TEMP.A0;
    1943c:	4b5f      	ldr	r3, [pc, #380]	; (195bc <SystemInit+0x188>)
+    return true;
+}
+
+static bool errata_103(void)
+{
+    if (*(uint32_t *)0x10000130ul == 0xAul){
    1943e:	4c60      	ldr	r4, [pc, #384]	; (195c0 <SystemInit+0x18c>)
+        NRF_CLOCK->EVENTS_DONE = 0;
    19440:	f04f 4180 	mov.w	r1, #1073741824	; 0x40000000
+        *(volatile uint32_t *)0x4000053C = ((*(volatile uint32_t *)0x10000244) & 0x0000E000) >> 13;
    19444:	f3c2 3242 	ubfx	r2, r2, #13, #3
    19448:	602a      	str	r2, [r5, #0]
+        NRF_CLOCK->EVENTS_DONE = 0;
    1944a:	2000      	movs	r0, #0
+        NRF_TEMP->A0 = NRF_FICR->TEMP.A0;
    1944c:	f04f 5280 	mov.w	r2, #268435456	; 0x10000000
+        NRF_CLOCK->EVENTS_DONE = 0;
    19450:	f8c1 010c 	str.w	r0, [r1, #268]	; 0x10c
+        NRF_CLOCK->EVENTS_CTTO = 0;
    19454:	f8c1 0110 	str.w	r0, [r1, #272]	; 0x110
+        NRF_CLOCK->CTIV = 0;
    19458:	f8c1 0538 	str.w	r0, [r1, #1336]	; 0x538
+        NRF_TEMP->A0 = NRF_FICR->TEMP.A0;
    1945c:	f8d2 0404 	ldr.w	r0, [r2, #1028]	; 0x404
    19460:	f8c3 0520 	str.w	r0, [r3, #1312]	; 0x520
+        NRF_TEMP->A1 = NRF_FICR->TEMP.A1;
    19464:	f8d2 0408 	ldr.w	r0, [r2, #1032]	; 0x408
    19468:	f8c3 0524 	str.w	r0, [r3, #1316]	; 0x524
+        NRF_TEMP->A2 = NRF_FICR->TEMP.A2;
    1946c:	f8d2 040c 	ldr.w	r0, [r2, #1036]	; 0x40c
    19470:	f8c3 0528 	str.w	r0, [r3, #1320]	; 0x528
+        NRF_TEMP->A3 = NRF_FICR->TEMP.A3;
    19474:	f8d2 0410 	ldr.w	r0, [r2, #1040]	; 0x410
    19478:	f8c3 052c 	str.w	r0, [r3, #1324]	; 0x52c
+        NRF_TEMP->A4 = NRF_FICR->TEMP.A4;
    1947c:	f8d2 0414 	ldr.w	r0, [r2, #1044]	; 0x414
    19480:	f8c3 0530 	str.w	r0, [r3, #1328]	; 0x530
+        NRF_TEMP->A5 = NRF_FICR->TEMP.A5;
    19484:	f8d2 0418 	ldr.w	r0, [r2, #1048]	; 0x418
    19488:	f8c3 0534 	str.w	r0, [r3, #1332]	; 0x534
+        NRF_TEMP->B0 = NRF_FICR->TEMP.B0;
    1948c:	f8d2 041c 	ldr.w	r0, [r2, #1052]	; 0x41c
    19490:	f8c3 0540 	str.w	r0, [r3, #1344]	; 0x540
+        NRF_TEMP->B1 = NRF_FICR->TEMP.B1;
    19494:	f8d2 0420 	ldr.w	r0, [r2, #1056]	; 0x420
    19498:	f8c3 0544 	str.w	r0, [r3, #1348]	; 0x544
+        NRF_TEMP->B2 = NRF_FICR->TEMP.B2;
    1949c:	f8d2 0424 	ldr.w	r0, [r2, #1060]	; 0x424
    194a0:	f8c3 0548 	str.w	r0, [r3, #1352]	; 0x548
+        NRF_TEMP->B3 = NRF_FICR->TEMP.B3;
    194a4:	f8d2 0428 	ldr.w	r0, [r2, #1064]	; 0x428
    194a8:	f8c3 054c 	str.w	r0, [r3, #1356]	; 0x54c
+        NRF_TEMP->B4 = NRF_FICR->TEMP.B4;
    194ac:	f8d2 042c 	ldr.w	r0, [r2, #1068]	; 0x42c
    194b0:	f8c3 0550 	str.w	r0, [r3, #1360]	; 0x550
+        NRF_TEMP->B5 = NRF_FICR->TEMP.B5;
    194b4:	f8d2 0430 	ldr.w	r0, [r2, #1072]	; 0x430
    194b8:	f8c3 0554 	str.w	r0, [r3, #1364]	; 0x554
+        NRF_TEMP->T0 = NRF_FICR->TEMP.T0;
    194bc:	f8d2 0434 	ldr.w	r0, [r2, #1076]	; 0x434
    194c0:	f8c3 0560 	str.w	r0, [r3, #1376]	; 0x560
+        NRF_TEMP->T1 = NRF_FICR->TEMP.T1;
    194c4:	f8d2 0438 	ldr.w	r0, [r2, #1080]	; 0x438
    194c8:	f8c3 0564 	str.w	r0, [r3, #1380]	; 0x564
+        NRF_TEMP->T2 = NRF_FICR->TEMP.T2;
    194cc:	f8d2 043c 	ldr.w	r0, [r2, #1084]	; 0x43c
    194d0:	f8c3 0568 	str.w	r0, [r3, #1384]	; 0x568
+        NRF_TEMP->T3 = NRF_FICR->TEMP.T3;
    194d4:	f8d2 0440 	ldr.w	r0, [r2, #1088]	; 0x440
    194d8:	f8c3 056c 	str.w	r0, [r3, #1388]	; 0x56c
+    if (*(uint32_t *)0x10000130ul == 0xAul){
    194dc:	6820      	ldr	r0, [r4, #0]
+        NRF_TEMP->T4 = NRF_FICR->TEMP.T4;
    194de:	f8d2 2444 	ldr.w	r2, [r2, #1092]	; 0x444
    194e2:	f8c3 2570 	str.w	r2, [r3, #1392]	; 0x570
+    if (*(uint32_t *)0x10000130ul == 0xAul){
    194e6:	280a      	cmp	r0, #10
    194e8:	d017      	beq.n	1951a <SystemInit+0xe6>
+        if (NRF_POWER->RESETREAS & POWER_RESETREAS_RESETPIN_Msk){
    194ea:	f8d1 3400 	ldr.w	r3, [r1, #1024]	; 0x400
    194ee:	07db      	lsls	r3, r3, #31
    194f0:	d41f      	bmi.n	19532 <SystemInit+0xfe>
+        *(volatile uint32_t *)0x40000EE4ul |= 0x0000000Ful;
    194f2:	4a34      	ldr	r2, [pc, #208]	; (195c4 <SystemInit+0x190>)
    194f4:	6813      	ldr	r3, [r2, #0]
    194f6:	f043 030f 	orr.w	r3, r3, #15
    194fa:	6013      	str	r3, [r2, #0]
+        if (((NRF_UICR->PSELRESET[0] & UICR_PSELRESET_CONNECT_Msk) != (UICR_PSELRESET_CONNECT_Connected << UICR_PSELRESET_CONNECT_Pos)) ||
    194fc:	f04f 2310 	mov.w	r3, #268439552	; 0x10001000
    19500:	f8d3 2200 	ldr.w	r2, [r3, #512]	; 0x200
    19504:	2a00      	cmp	r2, #0
    19506:	db23      	blt.n	19550 <SystemInit+0x11c>
+            ((NRF_UICR->PSELRESET[1] & UICR_PSELRESET_CONNECT_Msk) != (UICR_PSELRESET_CONNECT_Connected << UICR_PSELRESET_CONNECT_Pos))){
    19508:	f8d3 3204 	ldr.w	r3, [r3, #516]	; 0x204
+        if (((NRF_UICR->PSELRESET[0] & UICR_PSELRESET_CONNECT_Msk) != (UICR_PSELRESET_CONNECT_Connected << UICR_PSELRESET_CONNECT_Pos)) ||
    1950c:	2b00      	cmp	r3, #0
    1950e:	db1f      	blt.n	19550 <SystemInit+0x11c>
+    SystemCoreClock = __SYSTEM_CLOCK_64M;
    19510:	4b2d      	ldr	r3, [pc, #180]	; (195c8 <SystemInit+0x194>)
    19512:	4a2e      	ldr	r2, [pc, #184]	; (195cc <SystemInit+0x198>)
    19514:	601a      	str	r2, [r3, #0]
+}
    19516:	bc30      	pop	{r4, r5}
    19518:	4770      	bx	lr
+        if (*(uint32_t *)0x10000134ul == 0x0ul){
    1951a:	4b2d      	ldr	r3, [pc, #180]	; (195d0 <SystemInit+0x19c>)
    1951c:	681b      	ldr	r3, [r3, #0]
    1951e:	2b00      	cmp	r3, #0
    19520:	d1e3      	bne.n	194ea <SystemInit+0xb6>
+        NRF_CCM->MAXPACKETSIZE = 0xFBul;
    19522:	4b2c      	ldr	r3, [pc, #176]	; (195d4 <SystemInit+0x1a0>)
    19524:	22fb      	movs	r2, #251	; 0xfb
    19526:	f8c3 2518 	str.w	r2, [r3, #1304]	; 0x518
+        if (NRF_POWER->RESETREAS & POWER_RESETREAS_RESETPIN_Msk){
    1952a:	f8d1 3400 	ldr.w	r3, [r1, #1024]	; 0x400
    1952e:	07da      	lsls	r2, r3, #31
    19530:	d505      	bpl.n	1953e <SystemInit+0x10a>
+            NRF_POWER->RESETREAS =  ~POWER_RESETREAS_RESETPIN_Msk;
    19532:	f04f 4380 	mov.w	r3, #1073741824	; 0x40000000
    19536:	f06f 0201 	mvn.w	r2, #1
    1953a:	f8c3 2400 	str.w	r2, [r3, #1024]	; 0x400
+}
+#endif
+
+static bool errata_217(void)
+{
+    if (*(uint32_t *)0x10000130ul == 0xAul){
    1953e:	4b20      	ldr	r3, [pc, #128]	; (195c0 <SystemInit+0x18c>)
    19540:	681b      	ldr	r3, [r3, #0]
    19542:	2b0a      	cmp	r3, #10
    19544:	d1d5      	bne.n	194f2 <SystemInit+0xbe>
+        if (*(uint32_t *)0x10000134ul == 0x0ul){
    19546:	4b22      	ldr	r3, [pc, #136]	; (195d0 <SystemInit+0x19c>)
    19548:	681b      	ldr	r3, [r3, #0]
    1954a:	2b00      	cmp	r3, #0
    1954c:	d0d6      	beq.n	194fc <SystemInit+0xc8>
    1954e:	e7d0      	b.n	194f2 <SystemInit+0xbe>
+            NRF_NVMC->CONFIG = NVMC_CONFIG_WEN_Wen << NVMC_CONFIG_WEN_Pos;
    19550:	4a21      	ldr	r2, [pc, #132]	; (195d8 <SystemInit+0x1a4>)
    19552:	2301      	movs	r3, #1
    19554:	f8c2 3504 	str.w	r3, [r2, #1284]	; 0x504
+            while (NRF_NVMC->READY == NVMC_READY_READY_Busy){}
    19558:	f8d2 3400 	ldr.w	r3, [r2, #1024]	; 0x400
    1955c:	2b00      	cmp	r3, #0
    1955e:	d0fb      	beq.n	19558 <SystemInit+0x124>
+            NRF_UICR->PSELRESET[0] = 21;
    19560:	f04f 2310 	mov.w	r3, #268439552	; 0x10001000
    19564:	2115      	movs	r1, #21
+            while (NRF_NVMC->READY == NVMC_READY_READY_Busy){}
    19566:	4a1c      	ldr	r2, [pc, #112]	; (195d8 <SystemInit+0x1a4>)
+            NRF_UICR->PSELRESET[0] = 21;
    19568:	f8c3 1200 	str.w	r1, [r3, #512]	; 0x200
+            while (NRF_NVMC->READY == NVMC_READY_READY_Busy){}
    1956c:	f8d2 3400 	ldr.w	r3, [r2, #1024]	; 0x400
    19570:	2b00      	cmp	r3, #0
    19572:	d0fb      	beq.n	1956c <SystemInit+0x138>
+            NRF_UICR->PSELRESET[1] = 21;
    19574:	f04f 2310 	mov.w	r3, #268439552	; 0x10001000
    19578:	2115      	movs	r1, #21
+            while (NRF_NVMC->READY == NVMC_READY_READY_Busy){}
    1957a:	4a17      	ldr	r2, [pc, #92]	; (195d8 <SystemInit+0x1a4>)
+            NRF_UICR->PSELRESET[1] = 21;
    1957c:	f8c3 1204 	str.w	r1, [r3, #516]	; 0x204
+            while (NRF_NVMC->READY == NVMC_READY_READY_Busy){}
    19580:	f8d2 3400 	ldr.w	r3, [r2, #1024]	; 0x400
    19584:	2b00      	cmp	r3, #0
    19586:	d0fb      	beq.n	19580 <SystemInit+0x14c>
+            NRF_NVMC->CONFIG = NVMC_CONFIG_WEN_Ren << NVMC_CONFIG_WEN_Pos;
    19588:	2300      	movs	r3, #0
+            while (NRF_NVMC->READY == NVMC_READY_READY_Busy){}
    1958a:	4913      	ldr	r1, [pc, #76]	; (195d8 <SystemInit+0x1a4>)
+            NRF_NVMC->CONFIG = NVMC_CONFIG_WEN_Ren << NVMC_CONFIG_WEN_Pos;
    1958c:	f8c2 3504 	str.w	r3, [r2, #1284]	; 0x504
+            while (NRF_NVMC->READY == NVMC_READY_READY_Busy){}
    19590:	f8d1 3400 	ldr.w	r3, [r1, #1024]	; 0x400
    19594:	2b00      	cmp	r3, #0
    19596:	d0fb      	beq.n	19590 <SystemInit+0x15c>
+  __ASM volatile ("dsb 0xF":::"memory");
    19598:	f3bf 8f4f 	dsb	sy
+                           (SCB->AIRCR & SCB_AIRCR_PRIGROUP_Msk) |
    1959c:	490f      	ldr	r1, [pc, #60]	; (195dc <SystemInit+0x1a8>)
+  SCB->AIRCR  = (uint32_t)((0x5FAUL << SCB_AIRCR_VECTKEY_Pos)    |
    1959e:	4b10      	ldr	r3, [pc, #64]	; (195e0 <SystemInit+0x1ac>)
+                           (SCB->AIRCR & SCB_AIRCR_PRIGROUP_Msk) |
    195a0:	68ca      	ldr	r2, [r1, #12]
    195a2:	f402 62e0 	and.w	r2, r2, #1792	; 0x700
+  SCB->AIRCR  = (uint32_t)((0x5FAUL << SCB_AIRCR_VECTKEY_Pos)    |
    195a6:	4313      	orrs	r3, r2
    195a8:	60cb      	str	r3, [r1, #12]
    195aa:	f3bf 8f4f 	dsb	sy
+  __ASM volatile ("nop");
    195ae:	bf00      	nop
    195b0:	e7fd      	b.n	195ae <SystemInit+0x17a>
    195b2:	bf00      	nop
@@ -462,118 +820,219 @@ Disassembly of section .text:
    195e0:	05fa0004 	.word	0x05fa0004
 
 000195e4 <clock_irq_handler>:
+        p_item->event_handler(evt_type);
+    }
+}
+
+static void clock_irq_handler(nrfx_clock_evt_type_t evt)
+{
    195e4:	b510      	push	{r4, lr}
+    if (evt == NRFX_CLOCK_EVT_HFCLK_STARTED)
    195e6:	b968      	cbnz	r0, 19604 <clock_irq_handler+0x20>
+    {
+        m_clock_cb.hfclk_on = true;
    195e8:	4c0e      	ldr	r4, [pc, #56]	; (19624 <clock_irq_handler+0x40>)
+    nrf_drv_clock_handler_item_t * p_item = *p_head;
    195ea:	68a3      	ldr	r3, [r4, #8]
+        m_clock_cb.hfclk_on = true;
    195ec:	2201      	movs	r2, #1
    195ee:	7062      	strb	r2, [r4, #1]
+    if (p_item)
    195f0:	b13b      	cbz	r3, 19602 <clock_irq_handler+0x1e>
+        p_item->event_handler(evt_type);
    195f2:	e9d3 2300 	ldrd	r2, r3, [r3]
    195f6:	2000      	movs	r0, #0
+        *p_head = p_item->p_next;
    195f8:	60a2      	str	r2, [r4, #8]
+        p_item->event_handler(evt_type);
    195fa:	4798      	blx	r3
+    nrf_drv_clock_handler_item_t * p_item = *p_head;
    195fc:	68a3      	ldr	r3, [r4, #8]
+    if (p_item)
    195fe:	2b00      	cmp	r3, #0
    19600:	d1f7      	bne.n	195f2 <clock_irq_handler+0xe>
+            m_clock_cb.cal_done_handler(aborted ?
+                NRF_DRV_CLOCK_EVT_CAL_ABORTED : NRF_DRV_CLOCK_EVT_CAL_DONE);
+        }
+    }
+#endif // CALIBRATION_SUPPORT
+}
    19602:	bd10      	pop	{r4, pc}
+    if (evt == NRFX_CLOCK_EVT_LFCLK_STARTED)
    19604:	2801      	cmp	r0, #1
    19606:	d1fc      	bne.n	19602 <clock_irq_handler+0x1e>
+        m_clock_cb.lfclk_on = true;
    19608:	4c06      	ldr	r4, [pc, #24]	; (19624 <clock_irq_handler+0x40>)
+    nrf_drv_clock_handler_item_t * p_item = *p_head;
    1960a:	6923      	ldr	r3, [r4, #16]
+        m_clock_cb.lfclk_on = true;
    1960c:	70a0      	strb	r0, [r4, #2]
+    if (p_item)
    1960e:	2b00      	cmp	r3, #0
    19610:	d0f7      	beq.n	19602 <clock_irq_handler+0x1e>
+        p_item->event_handler(evt_type);
    19612:	e9d3 2300 	ldrd	r2, r3, [r3]
    19616:	2001      	movs	r0, #1
+        *p_head = p_item->p_next;
    19618:	6122      	str	r2, [r4, #16]
+        p_item->event_handler(evt_type);
    1961a:	4798      	blx	r3
+    nrf_drv_clock_handler_item_t * p_item = *p_head;
    1961c:	6923      	ldr	r3, [r4, #16]
+    if (p_item)
    1961e:	2b00      	cmp	r3, #0
    19620:	d1f7      	bne.n	19612 <clock_irq_handler+0x2e>
+}
    19622:	bd10      	pop	{r4, pc}
    19624:	200011b8 	.word	0x200011b8
 
 00019628 <soc_evt_handler>:
+ * @param[in] evt_id    SoC event.
+ * @param[in] p_context Context.
+ */
+static void soc_evt_handler(uint32_t evt_id, void * p_context)
+{
+    if (evt_id == NRF_EVT_HFCLKSTARTED)
    19628:	b970      	cbnz	r0, 19648 <soc_evt_handler+0x20>
+{
    1962a:	b510      	push	{r4, lr}
+    {
+        m_clock_cb.hfclk_on = true;
    1962c:	4c07      	ldr	r4, [pc, #28]	; (1964c <soc_evt_handler+0x24>)
+    nrf_drv_clock_handler_item_t * p_item = *p_head;
    1962e:	68a3      	ldr	r3, [r4, #8]
+        m_clock_cb.hfclk_on = true;
    19630:	2201      	movs	r2, #1
    19632:	7062      	strb	r2, [r4, #1]
+    if (p_item)
    19634:	b13b      	cbz	r3, 19646 <soc_evt_handler+0x1e>
+        p_item->event_handler(evt_type);
    19636:	e9d3 2300 	ldrd	r2, r3, [r3]
    1963a:	2000      	movs	r0, #0
+        *p_head = p_item->p_next;
    1963c:	60a2      	str	r2, [r4, #8]
+        p_item->event_handler(evt_type);
    1963e:	4798      	blx	r3
+    nrf_drv_clock_handler_item_t * p_item = *p_head;
    19640:	68a3      	ldr	r3, [r4, #8]
+    if (p_item)
    19642:	2b00      	cmp	r3, #0
    19644:	d1f7      	bne.n	19636 <soc_evt_handler+0xe>
+        clock_clk_started_notify(NRF_DRV_CLOCK_EVT_HFCLK_STARTED);
+    }
+}
    19646:	bd10      	pop	{r4, pc}
    19648:	4770      	bx	lr
    1964a:	bf00      	nop
    1964c:	200011b8 	.word	0x200011b8
 
 00019650 <sd_state_evt_handler>:
+ *
+ * @param[in] state     State.
+ * @param[in] p_context Context.
+ */
+static void sd_state_evt_handler(nrf_sdh_state_evt_t state, void * p_context)
+{
    19650:	b530      	push	{r4, r5, lr}
+    switch (state)
    19652:	2801      	cmp	r0, #1
+{
    19654:	b083      	sub	sp, #12
+    switch (state)
    19656:	d004      	beq.n	19662 <sd_state_evt_handler+0x12>
    19658:	2803      	cmp	r0, #3
    1965a:	d01d      	beq.n	19698 <sd_state_evt_handler+0x48>
    1965c:	b1b0      	cbz	r0, 1968c <sd_state_evt_handler+0x3c>
+            break;
+
+        default:
+            break;
+    }
+}
    1965e:	b003      	add	sp, #12
    19660:	bd30      	pop	{r4, r5, pc}
+            if (!m_clock_cb.module_initialized)
    19662:	4c22      	ldr	r4, [pc, #136]	; (196ec <sd_state_evt_handler+0x9c>)
+            CRITICAL_REGION_ENTER();
    19664:	2300      	movs	r3, #0
    19666:	f10d 0007 	add.w	r0, sp, #7
    1966a:	f88d 3007 	strb.w	r3, [sp, #7]
    1966e:	f7ff fe83 	bl	19378 <app_util_critical_region_enter>
+            if (!m_clock_cb.module_initialized)
    19672:	7823      	ldrb	r3, [r4, #0]
    19674:	b34b      	cbz	r3, 196ca <sd_state_evt_handler+0x7a>
+            ++(m_clock_cb.lfclk_requests);
    19676:	68e3      	ldr	r3, [r4, #12]
+            CRITICAL_REGION_EXIT();
    19678:	f89d 0007 	ldrb.w	r0, [sp, #7]
+            ++(m_clock_cb.lfclk_requests);
    1967c:	3301      	adds	r3, #1
+            m_clock_cb.lfclk_on = true;
    1967e:	2201      	movs	r2, #1
+            ++(m_clock_cb.lfclk_requests);
    19680:	60e3      	str	r3, [r4, #12]
+            m_clock_cb.lfclk_on = true;
    19682:	70a2      	strb	r2, [r4, #2]
+            CRITICAL_REGION_EXIT();
    19684:	f7ff fe9e 	bl	193c4 <app_util_critical_region_exit>
+}
    19688:	b003      	add	sp, #12
    1968a:	bd30      	pop	{r4, r5, pc}
+  NVIC->ICER[(((uint32_t)(int32_t)IRQn) >> 5UL)] = (uint32_t)(1UL << (((uint32_t)(int32_t)IRQn) & 0x1FUL));
    1968c:	4b18      	ldr	r3, [pc, #96]	; (196f0 <sd_state_evt_handler+0xa0>)
    1968e:	2201      	movs	r2, #1
    19690:	f8c3 2080 	str.w	r2, [r3, #128]	; 0x80
    19694:	b003      	add	sp, #12
    19696:	bd30      	pop	{r4, r5, pc}
+    --(m_clock_cb.lfclk_requests);
    19698:	4c14      	ldr	r4, [pc, #80]	; (196ec <sd_state_evt_handler+0x9c>)
+            nrfx_clock_enable();
    1969a:	f000 f839 	bl	19710 <nrfx_clock_enable>
+    CRITICAL_REGION_ENTER();
    1969e:	2300      	movs	r3, #0
    196a0:	f10d 0007 	add.w	r0, sp, #7
    196a4:	f88d 3007 	strb.w	r3, [sp, #7]
    196a8:	f7ff fe66 	bl	19378 <app_util_critical_region_enter>
+    --(m_clock_cb.lfclk_requests);
    196ac:	68e3      	ldr	r3, [r4, #12]
    196ae:	3b01      	subs	r3, #1
    196b0:	60e3      	str	r3, [r4, #12]
+    if (m_clock_cb.lfclk_requests == 0)
    196b2:	68e5      	ldr	r5, [r4, #12]
    196b4:	b12d      	cbz	r5, 196c2 <sd_state_evt_handler+0x72>
+    CRITICAL_REGION_EXIT();
    196b6:	f89d 0007 	ldrb.w	r0, [sp, #7]
    196ba:	f7ff fe83 	bl	193c4 <app_util_critical_region_exit>
+}
    196be:	b003      	add	sp, #12
    196c0:	bd30      	pop	{r4, r5, pc}
+    nrfx_clock_lfclk_stop();
    196c2:	f000 f837 	bl	19734 <nrfx_clock_lfclk_stop>
+    m_clock_cb.lfclk_on = false;
    196c6:	70a5      	strb	r5, [r4, #2]
+}
    196c8:	e7f5      	b.n	196b6 <sd_state_evt_handler+0x66>
+        err_code = nrfx_clock_init(clock_irq_handler);
    196ca:	480a      	ldr	r0, [pc, #40]	; (196f4 <sd_state_evt_handler+0xa4>)
+        m_clock_cb.hfclk_requests = 0;
    196cc:	6063      	str	r3, [r4, #4]
+        m_clock_cb.p_hf_head      = NULL;
    196ce:	60a3      	str	r3, [r4, #8]
+        m_clock_cb.p_lf_head      = NULL;
    196d0:	6123      	str	r3, [r4, #16]
+        m_clock_cb.lfclk_requests = 0;
    196d2:	60e3      	str	r3, [r4, #12]
+        err_code = nrfx_clock_init(clock_irq_handler);
    196d4:	f000 f810 	bl	196f8 <nrfx_clock_init>
+        if (!nrf_sdh_is_enabled())
    196d8:	f000 ffb4 	bl	1a644 <nrf_sdh_is_enabled>
    196dc:	b110      	cbz	r0, 196e4 <sd_state_evt_handler+0x94>
+        m_clock_cb.module_initialized = true;
    196de:	2301      	movs	r3, #1
    196e0:	7023      	strb	r3, [r4, #0]
+    return err_code;
    196e2:	e7c8      	b.n	19676 <sd_state_evt_handler+0x26>
+            nrfx_clock_enable();
    196e4:	f000 f814 	bl	19710 <nrfx_clock_enable>
    196e8:	e7f9      	b.n	196de <sd_state_evt_handler+0x8e>
    196ea:	bf00      	nop
@@ -582,86 +1041,201 @@ Disassembly of section .text:
    196f4:	000195e5 	.word	0x000195e5
 
 000196f8 <nrfx_clock_init>:
+nrfx_err_t nrfx_clock_init(nrfx_clock_event_handler_t event_handler)
+{
+    NRFX_ASSERT(event_handler);
+
+    nrfx_err_t err_code = NRFX_SUCCESS;
+    if (m_clock_cb.module_initialized)
    196f8:	4a04      	ldr	r2, [pc, #16]	; (1970c <nrfx_clock_init+0x14>)
    196fa:	7913      	ldrb	r3, [r2, #4]
    196fc:	b923      	cbnz	r3, 19708 <nrfx_clock_init+0x10>
+    {
+#if NRFX_CHECK(NRFX_CLOCK_CONFIG_LF_CAL_ENABLED)
+        m_clock_cb.cal_state = CAL_STATE_IDLE;
+#endif
+        m_clock_cb.event_handler = event_handler;
+        m_clock_cb.module_initialized = true;
    196fe:	2101      	movs	r1, #1
+        m_clock_cb.event_handler = event_handler;
    19700:	6010      	str	r0, [r2, #0]
+        m_clock_cb.module_initialized = true;
    19702:	8091      	strh	r1, [r2, #4]
+    nrfx_err_t err_code = NRFX_SUCCESS;
    19704:	4618      	mov	r0, r3
    19706:	4770      	bx	lr
+        err_code = NRFX_ERROR_ALREADY_INITIALIZED;
    19708:	2085      	movs	r0, #133	; 0x85
+#endif
+    }
+
+    NRFX_LOG_INFO("Function: %s, error code: %s.", __func__, NRFX_LOG_ERROR_STRING_GET(err_code));
+    return err_code;
+}
    1970a:	4770      	bx	lr
    1970c:	200011cc 	.word	0x200011cc
 
 00019710 <nrfx_clock_enable>:
+ * @retval false Otherwise.
+ */
+#define NRFX_IRQ_IS_ENABLED(irq_number)  _NRFX_IRQ_IS_ENABLED(irq_number)
+static inline bool _NRFX_IRQ_IS_ENABLED(IRQn_Type irq_number)
+{
+    return 0 != (NVIC->ISER[irq_number / 32] & (1UL << (irq_number % 32)));
    19710:	4b07      	ldr	r3, [pc, #28]	; (19730 <nrfx_clock_enable+0x20>)
    19712:	681a      	ldr	r2, [r3, #0]
+    priority = NRFX_CLOCK_CONFIG_IRQ_PRIORITY;
+#else
+    #error "This code is not supposed to be compiled when neither POWER nor CLOCK is enabled."
+#endif
+
+    if (!NRFX_IRQ_IS_ENABLED(nrfx_get_irq_number(NRF_CLOCK)))
    19714:	07d2      	lsls	r2, r2, #31
    19716:	d404      	bmi.n	19722 <nrfx_clock_enable+0x12>
+    NVIC->IP[((uint32_t)(int32_t)IRQn)]               = (uint8_t)((priority << (8U - __NVIC_PRIO_BITS)) & (uint32_t)0xFFUL);
    19718:	21c0      	movs	r1, #192	; 0xc0
+  NVIC->ISER[(((uint32_t)(int32_t)IRQn) >> 5UL)] = (uint32_t)(1UL << (((uint32_t)(int32_t)IRQn) & 0x1FUL));
    1971a:	2201      	movs	r2, #1
+    NVIC->IP[((uint32_t)(int32_t)IRQn)]               = (uint8_t)((priority << (8U - __NVIC_PRIO_BITS)) & (uint32_t)0xFFUL);
    1971c:	f883 1300 	strb.w	r1, [r3, #768]	; 0x300
+  NVIC->ISER[(((uint32_t)(int32_t)IRQn) >> 5UL)] = (uint32_t)(1UL << (((uint32_t)(int32_t)IRQn) & 0x1FUL));
    19720:	601a      	str	r2, [r3, #0]
+    return (bool)*((volatile uint32_t *)((uint8_t *)NRF_CLOCK + event));
+}
+
+__STATIC_INLINE void nrf_clock_lf_src_set(nrf_clock_lfclk_t source)
+{
+    NRF_CLOCK->LFCLKSRC = (uint32_t)(source);
    19722:	f04f 4380 	mov.w	r3, #1073741824	; 0x40000000
    19726:	2201      	movs	r2, #1
    19728:	f8c3 2518 	str.w	r2, [r3, #1304]	; 0x518
+#if NRFX_CHECK(NRFX_POWER_ENABLED)
+    nrfx_clock_irq_enabled = true;
+#endif
+
+    NRFX_LOG_INFO("Module enabled.");
+}
    1972c:	4770      	bx	lr
    1972e:	bf00      	nop
    19730:	e000e100 	.word	0xe000e100
 
 00019734 <nrfx_clock_lfclk_stop>:
+    *((volatile uint32_t *)((uint8_t *)NRF_CLOCK + task)) = 0x1UL;
    19734:	4b04      	ldr	r3, [pc, #16]	; (19748 <nrfx_clock_lfclk_stop+0x14>)
    19736:	2201      	movs	r2, #1
    19738:	601a      	str	r2, [r3, #0]
+                                CLOCK_LFCLKSRCCOPY_SRC_Msk) >> CLOCK_LFCLKSRCCOPY_SRC_Pos);
+}
+
+__STATIC_INLINE bool nrf_clock_lf_is_running(void)
+{
+    return ((NRF_CLOCK->LFCLKSTAT &
    1973a:	f04f 4280 	mov.w	r2, #1073741824	; 0x40000000
    1973e:	f8d2 3418 	ldr.w	r3, [r2, #1048]	; 0x418
+
+void nrfx_clock_lfclk_stop(void)
+{
+    NRFX_ASSERT(m_clock_cb.module_initialized);
+    nrf_clock_task_trigger(NRF_CLOCK_TASK_LFCLKSTOP);
+    while (nrf_clock_lf_is_running())
    19742:	03db      	lsls	r3, r3, #15
    19744:	d4fb      	bmi.n	1973e <nrfx_clock_lfclk_stop+0xa>
+    {}
+}
    19746:	4770      	bx	lr
    19748:	4000000c 	.word	0x4000000c
 
 0001974c <POWER_CLOCK_IRQHandler>:
+    nrf_clock_task_trigger(NRF_CLOCK_TASK_CTSTOP);
+#endif
+}
+
+void nrfx_clock_irq_handler(void)
+{
    1974c:	b510      	push	{r4, lr}
+    return (bool)*((volatile uint32_t *)((uint8_t *)NRF_CLOCK + event));
    1974e:	4b17      	ldr	r3, [pc, #92]	; (197ac <POWER_CLOCK_IRQHandler+0x60>)
    19750:	681a      	ldr	r2, [r3, #0]
    19752:	b082      	sub	sp, #8
+    if (nrf_clock_event_check(NRF_CLOCK_EVENT_HFCLKSTARTED))
    19754:	b162      	cbz	r2, 19770 <POWER_CLOCK_IRQHandler+0x24>
+    *((volatile uint32_t *)((uint8_t *)NRF_CLOCK + event)) = 0x0UL;
    19756:	2100      	movs	r1, #0
+        nrf_clock_event_clear(NRF_CLOCK_EVENT_HFCLKSTARTED);
+        NRFX_LOG_DEBUG("Event: %s.", EVT_TO_STR(NRF_CLOCK_EVENT_HFCLKSTARTED));
+        nrf_clock_int_disable(NRF_CLOCK_INT_HF_STARTED_MASK);
+
+#if NRFX_CHECK(USE_WORKAROUND_FOR_ANOMALY_201)
+        if (!m_clock_cb.hfclk_started)
    19758:	4a15      	ldr	r2, [pc, #84]	; (197b0 <POWER_CLOCK_IRQHandler+0x64>)
    1975a:	6019      	str	r1, [r3, #0]
+    volatile uint32_t dummy = *((volatile uint32_t *)((uint8_t *)NRF_CLOCK + (uint32_t)event));
    1975c:	681b      	ldr	r3, [r3, #0]
    1975e:	7950      	ldrb	r0, [r2, #5]
    19760:	9300      	str	r3, [sp, #0]
+    NRF_CLOCK->INTENCLR = int_mask;
    19762:	f04f 4180 	mov.w	r1, #1073741824	; 0x40000000
    19766:	2301      	movs	r3, #1
+    (void)dummy;
    19768:	9c00      	ldr	r4, [sp, #0]
+    NRF_CLOCK->INTENCLR = int_mask;
    1976a:	f8c1 3308 	str.w	r3, [r1, #776]	; 0x308
    1976e:	b198      	cbz	r0, 19798 <POWER_CLOCK_IRQHandler+0x4c>
+    return (bool)*((volatile uint32_t *)((uint8_t *)NRF_CLOCK + event));
    19770:	4b10      	ldr	r3, [pc, #64]	; (197b4 <POWER_CLOCK_IRQHandler+0x68>)
    19772:	681a      	ldr	r2, [r3, #0]
+        }
+#else
+        m_clock_cb.event_handler(NRFX_CLOCK_EVT_HFCLK_STARTED);
+#endif
+    }
+    if (nrf_clock_event_check(NRF_CLOCK_EVENT_LFCLKSTARTED))
    19774:	b1ba      	cbz	r2, 197a6 <POWER_CLOCK_IRQHandler+0x5a>
+    *((volatile uint32_t *)((uint8_t *)NRF_CLOCK + event)) = 0x0UL;
    19776:	2200      	movs	r2, #0
    19778:	601a      	str	r2, [r3, #0]
+    volatile uint32_t dummy = *((volatile uint32_t *)((uint8_t *)NRF_CLOCK + (uint32_t)event));
    1977a:	681b      	ldr	r3, [r3, #0]
    1977c:	9301      	str	r3, [sp, #4]
+    NRF_CLOCK->INTENCLR = int_mask;
    1977e:	f04f 4280 	mov.w	r2, #1073741824	; 0x40000000
    19782:	2102      	movs	r1, #2
+    {
+        nrf_clock_event_clear(NRF_CLOCK_EVENT_LFCLKSTARTED);
+        NRFX_LOG_DEBUG("Event: %s.", EVT_TO_STR(NRF_CLOCK_EVENT_LFCLKSTARTED));
+        nrf_clock_int_disable(NRF_CLOCK_INT_LF_STARTED_MASK);
+
+        m_clock_cb.event_handler(NRFX_CLOCK_EVT_LFCLK_STARTED);
    19784:	4b0a      	ldr	r3, [pc, #40]	; (197b0 <POWER_CLOCK_IRQHandler+0x64>)
+    (void)dummy;
    19786:	9801      	ldr	r0, [sp, #4]
+    NRF_CLOCK->INTENCLR = int_mask;
    19788:	f8c2 1308 	str.w	r1, [r2, #776]	; 0x308
    1978c:	681b      	ldr	r3, [r3, #0]
    1978e:	2001      	movs	r0, #1
+        nrf_clock_int_disable(NRF_CLOCK_INT_DONE_MASK);
+        m_clock_cb.cal_state = CAL_STATE_IDLE;
+        m_clock_cb.event_handler(NRFX_CLOCK_EVT_CAL_DONE);
+    }
+#endif //  NRFX_CHECK(NRFX_CLOCK_CONFIG_LF_CAL_ENABLED)
+}
    19790:	b002      	add	sp, #8
    19792:	e8bd 4010 	ldmia.w	sp!, {r4, lr}
+        m_clock_cb.event_handler(NRFX_CLOCK_EVT_LFCLK_STARTED);
    19796:	4718      	bx	r3
+            m_clock_cb.event_handler(NRFX_CLOCK_EVT_HFCLK_STARTED);
    19798:	6811      	ldr	r1, [r2, #0]
+            m_clock_cb.hfclk_started = true;
    1979a:	7153      	strb	r3, [r2, #5]
+            m_clock_cb.event_handler(NRFX_CLOCK_EVT_HFCLK_STARTED);
    1979c:	4788      	blx	r1
+    return (bool)*((volatile uint32_t *)((uint8_t *)NRF_CLOCK + event));
    1979e:	4b05      	ldr	r3, [pc, #20]	; (197b4 <POWER_CLOCK_IRQHandler+0x68>)
    197a0:	681a      	ldr	r2, [r3, #0]
+    if (nrf_clock_event_check(NRF_CLOCK_EVENT_LFCLKSTARTED))
    197a2:	2a00      	cmp	r2, #0
    197a4:	d1e7      	bne.n	19776 <POWER_CLOCK_IRQHandler+0x2a>
+}
    197a6:	b002      	add	sp, #8
    197a8:	bd10      	pop	{r4, pc}
    197aa:	bf00      	nop
@@ -670,16 +1244,38 @@ Disassembly of section .text:
    197b4:	40000104 	.word	0x40000104
 
 000197b8 <GPIOTE_IRQHandler>:
+    return nrf_gpiote_event_addr_get(event);
+}
+
+
+void nrfx_gpiote_irq_handler(void)
+{
    197b8:	e92d 41f0 	stmdb	sp!, {r4, r5, r6, r7, r8, lr}
    197bc:	b086      	sub	sp, #24
+    return ((uint32_t)NRF_GPIOTE + task);
+}
+
+__STATIC_INLINE bool nrf_gpiote_event_is_set(nrf_gpiote_events_t event)
+{
+    return (*(uint32_t *)nrf_gpiote_event_addr_get(event) == 0x1UL) ? true : false;
    197be:	4ac0      	ldr	r2, [pc, #768]	; (19ac0 <GPIOTE_IRQHandler+0x308>)
+    uint32_t status            = 0;
+    uint32_t input[GPIO_COUNT] = {0};
    197c0:	2300      	movs	r3, #0
    197c2:	9301      	str	r3, [sp, #4]
+    nrf_gpiote_events_t event = NRF_GPIOTE_EVENTS_IN_0;
+    uint32_t            mask  = (uint32_t)NRF_GPIOTE_INT_IN0_MASK;
+
+    for (i = 0; i < GPIOTE_CH_NUM; i++)
+    {
+        if (nrf_gpiote_event_is_set(event) && nrf_gpiote_int_is_enabled(mask))
    197c4:	6811      	ldr	r1, [r2, #0]
    197c6:	2901      	cmp	r1, #1
    197c8:	f000 81c8 	beq.w	19b5c <GPIOTE_IRQHandler+0x3a4>
+    uint32_t status            = 0;
    197cc:	461e      	mov	r6, r3
    197ce:	4bbd      	ldr	r3, [pc, #756]	; (19ac4 <GPIOTE_IRQHandler+0x30c>)
+        if (nrf_gpiote_event_is_set(event) && nrf_gpiote_int_is_enabled(mask))
    197d0:	681a      	ldr	r2, [r3, #0]
    197d2:	2a01      	cmp	r2, #1
    197d4:	f000 81b4 	beq.w	19b40 <GPIOTE_IRQHandler+0x388>
@@ -708,237 +1304,432 @@ Disassembly of section .text:
    1980e:	2a01      	cmp	r2, #1
    19810:	d008      	beq.n	19824 <GPIOTE_IRQHandler+0x6c>
    19812:	4bb3      	ldr	r3, [pc, #716]	; (19ae0 <GPIOTE_IRQHandler+0x328>)
+        event = (nrf_gpiote_events_t)((uint32_t)event + sizeof(uint32_t));
+    }
+
+    /* collect PORT status event, if event is set read pins state. Processing is postponed to the
+     * end of interrupt. */
+    if (nrf_gpiote_event_is_set(NRF_GPIOTE_EVENTS_PORT))
    19814:	681a      	ldr	r2, [r3, #0]
    19816:	2a01      	cmp	r2, #1
    19818:	f000 81ac 	beq.w	19b74 <GPIOTE_IRQHandler+0x3bc>
+        status |= (uint32_t)NRF_GPIOTE_INT_PORT_MASK;
+        nrf_gpio_ports_read(0, GPIO_COUNT, input);
+    }
+
+    /* Process pin events. */
+    if (status & NRF_GPIOTE_INT_IN_MASK)
    1981c:	b9f6      	cbnz	r6, 1985c <GPIOTE_IRQHandler+0xa4>
+                }
+            }
+        }
+        while (repeat);
+    }
+}
    1981e:	b006      	add	sp, #24
    19820:	e8bd 81f0 	ldmia.w	sp!, {r4, r5, r6, r7, r8, pc}
+    NRF_GPIOTE->INTENCLR = mask;
+}
+
+__STATIC_INLINE uint32_t nrf_gpiote_int_is_enabled(uint32_t mask)
+{
+    return (NRF_GPIOTE->INTENSET & mask);
    19824:	4aaf      	ldr	r2, [pc, #700]	; (19ae4 <GPIOTE_IRQHandler+0x32c>)
    19826:	f8d2 2304 	ldr.w	r2, [r2, #772]	; 0x304
+        if (nrf_gpiote_event_is_set(event) && nrf_gpiote_int_is_enabled(mask))
    1982a:	0612      	lsls	r2, r2, #24
    1982c:	d5f1      	bpl.n	19812 <GPIOTE_IRQHandler+0x5a>
+    *(uint32_t *)nrf_gpiote_event_addr_get(event) = 0;
    1982e:	2200      	movs	r2, #0
    19830:	601a      	str	r2, [r3, #0]
+    volatile uint32_t dummy = *((volatile uint32_t *)nrf_gpiote_event_addr_get(event));
    19832:	6819      	ldr	r1, [r3, #0]
    19834:	9104      	str	r1, [sp, #16]
+    if (nrf_gpiote_event_is_set(NRF_GPIOTE_EVENTS_PORT))
    19836:	6e19      	ldr	r1, [r3, #96]	; 0x60
+    (void)dummy;
    19838:	9804      	ldr	r0, [sp, #16]
    1983a:	2901      	cmp	r1, #1
+    return (*(uint32_t *)nrf_gpiote_event_addr_get(event) == 0x1UL) ? true : false;
    1983c:	f103 0360 	add.w	r3, r3, #96	; 0x60
+            status |= mask;
    19840:	f046 0680 	orr.w	r6, r6, #128	; 0x80
+    if (nrf_gpiote_event_is_set(NRF_GPIOTE_EVENTS_PORT))
    19844:	d10a      	bne.n	1985c <GPIOTE_IRQHandler+0xa4>
+    *(uint32_t *)nrf_gpiote_event_addr_get(event) = 0;
    19846:	601a      	str	r2, [r3, #0]
+    volatile uint32_t dummy = *((volatile uint32_t *)nrf_gpiote_event_addr_get(event));
    19848:	681b      	ldr	r3, [r3, #0]
    1984a:	9305      	str	r3, [sp, #20]
+}
+
+
+__STATIC_INLINE uint32_t nrf_gpio_port_in_read(NRF_GPIO_Type const * p_reg)
+{
+    return p_reg->IN;
    1984c:	f04f 43a0 	mov.w	r3, #1342177280	; 0x50000000
+    (void)dummy;
    19850:	9a05      	ldr	r2, [sp, #20]
    19852:	f8d3 3510 	ldr.w	r3, [r3, #1296]	; 0x510
+    NRFX_ASSERT(start_port + length <= GPIO_COUNT);
+    uint32_t i;
+
+    for (i = start_port; i < (start_port + length); i++)
+    {
+        *p_masks = nrf_gpio_port_in_read(gpio_regs[i]);
    19856:	9301      	str	r3, [sp, #4]
+        status |= (uint32_t)NRF_GPIOTE_INT_PORT_MASK;
    19858:	f046 4600 	orr.w	r6, r6, #2147483648	; 0x80000000
+    return m_cb.handlers[channel];
    1985c:	4fa2      	ldr	r7, [pc, #648]	; (19ae8 <GPIOTE_IRQHandler+0x330>)
+        mask = (uint32_t)NRF_GPIOTE_INT_IN0_MASK;
    1985e:	2501      	movs	r5, #1
+        for (i = 0; i < GPIOTE_CH_NUM; i++)
    19860:	2400      	movs	r4, #0
+                              ((polarity << GPIOTE_CONFIG_POLARITY_Pos) & GPIOTE_CONFIG_POLARITY_Msk);
+}
+
+__STATIC_INLINE uint32_t nrf_gpiote_event_pin_get(uint32_t idx)
+{
+    return ((NRF_GPIOTE->CONFIG[idx] & GPIOTE_CONFIG_PORT_PIN_Msk) >> GPIOTE_CONFIG_PSEL_Pos);
    19862:	00a3      	lsls	r3, r4, #2
    19864:	f103 4380 	add.w	r3, r3, #1073741824	; 0x40000000
+            if (mask & status)
    19868:	422e      	tst	r6, r5
    1986a:	f503 43c0 	add.w	r3, r3, #24576	; 0x6000
+            mask <<= 1;
    1986e:	ea4f 0545 	mov.w	r5, r5, lsl #1
+            if (mask & status)
    19872:	d00b      	beq.n	1988c <GPIOTE_IRQHandler+0xd4>
    19874:	f8d3 0510 	ldr.w	r0, [r3, #1296]	; 0x510
+    return m_cb.handlers[channel];
    19878:	f857 2024 	ldr.w	r2, [r7, r4, lsl #2]
+}
+
+__STATIC_INLINE nrf_gpiote_polarity_t nrf_gpiote_event_polarity_get(uint32_t idx)
+{
+    return (nrf_gpiote_polarity_t)((NRF_GPIOTE->CONFIG[idx] & GPIOTE_CONFIG_POLARITY_Msk) >> GPIOTE_CONFIG_POLARITY_Pos);
    1987c:	f8d3 1510 	ldr.w	r1, [r3, #1296]	; 0x510
+                    handler(pin, polarity);
    19880:	f3c0 2004 	ubfx	r0, r0, #8, #5
    19884:	f3c1 4101 	ubfx	r1, r1, #16, #2
+                if (handler)
    19888:	b102      	cbz	r2, 1988c <GPIOTE_IRQHandler+0xd4>
+                    handler(pin, polarity);
    1988a:	4790      	blx	r2
+        for (i = 0; i < GPIOTE_CH_NUM; i++)
    1988c:	3401      	adds	r4, #1
    1988e:	2c08      	cmp	r4, #8
    19890:	d1e7      	bne.n	19862 <GPIOTE_IRQHandler+0xaa>
+    if (status & (uint32_t)NRF_GPIOTE_INT_PORT_MASK)
    19892:	2e00      	cmp	r6, #0
    19894:	dac3      	bge.n	1981e <GPIOTE_IRQHandler+0x66>
+            pins_to_check[port_idx] = 0xFFFFFFFF;
    19896:	2200      	movs	r2, #0
    19898:	f04f 33ff 	mov.w	r3, #4294967295	; 0xffffffff
    1989c:	e9cd 2302 	strd	r2, r3, [sp, #8]
+        for (port_idx = 0; port_idx < GPIO_COUNT; port_idx++)
    198a0:	4c91      	ldr	r4, [pc, #580]	; (19ae8 <GPIOTE_IRQHandler+0x330>)
+__STATIC_INLINE uint32_t nrf_bitmask_bit_is_set(uint32_t bit, void const * p_mask)
+{
+    uint8_t const * p_mask8 = (uint8_t const *)p_mask;
+    uint32_t byte_idx = BITMASK_BYTE_GET(bit);
+    bit = BITMASK_RELBIT_GET(bit);
+    return (1 << bit) & p_mask8[byte_idx];
    198a2:	2501      	movs	r5, #1
+__STATIC_INLINE void nrf_bitmask_bit_set(uint32_t bit, void * p_mask)
+{
+    uint8_t * p_mask8 = (uint8_t *)p_mask;
+    uint32_t byte_idx = BITMASK_BYTE_GET(bit);
+    bit = BITMASK_RELBIT_GET(bit);
+    p_mask8[byte_idx] |= (1 << bit);
    198a4:	ae02      	add	r6, sp, #8
+                uint8_t           pin_and_sense = (uint8_t)m_cb.port_handlers_pins[i];
    198a6:	f994 0050 	ldrsb.w	r0, [r4, #80]	; 0x50
+                if ((m_cb.port_handlers_pins[i] != PIN_NOT_USED)
    198aa:	1c47      	adds	r7, r0, #1
    198ac:	d037      	beq.n	1991e <GPIOTE_IRQHandler+0x166>
+    uint32_t byte_idx = BITMASK_BYTE_GET(bit);
    198ae:	f3c0 0cc2 	ubfx	ip, r0, #3, #3
+    return (1 << bit) & p_mask8[byte_idx];
    198b2:	ab06      	add	r3, sp, #24
    198b4:	eb03 070c 	add.w	r7, r3, ip
+    bit = BITMASK_RELBIT_GET(bit);
    198b8:	f000 0307 	and.w	r3, r0, #7
+    return (1 << bit) & p_mask8[byte_idx];
    198bc:	f817 2c0c 	ldrb.w	r2, [r7, #-12]
    198c0:	fa05 f303 	lsl.w	r3, r5, r3
+                    && nrf_bitmask_bit_is_set(pin, pins_to_check))
    198c4:	421a      	tst	r2, r3
+                uint8_t           pin_and_sense = (uint8_t)m_cb.port_handlers_pins[i];
    198c6:	b2c1      	uxtb	r1, r0
+                nrfx_gpiote_pin_t pin           = (pin_and_sense & ~SENSE_FIELD_MASK);
    198c8:	f000 003f 	and.w	r0, r0, #63	; 0x3f
+                    && nrf_bitmask_bit_is_set(pin, pins_to_check))
    198cc:	d027      	beq.n	1991e <GPIOTE_IRQHandler+0x166>
+    return m_cb.pin_assignments[pin];
    198ce:	1822      	adds	r2, r4, r0
+                    nrf_gpiote_polarity_t polarity =
    198d0:	0989      	lsrs	r1, r1, #6
+                        channel_handler_get((uint32_t)channel_port_get(pin));
    198d2:	f992 2030 	ldrsb.w	r2, [r2, #48]	; 0x30
+    return m_cb.handlers[channel];
    198d6:	f854 8022 	ldr.w	r8, [r4, r2, lsl #2]
+                    if (handler || (polarity == NRF_GPIOTE_POLARITY_TOGGLE))
    198da:	f1b8 0f00 	cmp.w	r8, #0
    198de:	f000 819d 	beq.w	19c1c <GPIOTE_IRQHandler+0x464>
+                        if (polarity == NRF_GPIOTE_POLARITY_TOGGLE)
    198e2:	2903      	cmp	r1, #3
    198e4:	f000 819d 	beq.w	19c22 <GPIOTE_IRQHandler+0x46a>
+    return (nrf_gpio_pin_sense_t)((reg->PIN_CNF[pin_number] &
    198e8:	0082      	lsls	r2, r0, #2
    198ea:	f102 42a0 	add.w	r2, r2, #1342177280	; 0x50000000
    198ee:	f817 7c14 	ldrb.w	r7, [r7, #-20]
    198f2:	f8d2 c700 	ldr.w	ip, [r2, #1792]	; 0x700
+                        if ((pin_state && (sense == NRF_GPIO_PIN_SENSE_HIGH)) ||
    198f6:	401f      	ands	r7, r3
+                                   GPIO_PIN_CNF_SENSE_Msk) >> GPIO_PIN_CNF_SENSE_Pos);
    198f8:	f3cc 4c01 	ubfx	ip, ip, #16, #2
    198fc:	d00b      	beq.n	19916 <GPIOTE_IRQHandler+0x15e>
    198fe:	f1bc 0f02 	cmp.w	ip, #2
    19902:	d10c      	bne.n	1991e <GPIOTE_IRQHandler+0x166>
+                            if (polarity == NRF_GPIOTE_POLARITY_TOGGLE)
    19904:	2903      	cmp	r1, #3
    19906:	f000 81bf 	beq.w	19c88 <GPIOTE_IRQHandler+0x4d0>
+            repeat = 0;
    1990a:	2700      	movs	r7, #0
+                            if (handler)
    1990c:	f1b8 0f00 	cmp.w	r8, #0
    19910:	d006      	beq.n	19920 <GPIOTE_IRQHandler+0x168>
+                                handler(pin, polarity);
    19912:	47c0      	blx	r8
    19914:	e004      	b.n	19920 <GPIOTE_IRQHandler+0x168>
+                            (!pin_state && (sense == NRF_GPIO_PIN_SENSE_LOW))  )
    19916:	f1bc 0f03 	cmp.w	ip, #3
    1991a:	f000 81a3 	beq.w	19c64 <GPIOTE_IRQHandler+0x4ac>
+            repeat = 0;
    1991e:	2700      	movs	r7, #0
+                uint8_t           pin_and_sense = (uint8_t)m_cb.port_handlers_pins[i];
    19920:	f994 0051 	ldrsb.w	r0, [r4, #81]	; 0x51
+                if ((m_cb.port_handlers_pins[i] != PIN_NOT_USED)
    19924:	1c41      	adds	r1, r0, #1
    19926:	d032      	beq.n	1998e <GPIOTE_IRQHandler+0x1d6>
+    uint32_t byte_idx = BITMASK_BYTE_GET(bit);
    19928:	f3c0 0ec2 	ubfx	lr, r0, #3, #3
+    return (1 << bit) & p_mask8[byte_idx];
    1992c:	ab06      	add	r3, sp, #24
    1992e:	eb03 0c0e 	add.w	ip, r3, lr
+    bit = BITMASK_RELBIT_GET(bit);
    19932:	f000 0307 	and.w	r3, r0, #7
+    return (1 << bit) & p_mask8[byte_idx];
    19936:	f81c 2c0c 	ldrb.w	r2, [ip, #-12]
    1993a:	fa05 f303 	lsl.w	r3, r5, r3
+                    && nrf_bitmask_bit_is_set(pin, pins_to_check))
    1993e:	421a      	tst	r2, r3
+                uint8_t           pin_and_sense = (uint8_t)m_cb.port_handlers_pins[i];
    19940:	b2c1      	uxtb	r1, r0
+                nrfx_gpiote_pin_t pin           = (pin_and_sense & ~SENSE_FIELD_MASK);
    19942:	f000 003f 	and.w	r0, r0, #63	; 0x3f
+                    && nrf_bitmask_bit_is_set(pin, pins_to_check))
    19946:	d022      	beq.n	1998e <GPIOTE_IRQHandler+0x1d6>
+    return m_cb.pin_assignments[pin];
    19948:	1822      	adds	r2, r4, r0
+                    nrf_gpiote_polarity_t polarity =
    1994a:	0989      	lsrs	r1, r1, #6
+                        channel_handler_get((uint32_t)channel_port_get(pin));
    1994c:	f992 2030 	ldrsb.w	r2, [r2, #48]	; 0x30
+    return m_cb.handlers[channel];
    19950:	f854 8022 	ldr.w	r8, [r4, r2, lsl #2]
+                    if (handler || (polarity == NRF_GPIOTE_POLARITY_TOGGLE))
    19954:	f1b8 0f00 	cmp.w	r8, #0
    19958:	f000 817b 	beq.w	19c52 <GPIOTE_IRQHandler+0x49a>
+                        if (polarity == NRF_GPIOTE_POLARITY_TOGGLE)
    1995c:	2903      	cmp	r1, #3
    1995e:	f000 817b 	beq.w	19c58 <GPIOTE_IRQHandler+0x4a0>
+    return (nrf_gpio_pin_sense_t)((reg->PIN_CNF[pin_number] &
    19962:	0082      	lsls	r2, r0, #2
    19964:	f102 4ea0 	add.w	lr, r2, #1342177280	; 0x50000000
    19968:	f81c cc14 	ldrb.w	ip, [ip, #-20]
    1996c:	f8de 2700 	ldr.w	r2, [lr, #1792]	; 0x700
+                        if ((pin_state && (sense == NRF_GPIO_PIN_SENSE_HIGH)) ||
    19970:	ea1c 0f03 	tst.w	ip, r3
+                                   GPIO_PIN_CNF_SENSE_Msk) >> GPIO_PIN_CNF_SENSE_Pos);
    19974:	f3c2 4201 	ubfx	r2, r2, #16, #2
    19978:	f000 813a 	beq.w	19bf0 <GPIOTE_IRQHandler+0x438>
    1997c:	2a02      	cmp	r2, #2
    1997e:	d106      	bne.n	1998e <GPIOTE_IRQHandler+0x1d6>
+                            if (polarity == NRF_GPIOTE_POLARITY_TOGGLE)
    19980:	2903      	cmp	r1, #3
    19982:	f000 8184 	beq.w	19c8e <GPIOTE_IRQHandler+0x4d6>
+                            if (handler)
    19986:	f1b8 0f00 	cmp.w	r8, #0
    1998a:	d000      	beq.n	1998e <GPIOTE_IRQHandler+0x1d6>
+                                handler(pin, polarity);
    1998c:	47c0      	blx	r8
+                uint8_t           pin_and_sense = (uint8_t)m_cb.port_handlers_pins[i];
    1998e:	f994 0052 	ldrsb.w	r0, [r4, #82]	; 0x52
+                if ((m_cb.port_handlers_pins[i] != PIN_NOT_USED)
    19992:	1c42      	adds	r2, r0, #1
    19994:	d032      	beq.n	199fc <GPIOTE_IRQHandler+0x244>
+    uint32_t byte_idx = BITMASK_BYTE_GET(bit);
    19996:	f3c0 0ec2 	ubfx	lr, r0, #3, #3
+    return (1 << bit) & p_mask8[byte_idx];
    1999a:	ab06      	add	r3, sp, #24
    1999c:	eb03 0c0e 	add.w	ip, r3, lr
+    bit = BITMASK_RELBIT_GET(bit);
    199a0:	f000 0307 	and.w	r3, r0, #7
+    return (1 << bit) & p_mask8[byte_idx];
    199a4:	f81c 2c0c 	ldrb.w	r2, [ip, #-12]
    199a8:	fa05 f303 	lsl.w	r3, r5, r3
+                    && nrf_bitmask_bit_is_set(pin, pins_to_check))
    199ac:	421a      	tst	r2, r3
+                uint8_t           pin_and_sense = (uint8_t)m_cb.port_handlers_pins[i];
    199ae:	b2c1      	uxtb	r1, r0
+                nrfx_gpiote_pin_t pin           = (pin_and_sense & ~SENSE_FIELD_MASK);
    199b0:	f000 003f 	and.w	r0, r0, #63	; 0x3f
+                    && nrf_bitmask_bit_is_set(pin, pins_to_check))
    199b4:	d022      	beq.n	199fc <GPIOTE_IRQHandler+0x244>
+    return m_cb.pin_assignments[pin];
    199b6:	1822      	adds	r2, r4, r0
+                    nrf_gpiote_polarity_t polarity =
    199b8:	0989      	lsrs	r1, r1, #6
+                        channel_handler_get((uint32_t)channel_port_get(pin));
    199ba:	f992 2030 	ldrsb.w	r2, [r2, #48]	; 0x30
+    return m_cb.handlers[channel];
    199be:	f854 8022 	ldr.w	r8, [r4, r2, lsl #2]
+                    if (handler || (polarity == NRF_GPIOTE_POLARITY_TOGGLE))
    199c2:	f1b8 0f00 	cmp.w	r8, #0
    199c6:	f000 813b 	beq.w	19c40 <GPIOTE_IRQHandler+0x488>
+                        if (polarity == NRF_GPIOTE_POLARITY_TOGGLE)
    199ca:	2903      	cmp	r1, #3
    199cc:	f000 813b 	beq.w	19c46 <GPIOTE_IRQHandler+0x48e>
+    return (nrf_gpio_pin_sense_t)((reg->PIN_CNF[pin_number] &
    199d0:	0082      	lsls	r2, r0, #2
    199d2:	f102 4ea0 	add.w	lr, r2, #1342177280	; 0x50000000
    199d6:	f81c cc14 	ldrb.w	ip, [ip, #-20]
    199da:	f8de 2700 	ldr.w	r2, [lr, #1792]	; 0x700
+                        if ((pin_state && (sense == NRF_GPIO_PIN_SENSE_HIGH)) ||
    199de:	ea1c 0f03 	tst.w	ip, r3
+                                   GPIO_PIN_CNF_SENSE_Msk) >> GPIO_PIN_CNF_SENSE_Pos);
    199e2:	f3c2 4201 	ubfx	r2, r2, #16, #2
    199e6:	f000 80ed 	beq.w	19bc4 <GPIOTE_IRQHandler+0x40c>
    199ea:	2a02      	cmp	r2, #2
    199ec:	d106      	bne.n	199fc <GPIOTE_IRQHandler+0x244>
+                            if (polarity == NRF_GPIOTE_POLARITY_TOGGLE)
    199ee:	2903      	cmp	r1, #3
    199f0:	f000 8150 	beq.w	19c94 <GPIOTE_IRQHandler+0x4dc>
+                            if (handler)
    199f4:	f1b8 0f00 	cmp.w	r8, #0
    199f8:	d000      	beq.n	199fc <GPIOTE_IRQHandler+0x244>
+                                handler(pin, polarity);
    199fa:	47c0      	blx	r8
+                uint8_t           pin_and_sense = (uint8_t)m_cb.port_handlers_pins[i];
    199fc:	f994 0053 	ldrsb.w	r0, [r4, #83]	; 0x53
+                if ((m_cb.port_handlers_pins[i] != PIN_NOT_USED)
    19a00:	1c43      	adds	r3, r0, #1
    19a02:	d032      	beq.n	19a6a <GPIOTE_IRQHandler+0x2b2>
+    uint32_t byte_idx = BITMASK_BYTE_GET(bit);
    19a04:	f3c0 0ec2 	ubfx	lr, r0, #3, #3
+    return (1 << bit) & p_mask8[byte_idx];
    19a08:	ab06      	add	r3, sp, #24
    19a0a:	eb03 0c0e 	add.w	ip, r3, lr
+    bit = BITMASK_RELBIT_GET(bit);
    19a0e:	f000 0207 	and.w	r2, r0, #7
+    return (1 << bit) & p_mask8[byte_idx];
    19a12:	f81c 3c0c 	ldrb.w	r3, [ip, #-12]
    19a16:	fa05 f202 	lsl.w	r2, r5, r2
+                    && nrf_bitmask_bit_is_set(pin, pins_to_check))
    19a1a:	4213      	tst	r3, r2
+                uint8_t           pin_and_sense = (uint8_t)m_cb.port_handlers_pins[i];
    19a1c:	b2c1      	uxtb	r1, r0
+                nrfx_gpiote_pin_t pin           = (pin_and_sense & ~SENSE_FIELD_MASK);
    19a1e:	f000 003f 	and.w	r0, r0, #63	; 0x3f
+                    && nrf_bitmask_bit_is_set(pin, pins_to_check))
    19a22:	d022      	beq.n	19a6a <GPIOTE_IRQHandler+0x2b2>
+    return m_cb.pin_assignments[pin];
    19a24:	1823      	adds	r3, r4, r0
+                    nrf_gpiote_polarity_t polarity =
    19a26:	0989      	lsrs	r1, r1, #6
+                        channel_handler_get((uint32_t)channel_port_get(pin));
    19a28:	f993 3030 	ldrsb.w	r3, [r3, #48]	; 0x30
+    return m_cb.handlers[channel];
    19a2c:	f854 8023 	ldr.w	r8, [r4, r3, lsl #2]
+                    if (handler || (polarity == NRF_GPIOTE_POLARITY_TOGGLE))
    19a30:	f1b8 0f00 	cmp.w	r8, #0
    19a34:	f000 80fb 	beq.w	19c2e <GPIOTE_IRQHandler+0x476>
+                        if (polarity == NRF_GPIOTE_POLARITY_TOGGLE)
    19a38:	2903      	cmp	r1, #3
    19a3a:	f000 80fb 	beq.w	19c34 <GPIOTE_IRQHandler+0x47c>
+    return (nrf_gpio_pin_sense_t)((reg->PIN_CNF[pin_number] &
    19a3e:	0083      	lsls	r3, r0, #2
    19a40:	f103 4ea0 	add.w	lr, r3, #1342177280	; 0x50000000
    19a44:	f81c cc14 	ldrb.w	ip, [ip, #-20]
    19a48:	f8de 3700 	ldr.w	r3, [lr, #1792]	; 0x700
+                        if ((pin_state && (sense == NRF_GPIO_PIN_SENSE_HIGH)) ||
    19a4c:	ea1c 0f02 	tst.w	ip, r2
+                                   GPIO_PIN_CNF_SENSE_Msk) >> GPIO_PIN_CNF_SENSE_Pos);
    19a50:	f3c3 4301 	ubfx	r3, r3, #16, #2
    19a54:	f000 809c 	beq.w	19b90 <GPIOTE_IRQHandler+0x3d8>
    19a58:	2b02      	cmp	r3, #2
    19a5a:	d106      	bne.n	19a6a <GPIOTE_IRQHandler+0x2b2>
+                            if (polarity == NRF_GPIOTE_POLARITY_TOGGLE)
    19a5c:	2903      	cmp	r1, #3
    19a5e:	f000 811c 	beq.w	19c9a <GPIOTE_IRQHandler+0x4e2>
+                            if (handler)
    19a62:	f1b8 0f00 	cmp.w	r8, #0
    19a66:	d000      	beq.n	19a6a <GPIOTE_IRQHandler+0x2b2>
+                                handler(pin, polarity);
    19a68:	47c0      	blx	r8
+            if (repeat)
    19a6a:	2f00      	cmp	r7, #0
    19a6c:	f43f aed7 	beq.w	1981e <GPIOTE_IRQHandler+0x66>
+    return p_reg->IN;
    19a70:	f04f 43a0 	mov.w	r3, #1342177280	; 0x50000000
+                    if (new_input[port_idx] != input[port_idx])
    19a74:	9a01      	ldr	r2, [sp, #4]
    19a76:	f8d3 3510 	ldr.w	r3, [r3, #1296]	; 0x510
    19a7a:	429a      	cmp	r2, r3
    19a7c:	f43f aecf 	beq.w	1981e <GPIOTE_IRQHandler+0x66>
+                        pins_to_check[port_idx] = toggle_mask[port_idx];
    19a80:	9a02      	ldr	r2, [sp, #8]
+                        input[port_idx]         = new_input[port_idx];
    19a82:	9301      	str	r3, [sp, #4]
+                        pins_to_check[port_idx] = toggle_mask[port_idx];
    19a84:	9203      	str	r2, [sp, #12]
+        while (repeat);
    19a86:	e70e      	b.n	198a6 <GPIOTE_IRQHandler+0xee>
+    return (NRF_GPIOTE->INTENSET & mask);
    19a88:	4a16      	ldr	r2, [pc, #88]	; (19ae4 <GPIOTE_IRQHandler+0x32c>)
    19a8a:	f8d2 2304 	ldr.w	r2, [r2, #772]	; 0x304
+        if (nrf_gpiote_event_is_set(event) && nrf_gpiote_int_is_enabled(mask))
    19a8e:	0651      	lsls	r1, r2, #25
    19a90:	f57f aebb 	bpl.w	1980a <GPIOTE_IRQHandler+0x52>
+    *(uint32_t *)nrf_gpiote_event_addr_get(event) = 0;
    19a94:	2200      	movs	r2, #0
    19a96:	601a      	str	r2, [r3, #0]
+    volatile uint32_t dummy = *((volatile uint32_t *)nrf_gpiote_event_addr_get(event));
    19a98:	681b      	ldr	r3, [r3, #0]
    19a9a:	9304      	str	r3, [sp, #16]
+    (void)dummy;
    19a9c:	9b04      	ldr	r3, [sp, #16]
+            status |= mask;
    19a9e:	f046 0640 	orr.w	r6, r6, #64	; 0x40
    19aa2:	e6b2      	b.n	1980a <GPIOTE_IRQHandler+0x52>
+    return (NRF_GPIOTE->INTENSET & mask);
    19aa4:	4a0f      	ldr	r2, [pc, #60]	; (19ae4 <GPIOTE_IRQHandler+0x32c>)
    19aa6:	f8d2 2304 	ldr.w	r2, [r2, #772]	; 0x304
+        if (nrf_gpiote_event_is_set(event) && nrf_gpiote_int_is_enabled(mask))
    19aaa:	0690      	lsls	r0, r2, #26
    19aac:	f57f aea8 	bpl.w	19800 <GPIOTE_IRQHandler+0x48>
+    *(uint32_t *)nrf_gpiote_event_addr_get(event) = 0;
    19ab0:	2200      	movs	r2, #0
    19ab2:	601a      	str	r2, [r3, #0]
+    volatile uint32_t dummy = *((volatile uint32_t *)nrf_gpiote_event_addr_get(event));
    19ab4:	681b      	ldr	r3, [r3, #0]
    19ab6:	9304      	str	r3, [sp, #16]
+    (void)dummy;
    19ab8:	9b04      	ldr	r3, [sp, #16]
+            status |= mask;
    19aba:	f046 0620 	orr.w	r6, r6, #32
    19abe:	e69f      	b.n	19800 <GPIOTE_IRQHandler+0x48>
    19ac0:	40006100 	.word	0x40006100
@@ -952,116 +1743,169 @@ Disassembly of section .text:
    19ae0:	4000617c 	.word	0x4000617c
    19ae4:	40006000 	.word	0x40006000
    19ae8:	200011d8 	.word	0x200011d8
+    return (NRF_GPIOTE->INTENSET & mask);
    19aec:	4a6c      	ldr	r2, [pc, #432]	; (19ca0 <GPIOTE_IRQHandler+0x4e8>)
    19aee:	f8d2 2304 	ldr.w	r2, [r2, #772]	; 0x304
+        if (nrf_gpiote_event_is_set(event) && nrf_gpiote_int_is_enabled(mask))
    19af2:	06d4      	lsls	r4, r2, #27
    19af4:	f57f ae7f 	bpl.w	197f6 <GPIOTE_IRQHandler+0x3e>
+    *(uint32_t *)nrf_gpiote_event_addr_get(event) = 0;
    19af8:	2200      	movs	r2, #0
    19afa:	601a      	str	r2, [r3, #0]
+    volatile uint32_t dummy = *((volatile uint32_t *)nrf_gpiote_event_addr_get(event));
    19afc:	681b      	ldr	r3, [r3, #0]
    19afe:	9304      	str	r3, [sp, #16]
+    (void)dummy;
    19b00:	9b04      	ldr	r3, [sp, #16]
+            status |= mask;
    19b02:	f046 0610 	orr.w	r6, r6, #16
    19b06:	e676      	b.n	197f6 <GPIOTE_IRQHandler+0x3e>
+    return (NRF_GPIOTE->INTENSET & mask);
    19b08:	4a65      	ldr	r2, [pc, #404]	; (19ca0 <GPIOTE_IRQHandler+0x4e8>)
    19b0a:	f8d2 2304 	ldr.w	r2, [r2, #772]	; 0x304
+        if (nrf_gpiote_event_is_set(event) && nrf_gpiote_int_is_enabled(mask))
    19b0e:	0715      	lsls	r5, r2, #28
    19b10:	f57f ae6c 	bpl.w	197ec <GPIOTE_IRQHandler+0x34>
+    *(uint32_t *)nrf_gpiote_event_addr_get(event) = 0;
    19b14:	2200      	movs	r2, #0
    19b16:	601a      	str	r2, [r3, #0]
+    volatile uint32_t dummy = *((volatile uint32_t *)nrf_gpiote_event_addr_get(event));
    19b18:	681b      	ldr	r3, [r3, #0]
    19b1a:	9304      	str	r3, [sp, #16]
+    (void)dummy;
    19b1c:	9b04      	ldr	r3, [sp, #16]
+            status |= mask;
    19b1e:	f046 0608 	orr.w	r6, r6, #8
    19b22:	e663      	b.n	197ec <GPIOTE_IRQHandler+0x34>
+    return (NRF_GPIOTE->INTENSET & mask);
    19b24:	4a5e      	ldr	r2, [pc, #376]	; (19ca0 <GPIOTE_IRQHandler+0x4e8>)
    19b26:	f8d2 2304 	ldr.w	r2, [r2, #772]	; 0x304
+        if (nrf_gpiote_event_is_set(event) && nrf_gpiote_int_is_enabled(mask))
    19b2a:	0757      	lsls	r7, r2, #29
    19b2c:	f57f ae59 	bpl.w	197e2 <GPIOTE_IRQHandler+0x2a>
+    *(uint32_t *)nrf_gpiote_event_addr_get(event) = 0;
    19b30:	2200      	movs	r2, #0
    19b32:	601a      	str	r2, [r3, #0]
+    volatile uint32_t dummy = *((volatile uint32_t *)nrf_gpiote_event_addr_get(event));
    19b34:	681b      	ldr	r3, [r3, #0]
    19b36:	9304      	str	r3, [sp, #16]
+    (void)dummy;
    19b38:	9b04      	ldr	r3, [sp, #16]
+            status |= mask;
    19b3a:	f046 0604 	orr.w	r6, r6, #4
    19b3e:	e650      	b.n	197e2 <GPIOTE_IRQHandler+0x2a>
+    return (NRF_GPIOTE->INTENSET & mask);
    19b40:	4a57      	ldr	r2, [pc, #348]	; (19ca0 <GPIOTE_IRQHandler+0x4e8>)
    19b42:	f8d2 2304 	ldr.w	r2, [r2, #772]	; 0x304
+        if (nrf_gpiote_event_is_set(event) && nrf_gpiote_int_is_enabled(mask))
    19b46:	0792      	lsls	r2, r2, #30
    19b48:	f57f ae46 	bpl.w	197d8 <GPIOTE_IRQHandler+0x20>
+    *(uint32_t *)nrf_gpiote_event_addr_get(event) = 0;
    19b4c:	2200      	movs	r2, #0
    19b4e:	601a      	str	r2, [r3, #0]
+    volatile uint32_t dummy = *((volatile uint32_t *)nrf_gpiote_event_addr_get(event));
    19b50:	681b      	ldr	r3, [r3, #0]
    19b52:	9304      	str	r3, [sp, #16]
+    (void)dummy;
    19b54:	9b04      	ldr	r3, [sp, #16]
+            status |= mask;
    19b56:	f046 0602 	orr.w	r6, r6, #2
    19b5a:	e63d      	b.n	197d8 <GPIOTE_IRQHandler+0x20>
+    return (NRF_GPIOTE->INTENSET & mask);
    19b5c:	4950      	ldr	r1, [pc, #320]	; (19ca0 <GPIOTE_IRQHandler+0x4e8>)
    19b5e:	f8d1 6304 	ldr.w	r6, [r1, #772]	; 0x304
+        if (nrf_gpiote_event_is_set(event) && nrf_gpiote_int_is_enabled(mask))
    19b62:	f016 0601 	ands.w	r6, r6, #1
    19b66:	f43f ae32 	beq.w	197ce <GPIOTE_IRQHandler+0x16>
+    *(uint32_t *)nrf_gpiote_event_addr_get(event) = 0;
    19b6a:	6013      	str	r3, [r2, #0]
+    volatile uint32_t dummy = *((volatile uint32_t *)nrf_gpiote_event_addr_get(event));
    19b6c:	6813      	ldr	r3, [r2, #0]
    19b6e:	9304      	str	r3, [sp, #16]
+    (void)dummy;
    19b70:	9b04      	ldr	r3, [sp, #16]
+            status |= mask;
    19b72:	e62c      	b.n	197ce <GPIOTE_IRQHandler+0x16>
+    *(uint32_t *)nrf_gpiote_event_addr_get(event) = 0;
    19b74:	2200      	movs	r2, #0
    19b76:	601a      	str	r2, [r3, #0]
+    volatile uint32_t dummy = *((volatile uint32_t *)nrf_gpiote_event_addr_get(event));
    19b78:	681b      	ldr	r3, [r3, #0]
    19b7a:	9305      	str	r3, [sp, #20]
    19b7c:	f04f 43a0 	mov.w	r3, #1342177280	; 0x50000000
+    (void)dummy;
    19b80:	9a05      	ldr	r2, [sp, #20]
    19b82:	f8d3 3510 	ldr.w	r3, [r3, #1296]	; 0x510
+        *p_masks = nrf_gpio_port_in_read(gpio_regs[i]);
    19b86:	9301      	str	r3, [sp, #4]
+    if (status & NRF_GPIOTE_INT_IN_MASK)
    19b88:	2e00      	cmp	r6, #0
    19b8a:	f43f ae84 	beq.w	19896 <GPIOTE_IRQHandler+0xde>
    19b8e:	e663      	b.n	19858 <GPIOTE_IRQHandler+0xa0>
+                            (!pin_state && (sense == NRF_GPIO_PIN_SENSE_LOW))  )
    19b90:	2b03      	cmp	r3, #3
    19b92:	f47f af6a 	bne.w	19a6a <GPIOTE_IRQHandler+0x2b2>
+                            if (polarity == NRF_GPIOTE_POLARITY_TOGGLE)
    19b96:	2903      	cmp	r1, #3
    19b98:	f47f af63 	bne.w	19a62 <GPIOTE_IRQHandler+0x2aa>
    19b9c:	f44f 3200 	mov.w	r2, #131072	; 0x20000
+    reg->PIN_CNF[pin_number] &= ~GPIO_PIN_CNF_SENSE_Msk;
    19ba0:	f8de 3700 	ldr.w	r3, [lr, #1792]	; 0x700
    19ba4:	f423 3340 	bic.w	r3, r3, #196608	; 0x30000
    19ba8:	f8ce 3700 	str.w	r3, [lr, #1792]	; 0x700
+    reg->PIN_CNF[pin_number] |= (sense_config << GPIO_PIN_CNF_SENSE_Pos);
    19bac:	f8de 3700 	ldr.w	r3, [lr, #1792]	; 0x700
    19bb0:	4313      	orrs	r3, r2
    19bb2:	f8ce 3700 	str.w	r3, [lr, #1792]	; 0x700
+                            if (handler)
    19bb6:	f1b8 0f00 	cmp.w	r8, #0
    19bba:	f43f af59 	beq.w	19a70 <GPIOTE_IRQHandler+0x2b8>
+                                ++repeat;
    19bbe:	3701      	adds	r7, #1
    19bc0:	b2ff      	uxtb	r7, r7
    19bc2:	e751      	b.n	19a68 <GPIOTE_IRQHandler+0x2b0>
+                            (!pin_state && (sense == NRF_GPIO_PIN_SENSE_LOW))  )
    19bc4:	2a03      	cmp	r2, #3
    19bc6:	f47f af19 	bne.w	199fc <GPIOTE_IRQHandler+0x244>
+                            if (polarity == NRF_GPIOTE_POLARITY_TOGGLE)
    19bca:	2903      	cmp	r1, #3
    19bcc:	f47f af12 	bne.w	199f4 <GPIOTE_IRQHandler+0x23c>
    19bd0:	f44f 3200 	mov.w	r2, #131072	; 0x20000
+    reg->PIN_CNF[pin_number] &= ~GPIO_PIN_CNF_SENSE_Msk;
    19bd4:	f8de 3700 	ldr.w	r3, [lr, #1792]	; 0x700
    19bd8:	f423 3340 	bic.w	r3, r3, #196608	; 0x30000
    19bdc:	f8ce 3700 	str.w	r3, [lr, #1792]	; 0x700
+    reg->PIN_CNF[pin_number] |= (sense_config << GPIO_PIN_CNF_SENSE_Pos);
    19be0:	f8de 3700 	ldr.w	r3, [lr, #1792]	; 0x700
+                                ++repeat;
    19be4:	3701      	adds	r7, #1
    19be6:	4313      	orrs	r3, r2
    19be8:	b2ff      	uxtb	r7, r7
    19bea:	f8ce 3700 	str.w	r3, [lr, #1792]	; 0x700
    19bee:	e701      	b.n	199f4 <GPIOTE_IRQHandler+0x23c>
+                            (!pin_state && (sense == NRF_GPIO_PIN_SENSE_LOW))  )
    19bf0:	2a03      	cmp	r2, #3
    19bf2:	f47f aecc 	bne.w	1998e <GPIOTE_IRQHandler+0x1d6>
+                            if (polarity == NRF_GPIOTE_POLARITY_TOGGLE)
    19bf6:	2903      	cmp	r1, #3
    19bf8:	f47f aec5 	bne.w	19986 <GPIOTE_IRQHandler+0x1ce>
    19bfc:	f44f 3200 	mov.w	r2, #131072	; 0x20000
+    reg->PIN_CNF[pin_number] &= ~GPIO_PIN_CNF_SENSE_Msk;
    19c00:	f8de 3700 	ldr.w	r3, [lr, #1792]	; 0x700
    19c04:	f423 3340 	bic.w	r3, r3, #196608	; 0x30000
    19c08:	f8ce 3700 	str.w	r3, [lr, #1792]	; 0x700
+    reg->PIN_CNF[pin_number] |= (sense_config << GPIO_PIN_CNF_SENSE_Pos);
    19c0c:	f8de 3700 	ldr.w	r3, [lr, #1792]	; 0x700
+                                ++repeat;
    19c10:	3701      	adds	r7, #1
    19c12:	4313      	orrs	r3, r2
    19c14:	b2ff      	uxtb	r7, r7
    19c16:	f8ce 3700 	str.w	r3, [lr, #1792]	; 0x700
    19c1a:	e6b4      	b.n	19986 <GPIOTE_IRQHandler+0x1ce>
+                    if (handler || (polarity == NRF_GPIOTE_POLARITY_TOGGLE))
    19c1c:	2903      	cmp	r1, #3
    19c1e:	f47f ae7e 	bne.w	1991e <GPIOTE_IRQHandler+0x166>
+    p_mask8[byte_idx] |= (1 << bit);
    19c22:	f816 200c 	ldrb.w	r2, [r6, ip]
    19c26:	431a      	orrs	r2, r3
    19c28:	f806 200c 	strb.w	r2, [r6, ip]
@@ -1084,17 +1928,22 @@ Disassembly of section .text:
    19c5c:	431a      	orrs	r2, r3
    19c5e:	f806 200e 	strb.w	r2, [r6, lr]
    19c62:	e67e      	b.n	19962 <GPIOTE_IRQHandler+0x1aa>
+                            if (polarity == NRF_GPIOTE_POLARITY_TOGGLE)
    19c64:	2903      	cmp	r1, #3
    19c66:	f47f ae51 	bne.w	1990c <GPIOTE_IRQHandler+0x154>
    19c6a:	f44f 3700 	mov.w	r7, #131072	; 0x20000
+    reg->PIN_CNF[pin_number] &= ~GPIO_PIN_CNF_SENSE_Msk;
    19c6e:	f8d2 3700 	ldr.w	r3, [r2, #1792]	; 0x700
    19c72:	f423 3340 	bic.w	r3, r3, #196608	; 0x30000
    19c76:	f8c2 3700 	str.w	r3, [r2, #1792]	; 0x700
+    reg->PIN_CNF[pin_number] |= (sense_config << GPIO_PIN_CNF_SENSE_Pos);
    19c7a:	f8d2 3700 	ldr.w	r3, [r2, #1792]	; 0x700
    19c7e:	433b      	orrs	r3, r7
    19c80:	f8c2 3700 	str.w	r3, [r2, #1792]	; 0x700
+                                ++repeat;
    19c84:	2701      	movs	r7, #1
    19c86:	e641      	b.n	1990c <GPIOTE_IRQHandler+0x154>
+                            if (polarity == NRF_GPIOTE_POLARITY_TOGGLE)
    19c88:	f44f 3740 	mov.w	r7, #196608	; 0x30000
    19c8c:	e7ef      	b.n	19c6e <GPIOTE_IRQHandler+0x4b6>
    19c8e:	f44f 3240 	mov.w	r2, #196608	; 0x30000
@@ -1106,59 +1955,130 @@ Disassembly of section .text:
    19ca0:	40006000 	.word	0x40006000
 
 00019ca4 <Twim<1073754112ul, (GPIO::PIN)13, (GPIO::PIN)15, (GPIO::PIN)17>::init(unsigned char, Twim<1073754112ul, (GPIO::PIN)13, (GPIO::PIN)15, (GPIO::PIN)17>::FREQ)>:
+SA  isDataNack      ()          { return reg.ERRORSRC bitand 4; }
+
+//--------------------
+//  init/constructors
+//--------------------
+SA  init            (U8 addr, FREQ f = K400) { 
    19ca4:	b470      	push	{r4, r5, r6}
+SA  address         (U8 v)      { reg.ADDRESS = v; } //0-127
    19ca6:	4b11      	ldr	r3, [pc, #68]	; (19cec <Twim<1073754112ul, (GPIO::PIN)13, (GPIO::PIN)15, (GPIO::PIN)17>::init(unsigned char, Twim<1073754112ul, (GPIO::PIN)13, (GPIO::PIN)15, (GPIO::PIN)17>::FREQ)+0x48>)
+                    init_(it, ts...); 
+                }
+
+SCA init_       (initT& it) { //no more arguments, now set PIN_CNF from accumulated values
+                    if( it.DIRP ) off(); //if output, set to off
+                    reg.PIN_CNF = it.INIT_CNF;
    19ca8:	f04f 42a0 	mov.w	r2, #1342177280	; 0x50000000
+
+//------------
+//  init
+//------------
+                template<typename ...Ts>
+SA  init        (Ts... ts)  { initT it{2}; init_(it, ts...); }
    19cac:	f240 640c 	movw	r4, #1548	; 0x60c
    19cb0:	f8c3 0588 	str.w	r0, [r3, #1416]	; 0x588
+                        reg.PSEL_SDA = e;
    19cb4:	260d      	movs	r6, #13
+SA  frequency       (FREQ e)    { reg.FREQUENCY = e; }
    19cb6:	f8c3 1524 	str.w	r1, [r3, #1316]	; 0x524
+                        reg.PSEL_SCL = e;
    19cba:	250f      	movs	r5, #15
+                    reg.PIN_CNF = it.INIT_CNF;
    19cbc:	f8c2 4734 	str.w	r4, [r2, #1844]	; 0x734
+
+//------------
+//  output
+//------------
+SA  high        ()          { reg.OUTSET = bm_; } //register wide write
+SA  low         ()          { reg.OUTCLR = bm_; } //register wide write
    19cc0:	f44f 3100 	mov.w	r1, #131072	; 0x20000
+                    reg.PIN_CNF = it.INIT_CNF;
    19cc4:	f8c2 473c 	str.w	r4, [r2, #1852]	; 0x73c
+SA  enable          ()          { reg.ENABLE = 6; }
    19cc8:	2006      	movs	r0, #6
+SA  init        (Ts... ts)  { initT it{2}; init_(it, ts...); }
    19cca:	f240 2401 	movw	r4, #513	; 0x201
+                        reg.PSEL_SDA = e;
    19cce:	f8c3 650c 	str.w	r6, [r3, #1292]	; 0x50c
+                        reg.PSEL_SCL = e;
    19cd2:	f8c3 5508 	str.w	r5, [r3, #1288]	; 0x508
+SA  low         ()          { reg.OUTCLR = bm_; } //register wide write
    19cd6:	f8c2 150c 	str.w	r1, [r2, #1292]	; 0x50c
+                    reg.PIN_CNF = it.INIT_CNF;
    19cda:	f8c2 4744 	str.w	r4, [r2, #1860]	; 0x744
+SA  high        ()          { reg.OUTSET = bm_; } //register wide write
    19cde:	f8c2 1508 	str.w	r1, [r2, #1288]	; 0x508
+SA  enable          ()          { reg.ENABLE = 6; }
    19ce2:	f8c3 0500 	str.w	r0, [r3, #1280]	; 0x500
+                        if constexpr( Pwr_ != PIN(-1) ){
+                            Gpio<Pwr_>::init( OUTPUT, S0H1 );
+                            Gpio<Pwr_>::on();
+                        }
+                        enable(); 
+                    }
    19ce6:	bc70      	pop	{r4, r5, r6}
    19ce8:	4770      	bx	lr
    19cea:	bf00      	nop
    19cec:	40003000 	.word	0x40003000
 
 00019cf0 <int Markup<DevRtt<0> >(DevRtt<0>, char const*)>:
+    { MKhash("underline"),  "4m" },
+
+};
+
+template<typename Dev_>
+int Markup(Dev_ dev, const char* str){
    19cf0:	e92d 47f0 	stmdb	sp!, {r4, r5, r6, r7, r8, r9, sl, lr}
+    auto startStr = str;
+    auto count = 0;
+    for( ; *str; ){
    19cf4:	7808      	ldrb	r0, [r1, #0]
    19cf6:	2800      	cmp	r0, #0
    19cf8:	f000 80c6 	beq.w	19e88 <int Markup<DevRtt<0> >(DevRtt<0>, char const*)+0x198>
+
+        while ( *str and *str != '}' ){ hash = hash * 33 + *str; str++; }
+        startStr = str;
+        if( not *str ) break; //incomplete markup
+        str++; startStr++; //skip }
+        if( not markupON ) continue;
    19cfc:	4e6b      	ldr	r6, [pc, #428]	; (19eac <int Markup<DevRtt<0> >(DevRtt<0>, char const*)+0x1bc>)
+        return SEGGER_RTT_Write(N, buf, len);
    19cfe:	4f6c      	ldr	r7, [pc, #432]	; (19eb0 <int Markup<DevRtt<0> >(DevRtt<0>, char const*)+0x1c0>)
    19d00:	f8df 81f4 	ldr.w	r8, [pc, #500]	; 19ef8 <int Markup<DevRtt<0> >(DevRtt<0>, char const*)+0x208>
    19d04:	468a      	mov	sl, r1
+    for( ; *str; ){
    19d06:	460c      	mov	r4, r1
+    auto count = 0;
    19d08:	f04f 0900 	mov.w	r9, #0
    19d0c:	e004      	b.n	19d18 <int Markup<DevRtt<0> >(DevRtt<0>, char const*)+0x28>
+            str++;
    19d0e:	f10a 0a01 	add.w	sl, sl, #1
+    for( ; *str; ){
    19d12:	f89a 0000 	ldrb.w	r0, [sl]
    19d16:	b348      	cbz	r0, 19d6c <int Markup<DevRtt<0> >(DevRtt<0>, char const*)+0x7c>
+        if( *str != '{' ){ 
    19d18:	287b      	cmp	r0, #123	; 0x7b
    19d1a:	d1f8      	bne.n	19d0e <int Markup<DevRtt<0> >(DevRtt<0>, char const*)+0x1e>
+        if( n ) count += dev.write( startStr, n );
    19d1c:	ebba 0204 	subs.w	r2, sl, r4
    19d20:	d16c      	bne.n	19dfc <int Markup<DevRtt<0> >(DevRtt<0>, char const*)+0x10c>
+        if( *str == '{' ){ 
    19d22:	f89a 5001 	ldrb.w	r5, [sl, #1]
    19d26:	2d7b      	cmp	r5, #123	; 0x7b
+        str++; //skip {
    19d28:	f10a 0101 	add.w	r1, sl, #1
+        if( *str == '{' ){ 
    19d2c:	d071      	beq.n	19e12 <int Markup<DevRtt<0> >(DevRtt<0>, char const*)+0x122>
+        if( fg or bg ) str++;
    19d2e:	f005 03fb 	and.w	r3, r5, #251	; 0xfb
    19d32:	2b42      	cmp	r3, #66	; 0x42
    19d34:	bf0a      	itet	eq
    19d36:	f89a 3002 	ldrbeq.w	r3, [sl, #2]
    19d3a:	462b      	movne	r3, r5
    19d3c:	f10a 0102 	addeq.w	r1, sl, #2
+        while ( *str and *str != '}' ){ hash = hash * 33 + *str; str++; }
    19d40:	b1bb      	cbz	r3, 19d72 <int Markup<DevRtt<0> >(DevRtt<0>, char const*)+0x82>
    19d42:	2400      	movs	r4, #0
    19d44:	e003      	b.n	19d4e <int Markup<DevRtt<0> >(DevRtt<0>, char const*)+0x5e>
@@ -1169,17 +2089,32 @@ Disassembly of section .text:
    19d52:	2b7d      	cmp	r3, #125	; 0x7d
    19d54:	fa13 f282 	uxtah	r2, r3, r2
    19d58:	d1f5      	bne.n	19d46 <int Markup<DevRtt<0> >(DevRtt<0>, char const*)+0x56>
+        if( not markupON ) continue;
    19d5a:	7833      	ldrb	r3, [r6, #0]
+        str++; startStr++; //skip }
    19d5c:	f101 0a01 	add.w	sl, r1, #1
+        if( not markupON ) continue;
    19d60:	b953      	cbnz	r3, 19d78 <int Markup<DevRtt<0> >(DevRtt<0>, char const*)+0x88>
+    for( ; *str; ){
    19d62:	f89a 0000 	ldrb.w	r0, [sl]
+        str++; startStr++; //skip }
    19d66:	4654      	mov	r4, sl
+    for( ; *str; ){
    19d68:	2800      	cmp	r0, #0
    19d6a:	d1d5      	bne.n	19d18 <int Markup<DevRtt<0> >(DevRtt<0>, char const*)+0x28>
+            break;
+        }
+    }
+    //print any remaining chars
+    auto n = str - startStr;
+    if( n ) count += dev.write( startStr, n );    
    19d6c:	ebba 0204 	subs.w	r2, sl, r4
    19d70:	d169      	bne.n	19e46 <int Markup<DevRtt<0> >(DevRtt<0>, char const*)+0x156>
+    return count;
+}
    19d72:	4648      	mov	r0, r9
    19d74:	e8bd 87f0 	ldmia.w	sp!, {r4, r5, r6, r7, r8, r9, sl, pc}
+            if( c.hash != hash ) continue;
    19d78:	f244 431d 	movw	r3, #17437	; 0x441d
    19d7c:	429c      	cmp	r4, r3
    19d7e:	d050      	beq.n	19e22 <int Markup<DevRtt<0> >(DevRtt<0>, char const*)+0x132>
@@ -1228,59 +2163,88 @@ Disassembly of section .text:
    19df0:	f24d 03a6 	movw	r3, #53414	; 0xd0a6
    19df4:	429c      	cmp	r4, r3
    19df6:	d1b4      	bne.n	19d62 <int Markup<DevRtt<0> >(DevRtt<0>, char const*)+0x72>
+        for( auto& c : markupCodes ){
    19df8:	4c2e      	ldr	r4, [pc, #184]	; (19eb4 <int Markup<DevRtt<0> >(DevRtt<0>, char const*)+0x1c4>)
    19dfa:	e013      	b.n	19e24 <int Markup<DevRtt<0> >(DevRtt<0>, char const*)+0x134>
+        return SEGGER_RTT_Write(N, buf, len);
    19dfc:	4621      	mov	r1, r4
    19dfe:	2000      	movs	r0, #0
    19e00:	f000 f9f8 	bl	1a1f4 <SEGGER_RTT_Write>
+        if( *str == '{' ){ 
    19e04:	f89a 5001 	ldrb.w	r5, [sl, #1]
    19e08:	2d7b      	cmp	r5, #123	; 0x7b
+        if( n ) count += dev.write( startStr, n );
    19e0a:	4481      	add	r9, r0
+        str++; //skip {
    19e0c:	f10a 0101 	add.w	r1, sl, #1
+        if( *str == '{' ){ 
    19e10:	d18d      	bne.n	19d2e <int Markup<DevRtt<0> >(DevRtt<0>, char const*)+0x3e>
+        return SEGGER_RTT_Write(N, buf, len);
    19e12:	2201      	movs	r2, #1
    19e14:	2000      	movs	r0, #0
    19e16:	f000 f9ed 	bl	1a1f4 <SEGGER_RTT_Write>
+            str++; 
    19e1a:	f10a 0a02 	add.w	sl, sl, #2
+            count += dev.write( str, 1 ); 
    19e1e:	4481      	add	r9, r0
+            continue; 
    19e20:	e777      	b.n	19d12 <int Markup<DevRtt<0> >(DevRtt<0>, char const*)+0x22>
+        for( auto& c : markupCodes ){
    19e22:	4c25      	ldr	r4, [pc, #148]	; (19eb8 <int Markup<DevRtt<0> >(DevRtt<0>, char const*)+0x1c8>)
+        return SEGGER_RTT_Write(N, buf, len);
    19e24:	2202      	movs	r2, #2
    19e26:	4639      	mov	r1, r7
    19e28:	2000      	movs	r0, #0
    19e2a:	f000 f9e3 	bl	1a1f4 <SEGGER_RTT_Write>
+            if( fg ) count += dev.write( "38;2;", 5 );
    19e2e:	2d46      	cmp	r5, #70	; 0x46
+            count += dev.write( "\033[", 2 );
    19e30:	4481      	add	r9, r0
+            if( fg ) count += dev.write( "38;2;", 5 );
    19e32:	d01a      	beq.n	19e6a <int Markup<DevRtt<0> >(DevRtt<0>, char const*)+0x17a>
+            if( bg ) count += dev.write( "48;2;", 5 );
    19e34:	2d42      	cmp	r5, #66	; 0x42
    19e36:	d011      	beq.n	19e5c <int Markup<DevRtt<0> >(DevRtt<0>, char const*)+0x16c>
+        return SEGGER_RTT_WriteString(N, buf);
    19e38:	6861      	ldr	r1, [r4, #4]
    19e3a:	2000      	movs	r0, #0
    19e3c:	f000 faec 	bl	1a418 <SEGGER_RTT_WriteString>
+        str++; startStr++; //skip }
    19e40:	4654      	mov	r4, sl
+            count += dev.write( c.str );
    19e42:	4481      	add	r9, r0
+            break;
    19e44:	e765      	b.n	19d12 <int Markup<DevRtt<0> >(DevRtt<0>, char const*)+0x22>
+        return SEGGER_RTT_Write(N, buf, len);
    19e46:	4621      	mov	r1, r4
    19e48:	f000 f9d4 	bl	1a1f4 <SEGGER_RTT_Write>
+    if( n ) count += dev.write( startStr, n );    
    19e4c:	4481      	add	r9, r0
+}
    19e4e:	4648      	mov	r0, r9
    19e50:	e8bd 87f0 	ldmia.w	sp!, {r4, r5, r6, r7, r8, r9, sl, pc}
+        for( auto& c : markupCodes ){
    19e54:	4c19      	ldr	r4, [pc, #100]	; (19ebc <int Markup<DevRtt<0> >(DevRtt<0>, char const*)+0x1cc>)
    19e56:	e7e5      	b.n	19e24 <int Markup<DevRtt<0> >(DevRtt<0>, char const*)+0x134>
    19e58:	4c19      	ldr	r4, [pc, #100]	; (19ec0 <int Markup<DevRtt<0> >(DevRtt<0>, char const*)+0x1d0>)
    19e5a:	e7e3      	b.n	19e24 <int Markup<DevRtt<0> >(DevRtt<0>, char const*)+0x134>
+        return SEGGER_RTT_Write(N, buf, len);
    19e5c:	2205      	movs	r2, #5
    19e5e:	4641      	mov	r1, r8
    19e60:	2000      	movs	r0, #0
    19e62:	f000 f9c7 	bl	1a1f4 <SEGGER_RTT_Write>
+            if( bg ) count += dev.write( "48;2;", 5 );
    19e66:	4481      	add	r9, r0
    19e68:	e7e6      	b.n	19e38 <int Markup<DevRtt<0> >(DevRtt<0>, char const*)+0x148>
+        return SEGGER_RTT_Write(N, buf, len);
    19e6a:	4916      	ldr	r1, [pc, #88]	; (19ec4 <int Markup<DevRtt<0> >(DevRtt<0>, char const*)+0x1d4>)
    19e6c:	2205      	movs	r2, #5
    19e6e:	2000      	movs	r0, #0
    19e70:	f000 f9c0 	bl	1a1f4 <SEGGER_RTT_Write>
+            if( fg ) count += dev.write( "38;2;", 5 );
    19e74:	4481      	add	r9, r0
    19e76:	e7df      	b.n	19e38 <int Markup<DevRtt<0> >(DevRtt<0>, char const*)+0x148>
+        for( auto& c : markupCodes ){
    19e78:	4c13      	ldr	r4, [pc, #76]	; (19ec8 <int Markup<DevRtt<0> >(DevRtt<0>, char const*)+0x1d8>)
    19e7a:	e7d3      	b.n	19e24 <int Markup<DevRtt<0> >(DevRtt<0>, char const*)+0x134>
    19e7c:	4c13      	ldr	r4, [pc, #76]	; (19ecc <int Markup<DevRtt<0> >(DevRtt<0>, char const*)+0x1dc>)
@@ -1289,8 +2253,11 @@ Disassembly of section .text:
    19e82:	e7cf      	b.n	19e24 <int Markup<DevRtt<0> >(DevRtt<0>, char const*)+0x134>
    19e84:	4c13      	ldr	r4, [pc, #76]	; (19ed4 <int Markup<DevRtt<0> >(DevRtt<0>, char const*)+0x1e4>)
    19e86:	e7cd      	b.n	19e24 <int Markup<DevRtt<0> >(DevRtt<0>, char const*)+0x134>
+    auto count = 0;
    19e88:	4681      	mov	r9, r0
+    return count;
    19e8a:	e772      	b.n	19d72 <int Markup<DevRtt<0> >(DevRtt<0>, char const*)+0x82>
+        for( auto& c : markupCodes ){
    19e8c:	4c12      	ldr	r4, [pc, #72]	; (19ed8 <int Markup<DevRtt<0> >(DevRtt<0>, char const*)+0x1e8>)
    19e8e:	e7c9      	b.n	19e24 <int Markup<DevRtt<0> >(DevRtt<0>, char const*)+0x134>
    19e90:	4c12      	ldr	r4, [pc, #72]	; (19edc <int Markup<DevRtt<0> >(DevRtt<0>, char const*)+0x1ec>)
@@ -1329,13 +2296,23 @@ Disassembly of section .text:
    19ef8:	0001c08c 	.word	0x0001c08c
 
 00019efc <int Print<DevRtt<0>>(DevRtt<0>, char const*) [clone .isra.0]>:
+            bool markupON in nRFconfig.hpp
+
+        if disabled, the existing markup code is ignored
+------------------------------------------------------------------------------*/
+template<typename Dev, typename...Ts>
+int Print(Dev dev, const char* fmt, Ts...ts){
    19efc:	b510      	push	{r4, lr}
    19efe:	f5ad 7d00 	sub.w	sp, sp, #512	; 0x200
    19f02:	4602      	mov	r2, r0
+    char buf[512];
+    int n = snprintf( buf, 512, fmt, ts... );
    19f04:	f44f 7100 	mov.w	r1, #512	; 0x200
    19f08:	4668      	mov	r0, sp
    19f0a:	f000 fc5d 	bl	1a7c8 <sniprintf>
+    if( n == 0 ) return 0;
    19f0e:	b150      	cbz	r0, 19f26 <int Print<DevRtt<0>>(DevRtt<0>, char const*) [clone .isra.0]+0x2a>
+    if( n < 512 or not markupON ) return Markup( dev, buf ); 
    19f10:	f5b0 7f00 	cmp.w	r0, #512	; 0x200
    19f14:	4669      	mov	r1, sp
    19f16:	db02      	blt.n	19f1e <int Print<DevRtt<0>>(DevRtt<0>, char const*) [clone .isra.0]+0x22>
@@ -1344,29 +2321,45 @@ Disassembly of section .text:
    19f1c:	b933      	cbnz	r3, 19f2c <int Print<DevRtt<0>>(DevRtt<0>, char const*) [clone .isra.0]+0x30>
    19f1e:	f04f 0000 	mov.w	r0, #0
    19f22:	f7ff fee5 	bl	19cf0 <int Markup<DevRtt<0> >(DevRtt<0>, char const*)>
+    //ansi code
+    markupON = false;
+    n = Markup( dev, buf );
+    markupON = true;
+    return n;
+}
    19f26:	f50d 7d00 	add.w	sp, sp, #512	; 0x200
    19f2a:	bd10      	pop	{r4, pc}
+    markupON = false;
    19f2c:	2300      	movs	r3, #0
+    n = Markup( dev, buf );
    19f2e:	f04f 0000 	mov.w	r0, #0
+    markupON = false;
    19f32:	7023      	strb	r3, [r4, #0]
+    n = Markup( dev, buf );
    19f34:	f7ff fedc 	bl	19cf0 <int Markup<DevRtt<0> >(DevRtt<0>, char const*)>
+    markupON = true;
    19f38:	2301      	movs	r3, #1
    19f3a:	7023      	strb	r3, [r4, #0]
+}
    19f3c:	f50d 7d00 	add.w	sp, sp, #512	; 0x200
    19f40:	bd10      	pop	{r4, pc}
    19f42:	bf00      	nop
    19f44:	2000111c 	.word	0x2000111c
 
 00019f48 <int Print<DevRtt<0>, unsigned char, unsigned char>(DevRtt<0>, char const*, unsigned char, unsigned char) [clone .isra.0]>:
+int Print(Dev dev, const char* fmt, Ts...ts){
    19f48:	b510      	push	{r4, lr}
    19f4a:	f5ad 7d02 	sub.w	sp, sp, #520	; 0x208
    19f4e:	460b      	mov	r3, r1
+    int n = snprintf( buf, 512, fmt, ts... );
    19f50:	9200      	str	r2, [sp, #0]
    19f52:	f44f 7100 	mov.w	r1, #512	; 0x200
    19f56:	4602      	mov	r2, r0
    19f58:	a802      	add	r0, sp, #8
    19f5a:	f000 fc35 	bl	1a7c8 <sniprintf>
+    if( n == 0 ) return 0;
    19f5e:	b150      	cbz	r0, 19f76 <int Print<DevRtt<0>, unsigned char, unsigned char>(DevRtt<0>, char const*, unsigned char, unsigned char) [clone .isra.0]+0x2e>
+    if( n < 512 or not markupON ) return Markup( dev, buf ); 
    19f60:	f5b0 7f00 	cmp.w	r0, #512	; 0x200
    19f64:	a902      	add	r1, sp, #8
    19f66:	db02      	blt.n	19f6e <int Print<DevRtt<0>, unsigned char, unsigned char>(DevRtt<0>, char const*, unsigned char, unsigned char) [clone .isra.0]+0x26>
@@ -1375,129 +2368,269 @@ Disassembly of section .text:
    19f6c:	b933      	cbnz	r3, 19f7c <int Print<DevRtt<0>, unsigned char, unsigned char>(DevRtt<0>, char const*, unsigned char, unsigned char) [clone .isra.0]+0x34>
    19f6e:	f04f 0000 	mov.w	r0, #0
    19f72:	f7ff febd 	bl	19cf0 <int Markup<DevRtt<0> >(DevRtt<0>, char const*)>
+}
    19f76:	f50d 7d02 	add.w	sp, sp, #520	; 0x208
    19f7a:	bd10      	pop	{r4, pc}
+    markupON = false;
    19f7c:	2300      	movs	r3, #0
+    n = Markup( dev, buf );
    19f7e:	f04f 0000 	mov.w	r0, #0
+    markupON = false;
    19f82:	7023      	strb	r3, [r4, #0]
+    n = Markup( dev, buf );
    19f84:	f7ff feb4 	bl	19cf0 <int Markup<DevRtt<0> >(DevRtt<0>, char const*)>
+    markupON = true;
    19f88:	2301      	movs	r3, #1
    19f8a:	7023      	strb	r3, [r4, #0]
+}
    19f8c:	f50d 7d02 	add.w	sp, sp, #520	; 0x208
    19f90:	bd10      	pop	{r4, pc}
    19f92:	bf00      	nop
    19f94:	2000111c 	.word	0x2000111c
 
 00019f98 <main>:
+
+Twim0< board.sda.pinNumber(),   
+       board.scl.pinNumber(), 
+       board.i2cDevicePwr.pinNumber() >twi;
+
+int main(){
    19f98:	e92d 47f0 	stmdb	sp!, {r4, r5, r6, r7, r8, r9, sl, lr}
+
+    Debug("{normal}\n\n");
    19f9c:	4855      	ldr	r0, [pc, #340]	; (1a0f4 <main+0x15c>)
    19f9e:	4f56      	ldr	r7, [pc, #344]	; (1a0f8 <main+0x160>)
+                        reg.TXD.MAXCNT = len;
    19fa0:	4c56      	ldr	r4, [pc, #344]	; (1a0fc <main+0x164>)
+        }
+        //no errors and write/read amounts match requested amounts
+
+asm("nop"); //#1
+        
+        Debug("status: 0x%02X%02X\n", rbuf[0], rbuf[1]); //big endian
    19fa2:	f8df 9164 	ldr.w	r9, [pc, #356]	; 1a108 <main+0x170>
+
+        //check ready bit
+        if( not (rbuf[0] bitand 0x20) ){
+            Debug("status ready bit not set\n");
    19fa6:	f8df 8164 	ldr.w	r8, [pc, #356]	; 1a10c <main+0x174>
+int main(){
    19faa:	b082      	sub	sp, #8
+    Debug("{normal}\n\n");
    19fac:	f7ff ffa6 	bl	19efc <int Print<DevRtt<0>>(DevRtt<0>, char const*) [clone .isra.0]>
+    twi.init( 0x48 ); //tmp117=0x48, default 100kHz
    19fb0:	f04f 61c8 	mov.w	r1, #104857600	; 0x6400000
    19fb4:	2048      	movs	r0, #72	; 0x48
    19fb6:	f7ff fe75 	bl	19ca4 <Twim<1073754112ul, (GPIO::PIN)13, (GPIO::PIN)15, (GPIO::PIN)17>::init(unsigned char, Twim<1073754112ul, (GPIO::PIN)13, (GPIO::PIN)15, (GPIO::PIN)17>::FREQ)>
+    for(auto n = 1; ;){ //do n times
    19fba:	f047 0701 	orr.w	r7, r7, #1
    19fbe:	ae01      	add	r6, sp, #4
+ * @param ms_time Number of milliseconds to wait.
+ */
+
+__STATIC_INLINE void nrf_delay_ms(uint32_t ms_time)
+{
+    if (ms_time == 0)
    19fc0:	f241 3588 	movw	r5, #5000	; 0x1388
+    typedef void (* delay_func_t)(uint32_t);
+    const delay_func_t delay_cycles =
+        // Set LSB to 1 to execute the code in the Thumb mode.
+        (delay_func_t)((((uint32_t)delay_machine_code) | 1));
+    uint32_t cycles = time_us * NRFX_DELAY_CPU_FREQ_MHZ;
+    delay_cycles(cycles);
    19fc4:	f44f 407a 	mov.w	r0, #64000	; 0xfa00
    19fc8:	47b8      	blx	r7
+        return;
+    }
+
+    do {
+        nrf_delay_us(1000);
+    } while (--ms_time);
    19fca:	3d01      	subs	r5, #1
    19fcc:	d1fa      	bne.n	19fc4 <main+0x2c>
+        uint8_t tbuf[1]{ 1 };   //status register address
    19fce:	2301      	movs	r3, #1
+                        reg.RXD.MAXCNT = len;
    19fd0:	2002      	movs	r0, #2
+SA  clearError      ()          { reg.ERRORSRC = 7; reg.EVENTS.ERROR = 0; }
    19fd2:	2107      	movs	r1, #7
+SA  shortsSetup     (SHORTS e)  { reg.SHORTS = e; }
    19fd4:	f44f 5284 	mov.w	r2, #4224	; 0x1080
+        uint8_t rbuf[2]{ 0,0 }; //status register read value, 2bytes
    19fd8:	f8ad 5004 	strh.w	r5, [sp, #4]
+        uint8_t tbuf[1]{ 1 };   //status register address
    19fdc:	f88d 3000 	strb.w	r3, [sp]
+                        reg.TXD.MAXCNT = len;
    19fe0:	f8c4 3548 	str.w	r3, [r4, #1352]	; 0x548
+                        reg.TXD.PTR = addr;
    19fe4:	f8c4 d544 	str.w	sp, [r4, #1348]	; 0x544
+                        reg.RXD.MAXCNT = len;
    19fe8:	f8c4 0538 	str.w	r0, [r4, #1336]	; 0x538
+                        reg.RXD.PTR = addr;
    19fec:	f8c4 6534 	str.w	r6, [r4, #1332]	; 0x534
+SA  clearError      ()          { reg.ERRORSRC = 7; reg.EVENTS.ERROR = 0; }
    19ff0:	f8c4 14c4 	str.w	r1, [r4, #1220]	; 0x4c4
    19ff4:	f8c4 5124 	str.w	r5, [r4, #292]	; 0x124
+SA  clearStopped    ()          { reg.EVENTS.STOPPED = 0; }
    19ff8:	f8c4 5104 	str.w	r5, [r4, #260]	; 0x104
+SA  clearSuspended  ()          { reg.EVENTS.SUSPENDED = 0; }
    19ffc:	f8c4 5148 	str.w	r5, [r4, #328]	; 0x148
+SA  clearRxStarted  ()          { reg.EVENTS.RXSTARTED = 0; }
    1a000:	f8c4 514c 	str.w	r5, [r4, #332]	; 0x14c
+SA  clearTxStarted  ()          { reg.EVENTS.TXSTARTED = 0; }
    1a004:	f8c4 5150 	str.w	r5, [r4, #336]	; 0x150
+SA  clearLastRx     ()          { reg.EVENTS.LASTRX = 0; }
    1a008:	f8c4 515c 	str.w	r5, [r4, #348]	; 0x15c
+SA  clearLastTx     ()          { reg.EVENTS.LASTTX = 0; }
    1a00c:	f8c4 5160 	str.w	r5, [r4, #352]	; 0x160
+SA  shortsSetup     (SHORTS e)  { reg.SHORTS = e; }
    1a010:	f8c4 2200 	str.w	r2, [r4, #512]	; 0x200
+SA  startTx         ()          { reg.TASKS.STARTTX = 1; } 
    1a014:	60a3      	str	r3, [r4, #8]
+SA  startTxRxStop   ()          { clearEvents(); shortsSetup(LASTTX_STARTRX_STOP); startTx(); }
    1a016:	e002      	b.n	1a01e <main+0x86>
+SA  isError         ()          { return reg.EVENTS.ERROR; }
    1a018:	f8d4 3124 	ldr.w	r3, [r4, #292]	; 0x124
+
+//TODO - add timeouts so if something wrong we don't block forever
+
+SA  waitForStop     () {
+                        while( not isStopped() ){
+                            if( isError() ){
    1a01c:	b9a3      	cbnz	r3, 1a048 <main+0xb0>
+SA  isStopped       ()          { return reg.EVENTS.STOPPED; }
    1a01e:	f8d4 3104 	ldr.w	r3, [r4, #260]	; 0x104
+                        while( not isStopped() ){
    1a022:	2b00      	cmp	r3, #0
    1a024:	d0f8      	beq.n	1a018 <main+0x80>
+SA  txAmount        ()          { return reg.TXD.AMOUNT; }
    1a026:	f8d4 554c 	ldr.w	r5, [r4, #1356]	; 0x54c
+// asm("nop");
+                        txBufferSet( txbuf );
+                        rxBufferSet( rxbuf );
+                        startTxRxStop(); 
+                        if( not waitForStop() ) return false;
+                        if( (txAmount() == NT) and (rxAmount() == NR) ) return true;
    1a02a:	2d01      	cmp	r5, #1
    1a02c:	d010      	beq.n	1a050 <main+0xb8>
+SA  disable         ()          { reg.ENABLE = 0; }
    1a02e:	2300      	movs	r3, #0
+SA  clearError      ()          { reg.ERRORSRC = 7; reg.EVENTS.ERROR = 0; }
    1a030:	2107      	movs	r1, #7
+SA  enable          ()          { reg.ENABLE = 6; }
    1a032:	2206      	movs	r2, #6
+SA  disable         ()          { reg.ENABLE = 0; }
    1a034:	f8c4 3500 	str.w	r3, [r4, #1280]	; 0x500
+SA  clearError      ()          { reg.ERRORSRC = 7; reg.EVENTS.ERROR = 0; }
    1a038:	f8c4 14c4 	str.w	r1, [r4, #1220]	; 0x4c4
    1a03c:	f8c4 3124 	str.w	r3, [r4, #292]	; 0x124
+SA  shortsSetup     (SHORTS e)  { reg.SHORTS = e; }
    1a040:	f8c4 3200 	str.w	r3, [r4, #512]	; 0x200
+SA  enable          ()          { reg.ENABLE = 6; }
    1a044:	f8c4 2500 	str.w	r2, [r4, #1280]	; 0x500
+            Debug("writeRead failed\n");
    1a048:	482d      	ldr	r0, [pc, #180]	; (1a100 <main+0x168>)
    1a04a:	f7ff ff57 	bl	19efc <int Print<DevRtt<0>>(DevRtt<0>, char const*) [clone .isra.0]>
+            continue;
    1a04e:	e7b7      	b.n	19fc0 <main+0x28>
+SA  rxAmount        ()          { return reg.RXD.AMOUNT; }
    1a050:	f8d4 a53c 	ldr.w	sl, [r4, #1340]	; 0x53c
+                        if( (txAmount() == NT) and (rxAmount() == NR) ) return true;
    1a054:	f1ba 0f02 	cmp.w	sl, #2
    1a058:	d1e9      	bne.n	1a02e <main+0x96>
+asm("nop"); //#1
    1a05a:	bf00      	nop
+        Debug("status: 0x%02X%02X\n", rbuf[0], rbuf[1]); //big endian
    1a05c:	f89d 2005 	ldrb.w	r2, [sp, #5]
    1a060:	f89d 1004 	ldrb.w	r1, [sp, #4]
    1a064:	4648      	mov	r0, r9
    1a066:	f7ff ff6f 	bl	19f48 <int Print<DevRtt<0>, unsigned char, unsigned char>(DevRtt<0>, char const*, unsigned char, unsigned char) [clone .isra.0]>
+        if( not (rbuf[0] bitand 0x20) ){
    1a06a:	f89d 3004 	ldrb.w	r3, [sp, #4]
    1a06e:	069b      	lsls	r3, r3, #26
    1a070:	d53c      	bpl.n	1a0ec <main+0x154>
+            continue;
+        }
+
+        tbuf[0] = 0; //temp register address 
    1a072:	2300      	movs	r3, #0
+SA  clearError      ()          { reg.ERRORSRC = 7; reg.EVENTS.ERROR = 0; }
    1a074:	2107      	movs	r1, #7
+SA  shortsSetup     (SHORTS e)  { reg.SHORTS = e; }
    1a076:	f44f 5284 	mov.w	r2, #4224	; 0x1080
    1a07a:	f88d 3000 	strb.w	r3, [sp]
+        rbuf[0] = 0; rbuf[1] = 0; //clear rbuf (so can easily see if changed)
    1a07e:	f8ad 3004 	strh.w	r3, [sp, #4]
+                        reg.TXD.MAXCNT = len;
    1a082:	f8c4 5548 	str.w	r5, [r4, #1352]	; 0x548
+                        reg.TXD.PTR = addr;
    1a086:	f8c4 d544 	str.w	sp, [r4, #1348]	; 0x544
+                        reg.RXD.MAXCNT = len;
    1a08a:	f8c4 a538 	str.w	sl, [r4, #1336]	; 0x538
+                        reg.RXD.PTR = addr;
    1a08e:	f8c4 6534 	str.w	r6, [r4, #1332]	; 0x534
+SA  clearError      ()          { reg.ERRORSRC = 7; reg.EVENTS.ERROR = 0; }
    1a092:	f8c4 14c4 	str.w	r1, [r4, #1220]	; 0x4c4
    1a096:	f8c4 3124 	str.w	r3, [r4, #292]	; 0x124
+SA  clearStopped    ()          { reg.EVENTS.STOPPED = 0; }
    1a09a:	f8c4 3104 	str.w	r3, [r4, #260]	; 0x104
+SA  clearSuspended  ()          { reg.EVENTS.SUSPENDED = 0; }
    1a09e:	f8c4 3148 	str.w	r3, [r4, #328]	; 0x148
+SA  clearRxStarted  ()          { reg.EVENTS.RXSTARTED = 0; }
    1a0a2:	f8c4 314c 	str.w	r3, [r4, #332]	; 0x14c
+SA  clearTxStarted  ()          { reg.EVENTS.TXSTARTED = 0; }
    1a0a6:	f8c4 3150 	str.w	r3, [r4, #336]	; 0x150
+SA  clearLastRx     ()          { reg.EVENTS.LASTRX = 0; }
    1a0aa:	f8c4 315c 	str.w	r3, [r4, #348]	; 0x15c
+SA  clearLastTx     ()          { reg.EVENTS.LASTTX = 0; }
    1a0ae:	f8c4 3160 	str.w	r3, [r4, #352]	; 0x160
+SA  shortsSetup     (SHORTS e)  { reg.SHORTS = e; }
    1a0b2:	f8c4 2200 	str.w	r2, [r4, #512]	; 0x200
+SA  startTx         ()          { reg.TASKS.STARTTX = 1; } 
    1a0b6:	60a5      	str	r5, [r4, #8]
+SA  startTxRxStop   ()          { clearEvents(); shortsSetup(LASTTX_STARTRX_STOP); startTx(); }
    1a0b8:	e003      	b.n	1a0c2 <main+0x12a>
+SA  isError         ()          { return reg.EVENTS.ERROR; }
    1a0ba:	f8d4 3124 	ldr.w	r3, [r4, #292]	; 0x124
+                            if( isError() ){
    1a0be:	2b00      	cmp	r3, #0
    1a0c0:	d1c2      	bne.n	1a048 <main+0xb0>
+SA  isStopped       ()          { return reg.EVENTS.STOPPED; }
    1a0c2:	f8d4 3104 	ldr.w	r3, [r4, #260]	; 0x104
+                        while( not isStopped() ){
    1a0c6:	2b00      	cmp	r3, #0
    1a0c8:	d0f7      	beq.n	1a0ba <main+0x122>
+SA  txAmount        ()          { return reg.TXD.AMOUNT; }
    1a0ca:	f8d4 354c 	ldr.w	r3, [r4, #1356]	; 0x54c
+                        if( (txAmount() == NT) and (rxAmount() == NR) ) return true;
    1a0ce:	2b01      	cmp	r3, #1
    1a0d0:	d1ad      	bne.n	1a02e <main+0x96>
+SA  rxAmount        ()          { return reg.RXD.AMOUNT; }
    1a0d2:	f8d4 353c 	ldr.w	r3, [r4, #1340]	; 0x53c
+                        if( (txAmount() == NT) and (rxAmount() == NR) ) return true;
    1a0d6:	2b02      	cmp	r3, #2
    1a0d8:	d1a9      	bne.n	1a02e <main+0x96>
+        if( not twi.writeRead( tbuf, rbuf ) ){
+            Debug("writeRead failed\n");
+            continue;
+        }
+
+asm("nop"); //#2
    1a0da:	bf00      	nop
+
+        Debug("temp: 0x%02X%02X\n", rbuf[0], rbuf[1]); //big endian
    1a0dc:	4809      	ldr	r0, [pc, #36]	; (1a104 <main+0x16c>)
    1a0de:	f89d 2005 	ldrb.w	r2, [sp, #5]
    1a0e2:	f89d 1004 	ldrb.w	r1, [sp, #4]
    1a0e6:	f7ff ff2f 	bl	19f48 <int Print<DevRtt<0>, unsigned char, unsigned char>(DevRtt<0>, char const*, unsigned char, unsigned char) [clone .isra.0]>
+
+        //run n times
+        if( not --n ) for(;;){}
    1a0ea:	e7fe      	b.n	1a0ea <main+0x152>
+            Debug("status ready bit not set\n");
    1a0ec:	4640      	mov	r0, r8
    1a0ee:	f7ff ff05 	bl	19efc <int Print<DevRtt<0>>(DevRtt<0>, char const*) [clone .isra.0]>
+            continue;
    1a0f2:	e765      	b.n	19fc0 <main+0x28>
    1a0f4:	0001c094 	.word	0x0001c094
    1a0f8:	0001c1a0 	.word	0x0001c1a0
@@ -1508,67 +2641,119 @@ Disassembly of section .text:
    1a10c:	0001c0c8 	.word	0x0001c0c8
 
 0001a110 <_GLOBAL__sub_I_twi>:
+struct BL651tempBoard {
+
+    //SDA - P0_13 - input, S0D1
+    //SCL - P0_15 - input, SOD1
+    //PWR - P0_17 - output, power to i2c devices tmp117/si7051
+    SI Gpio<P0_13>  sda; 
    1a110:	4b2a      	ldr	r3, [pc, #168]	; (1a1bc <_GLOBAL__sub_I_twi+0xac>)
    1a112:	681a      	ldr	r2, [r3, #0]
    1a114:	07d0      	lsls	r0, r2, #31
    1a116:	bf5c      	itt	pl
    1a118:	2201      	movpl	r2, #1
    1a11a:	601a      	strpl	r2, [r3, #0]
+    SI Gpio<P0_15>  scl;
    1a11c:	4b28      	ldr	r3, [pc, #160]	; (1a1c0 <_GLOBAL__sub_I_twi+0xb0>)
    1a11e:	681a      	ldr	r2, [r3, #0]
    1a120:	07d1      	lsls	r1, r2, #31
    1a122:	bf5c      	itt	pl
    1a124:	2201      	movpl	r2, #1
    1a126:	601a      	strpl	r2, [r3, #0]
+    SI Gpio<P0_17>  i2cDevicePwr; 
    1a128:	4b26      	ldr	r3, [pc, #152]	; (1a1c4 <_GLOBAL__sub_I_twi+0xb4>)
    1a12a:	681a      	ldr	r2, [r3, #0]
    1a12c:	07d2      	lsls	r2, r2, #31
    1a12e:	bf5c      	itt	pl
    1a130:	2201      	movpl	r2, #1
    1a132:	601a      	strpl	r2, [r3, #0]
+//                 scl.init();
+//                 i2cDevicePwr.init();
+//             }
+
+    //these pins are not init until init() is run
+    SI Gpio<P0_7>  ledRed; //board label 1
    1a134:	4b24      	ldr	r3, [pc, #144]	; (1a1c8 <_GLOBAL__sub_I_twi+0xb8>)
    1a136:	681a      	ldr	r2, [r3, #0]
    1a138:	07d0      	lsls	r0, r2, #31
    1a13a:	bf5c      	itt	pl
    1a13c:	2201      	movpl	r2, #1
    1a13e:	601a      	strpl	r2, [r3, #0]
+    SI Gpio<P0_8>  ledGreen; //board label 2
    1a140:	4b22      	ldr	r3, [pc, #136]	; (1a1cc <_GLOBAL__sub_I_twi+0xbc>)
    1a142:	681a      	ldr	r2, [r3, #0]
    1a144:	07d1      	lsls	r1, r2, #31
    1a146:	bf5c      	itt	pl
    1a148:	2201      	movpl	r2, #1
    1a14a:	601a      	strpl	r2, [r3, #0]
+    SI Gpio<P0_27, LOWISON>  sw1; //SW1
    1a14c:	4b20      	ldr	r3, [pc, #128]	; (1a1d0 <_GLOBAL__sub_I_twi+0xc0>)
    1a14e:	681a      	ldr	r2, [r3, #0]
    1a150:	07d2      	lsls	r2, r2, #31
    1a152:	bf5c      	itt	pl
    1a154:	2201      	movpl	r2, #1
    1a156:	601a      	strpl	r2, [r3, #0]
+    private:
+//============
+
+    SCA updateInterval_{ 60 }; //no need to read all the time
+    //CH0, gain 1/6, ref = 0.6v, 10us (all default values)
+    SI SaadcChan vdd_{ SaadcChan::VDD };
    1a158:	4a1e      	ldr	r2, [pc, #120]	; (1a1d4 <_GLOBAL__sub_I_twi+0xc4>)
    1a15a:	6813      	ldr	r3, [r2, #0]
    1a15c:	f013 0301 	ands.w	r3, r3, #1
    1a160:	d11d      	bne.n	1a19e <_GLOBAL__sub_I_twi+0x8e>
+    }
+
+} //main
    1a162:	b430      	push	{r4, r5}
+                    }
+
+                    //manual init
+                    template<typename ...Ts>
+SCA init            (CH ch, PSEL p, Ts... ts) { 
+                        ch_ = ch;
    1a164:	4c1c      	ldr	r4, [pc, #112]	; (1a1d8 <_GLOBAL__sub_I_twi+0xc8>)
+                        pselN_ = (PSEL)it.PSELN;
    1a166:	4d1d      	ldr	r5, [pc, #116]	; (1a1dc <_GLOBAL__sub_I_twi+0xcc>)
+                        pselP_ = (PSEL)it.PSELP;
    1a168:	491d      	ldr	r1, [pc, #116]	; (1a1e0 <_GLOBAL__sub_I_twi+0xd0>)
+                        ch_ = ch;
    1a16a:	7023      	strb	r3, [r4, #0]
+                        pselN_ = (PSEL)it.PSELN;
    1a16c:	702b      	strb	r3, [r5, #0]
+                        pselP_ = (PSEL)it.PSELP;
    1a16e:	2409      	movs	r4, #9
+#else
+    #error "Temperature source not defined in nRFconfig.hpp" 
+#endif
+
+#include "Timer.hpp"
+inline Timer timerAdvUpdate;
    1a170:	4b1c      	ldr	r3, [pc, #112]	; (1a1e4 <_GLOBAL__sub_I_twi+0xd4>)
    1a172:	700c      	strb	r4, [r1, #0]
+    SI SaadcChan vdd_{ SaadcChan::VDD };
    1a174:	2101      	movs	r1, #1
+                        config_ = it.CONFIG;
    1a176:	481c      	ldr	r0, [pc, #112]	; (1a1e8 <_GLOBAL__sub_I_twi+0xd8>)
    1a178:	6011      	str	r1, [r2, #0]
+inline Timer timerAdvUpdate;
    1a17a:	681a      	ldr	r2, [r3, #0]
    1a17c:	f44f 3400 	mov.w	r4, #131072	; 0x20000
    1a180:	6004      	str	r4, [r0, #0]
    1a182:	07d4      	lsls	r4, r2, #31
    1a184:	d403      	bmi.n	1a18e <_GLOBAL__sub_I_twi+0x7e>
+#undef CUO
+
+/*------------------------------------------------------------------------------
+    Timer
+------------------------------------------------------------------------------*/
+struct Timer {
    1a186:	4a19      	ldr	r2, [pc, #100]	; (1a1ec <_GLOBAL__sub_I_twi+0xdc>)
    1a188:	2101      	movs	r1, #1
    1a18a:	6212      	str	r2, [r2, #32]
    1a18c:	6019      	str	r1, [r3, #0]
+    SI TempDriver_ temp_;
    1a18e:	4b18      	ldr	r3, [pc, #96]	; (1a1f0 <_GLOBAL__sub_I_twi+0xe0>)
    1a190:	681a      	ldr	r2, [r3, #0]
    1a192:	07d0      	lsls	r0, r2, #31
@@ -1577,6 +2762,7 @@ Disassembly of section .text:
    1a198:	601a      	strpl	r2, [r3, #0]
    1a19a:	bc30      	pop	{r4, r5}
    1a19c:	4770      	bx	lr
+inline Timer timerAdvUpdate;
    1a19e:	4b11      	ldr	r3, [pc, #68]	; (1a1e4 <_GLOBAL__sub_I_twi+0xd4>)
    1a1a0:	681a      	ldr	r2, [r3, #0]
    1a1a2:	07d1      	lsls	r1, r2, #31
@@ -1585,12 +2771,19 @@ Disassembly of section .text:
    1a1a8:	2101      	movs	r1, #1
    1a1aa:	6212      	str	r2, [r2, #32]
    1a1ac:	6019      	str	r1, [r3, #0]
+    SI TempDriver_ temp_;
    1a1ae:	4b10      	ldr	r3, [pc, #64]	; (1a1f0 <_GLOBAL__sub_I_twi+0xe0>)
    1a1b0:	681a      	ldr	r2, [r3, #0]
    1a1b2:	07d2      	lsls	r2, r2, #31
    1a1b4:	bf5c      	itt	pl
    1a1b6:	2201      	movpl	r2, #1
    1a1b8:	601a      	strpl	r2, [r3, #0]
+
+//============
+    protected:
+//============
+
+    Temperature(){} //cannot use this class directly
    1a1ba:	4770      	bx	lr
    1a1bc:	20001254 	.word	0x20001254
    1a1c0:	20001250 	.word	0x20001250
@@ -1608,20 +2801,34 @@ Disassembly of section .text:
    1a1f0:	20001234 	.word	0x20001234
 
 0001a1f4 <SEGGER_RTT_Write>:
+*    Number of bytes which have been stored in the "Up"-buffer.
+*
+*  Notes
+*    (1) Data is stored according to buffer flags.
+*/
+unsigned SEGGER_RTT_Write(unsigned BufferIndex, const void* pBuffer, unsigned NumBytes) {
    1a1f4:	e92d 4ff0 	stmdb	sp!, {r4, r5, r6, r7, r8, r9, sl, fp, lr}
+  unsigned Status;
+  //
+  INIT();
    1a1f8:	4f81      	ldr	r7, [pc, #516]	; (1a400 <SEGGER_RTT_Write+0x20c>)
    1a1fa:	783b      	ldrb	r3, [r7, #0]
+unsigned SEGGER_RTT_Write(unsigned BufferIndex, const void* pBuffer, unsigned NumBytes) {
    1a1fc:	b085      	sub	sp, #20
    1a1fe:	4680      	mov	r8, r0
    1a200:	468a      	mov	sl, r1
    1a202:	4691      	mov	r9, r2
+  INIT();
    1a204:	b1eb      	cbz	r3, 1a242 <SEGGER_RTT_Write+0x4e>
+  switch (pRing->Flags) {
    1a206:	eb08 0548 	add.w	r5, r8, r8, lsl #1
    1a20a:	eb07 05c5 	add.w	r5, r7, r5, lsl #3
+  SEGGER_RTT_LOCK();
    1a20e:	f04f 0b00 	mov.w	fp, #0
    1a212:	f10d 000f 	add.w	r0, sp, #15
    1a216:	f88d b00f 	strb.w	fp, [sp, #15]
    1a21a:	f7ff f8ad 	bl	19378 <app_util_critical_region_enter>
+  switch (pRing->Flags) {
    1a21e:	6aee      	ldr	r6, [r5, #44]	; 0x2c
    1a220:	2e01      	cmp	r6, #1
    1a222:	ea4f 0448 	mov.w	r4, r8, lsl #1
@@ -1630,151 +2837,249 @@ Disassembly of section .text:
    1a22c:	d04f      	beq.n	1a2ce <SEGGER_RTT_Write+0xda>
    1a22e:	b346      	cbz	r6, 1a282 <SEGGER_RTT_Write+0x8e>
    1a230:	465e      	mov	r6, fp
+  //
+  Status = SEGGER_RTT_WriteNoLock(BufferIndex, pBuffer, NumBytes);
+  //
+  // Finish up.
+  //
+  SEGGER_RTT_UNLOCK();
    1a232:	f89d 000f 	ldrb.w	r0, [sp, #15]
    1a236:	f7ff f8c5 	bl	193c4 <app_util_critical_region_exit>
+  //
+  return Status;
+}
    1a23a:	4630      	mov	r0, r6
    1a23c:	b005      	add	sp, #20
    1a23e:	e8bd 8ff0 	ldmia.w	sp!, {r4, r5, r6, r7, r8, r9, sl, fp, pc}
+  p->MaxNumUpBuffers    = SEGGER_RTT_MAX_NUM_UP_BUFFERS;
    1a242:	2202      	movs	r2, #2
+  p->aUp[0].RdOff         = 0u;
    1a244:	62bb      	str	r3, [r7, #40]	; 0x28
+  p->aUp[0].WrOff         = 0u;
    1a246:	627b      	str	r3, [r7, #36]	; 0x24
+  p->aDown[0].RdOff         = 0u;
    1a248:	65bb      	str	r3, [r7, #88]	; 0x58
+  p->aDown[0].WrOff         = 0u;
    1a24a:	657b      	str	r3, [r7, #84]	; 0x54
+  p->aUp[0].pBuffer       = _acUpBuffer;
    1a24c:	4b6d      	ldr	r3, [pc, #436]	; (1a404 <SEGGER_RTT_Write+0x210>)
+  p->aUp[0].sName         = "Terminal";
    1a24e:	496e      	ldr	r1, [pc, #440]	; (1a408 <SEGGER_RTT_Write+0x214>)
+  p->aUp[0].Flags         = SEGGER_RTT_MODE_DEFAULT;
    1a250:	62fa      	str	r2, [r7, #44]	; 0x2c
+  p->MaxNumDownBuffers  = SEGGER_RTT_MAX_NUM_DOWN_BUFFERS;
    1a252:	e9c7 2204 	strd	r2, r2, [r7, #16]
+  p->aDown[0].Flags         = SEGGER_RTT_MODE_DEFAULT;
    1a256:	65fa      	str	r2, [r7, #92]	; 0x5c
+  p->aUp[0].SizeOfBuffer  = sizeof(_acUpBuffer);
    1a258:	f44f 7000 	mov.w	r0, #512	; 0x200
+  p->aDown[0].pBuffer       = _acDownBuffer;
    1a25c:	4a6b      	ldr	r2, [pc, #428]	; (1a40c <SEGGER_RTT_Write+0x218>)
+  p->aUp[0].pBuffer       = _acUpBuffer;
    1a25e:	61fb      	str	r3, [r7, #28]
+  p->aDown[0].SizeOfBuffer  = sizeof(_acDownBuffer);
    1a260:	2310      	movs	r3, #16
    1a262:	653b      	str	r3, [r7, #80]	; 0x50
+  p->aUp[0].sName         = "Terminal";
    1a264:	61b9      	str	r1, [r7, #24]
+  p->aDown[0].sName         = "Terminal";
    1a266:	64b9      	str	r1, [r7, #72]	; 0x48
+  p->aUp[0].SizeOfBuffer  = sizeof(_acUpBuffer);
    1a268:	6238      	str	r0, [r7, #32]
+  strcpy(&p->acID[7], "RTT");
    1a26a:	4969      	ldr	r1, [pc, #420]	; (1a410 <SEGGER_RTT_Write+0x21c>)
+  p->aDown[0].pBuffer       = _acDownBuffer;
    1a26c:	64fa      	str	r2, [r7, #76]	; 0x4c
+  strcpy(&p->acID[7], "RTT");
    1a26e:	1df8      	adds	r0, r7, #7
    1a270:	f000 fade 	bl	1a830 <strcpy>
+  strcpy(&p->acID[0], "SEGGER");
    1a274:	4967      	ldr	r1, [pc, #412]	; (1a414 <SEGGER_RTT_Write+0x220>)
    1a276:	4638      	mov	r0, r7
    1a278:	f000 fada 	bl	1a830 <strcpy>
+  p->acID[6] = ' ';
    1a27c:	2320      	movs	r3, #32
    1a27e:	71bb      	strb	r3, [r7, #6]
+}
    1a280:	e7c1      	b.n	1a206 <SEGGER_RTT_Write+0x12>
+  RdOff = pRing->RdOff;
    1a282:	6aab      	ldr	r3, [r5, #40]	; 0x28
+  WrOff = pRing->WrOff;
    1a284:	f8d5 b024 	ldr.w	fp, [r5, #36]	; 0x24
+  if (RdOff <= WrOff) {
    1a288:	455b      	cmp	r3, fp
+    r = pRing->SizeOfBuffer - 1u - WrOff + RdOff;
    1a28a:	bf9c      	itt	ls
    1a28c:	6a2a      	ldrls	r2, [r5, #32]
    1a28e:	189b      	addls	r3, r3, r2
+    r = RdOff - WrOff - 1u;
    1a290:	3b01      	subs	r3, #1
    1a292:	eba3 030b 	sub.w	r3, r3, fp
+    if (Avail < NumBytes) {
    1a296:	4599      	cmp	r9, r3
    1a298:	d8cb      	bhi.n	1a232 <SEGGER_RTT_Write+0x3e>
+  Rem = pRing->SizeOfBuffer - WrOff;
    1a29a:	4444      	add	r4, r8
    1a29c:	eb07 04c4 	add.w	r4, r7, r4, lsl #3
+    SEGGER_RTT_MEMCPY(pRing->pBuffer + WrOff, pData, NumBytes);
    1a2a0:	f108 0801 	add.w	r8, r8, #1
+  Rem = pRing->SizeOfBuffer - WrOff;
    1a2a4:	6a25      	ldr	r5, [r4, #32]
    1a2a6:	eba5 060b 	sub.w	r6, r5, fp
+    SEGGER_RTT_MEMCPY(pRing->pBuffer + WrOff, pData, NumBytes);
    1a2aa:	eb08 0848 	add.w	r8, r8, r8, lsl #1
+  if (Rem > NumBytes) {
    1a2ae:	45b1      	cmp	r9, r6
+    SEGGER_RTT_MEMCPY(pRing->pBuffer + WrOff, pData, NumBytes);
    1a2b0:	eb07 07c8 	add.w	r7, r7, r8, lsl #3
+  if (Rem > NumBytes) {
    1a2b4:	f080 8091 	bcs.w	1a3da <SEGGER_RTT_Write+0x1e6>
+    SEGGER_RTT_MEMCPY(pRing->pBuffer + WrOff, pData, NumBytes);
    1a2b8:	6878      	ldr	r0, [r7, #4]
    1a2ba:	4651      	mov	r1, sl
    1a2bc:	464a      	mov	r2, r9
    1a2be:	4458      	add	r0, fp
    1a2c0:	f000 fa6c 	bl	1a79c <memcpy>
+    pRing->WrOff = WrOff + NumBytes;
    1a2c4:	eb09 030b 	add.w	r3, r9, fp
    1a2c8:	6263      	str	r3, [r4, #36]	; 0x24
    1a2ca:	464e      	mov	r6, r9
    1a2cc:	e7b1      	b.n	1a232 <SEGGER_RTT_Write+0x3e>
+  WrOff = pRing->WrOff;
    1a2ce:	f108 0801 	add.w	r8, r8, #1
+    SEGGER_RTT_MEMCPY(pRing->pBuffer + WrOff, pBuffer, NumBytesToWrite);
    1a2d2:	eb08 0848 	add.w	r8, r8, r8, lsl #1
+  WrOff = pRing->WrOff;
    1a2d6:	6a6c      	ldr	r4, [r5, #36]	; 0x24
+    SEGGER_RTT_MEMCPY(pRing->pBuffer + WrOff, pBuffer, NumBytesToWrite);
    1a2d8:	ea4f 08c8 	mov.w	r8, r8, lsl #3
+  NumBytesWritten = 0u;
    1a2dc:	465e      	mov	r6, fp
+    RdOff = pRing->RdOff;                         // May be changed by host (debug probe) in the meantime
    1a2de:	6aab      	ldr	r3, [r5, #40]	; 0x28
+    if (RdOff > WrOff) {
    1a2e0:	42a3      	cmp	r3, r4
+      NumBytesToWrite = RdOff - WrOff - 1u;
    1a2e2:	f103 32ff 	add.w	r2, r3, #4294967295	; 0xffffffff
+    if (RdOff > WrOff) {
    1a2e6:	d922      	bls.n	1a32e <SEGGER_RTT_Write+0x13a>
+      NumBytesToWrite = RdOff - WrOff - 1u;
    1a2e8:	1b13      	subs	r3, r2, r4
    1a2ea:	6a2a      	ldr	r2, [r5, #32]
+    NumBytesToWrite = MIN(NumBytesToWrite, (pRing->SizeOfBuffer - WrOff));      // Number of bytes that can be written until buffer wrap-around
    1a2ec:	454b      	cmp	r3, r9
+    SEGGER_RTT_MEMCPY(pRing->pBuffer + WrOff, pBuffer, NumBytesToWrite);
    1a2ee:	eb07 0108 	add.w	r1, r7, r8
+    NumBytesToWrite = MIN(NumBytesToWrite, (pRing->SizeOfBuffer - WrOff));      // Number of bytes that can be written until buffer wrap-around
    1a2f2:	eba2 0b04 	sub.w	fp, r2, r4
    1a2f6:	bf28      	it	cs
    1a2f8:	464b      	movcs	r3, r9
+    NumBytesToWrite = MIN(NumBytesToWrite, NumBytes);
    1a2fa:	459b      	cmp	fp, r3
+    SEGGER_RTT_MEMCPY(pRing->pBuffer + WrOff, pBuffer, NumBytesToWrite);
    1a2fc:	6848      	ldr	r0, [r1, #4]
+    NumBytesToWrite = MIN(NumBytesToWrite, NumBytes);
    1a2fe:	bf28      	it	cs
    1a300:	469b      	movcs	fp, r3
+    SEGGER_RTT_MEMCPY(pRing->pBuffer + WrOff, pBuffer, NumBytesToWrite);
    1a302:	4420      	add	r0, r4
    1a304:	4651      	mov	r1, sl
    1a306:	465a      	mov	r2, fp
    1a308:	f000 fa48 	bl	1a79c <memcpy>
+    if (WrOff == pRing->SizeOfBuffer) {
    1a30c:	6a2b      	ldr	r3, [r5, #32]
+    WrOff           += NumBytesToWrite;
    1a30e:	445c      	add	r4, fp
+    if (WrOff == pRing->SizeOfBuffer) {
    1a310:	429c      	cmp	r4, r3
+    NumBytesWritten += NumBytesToWrite;
    1a312:	445e      	add	r6, fp
+    NumBytes        -= NumBytesToWrite;
    1a314:	eba9 090b 	sub.w	r9, r9, fp
+    pBuffer         += NumBytesToWrite;
    1a318:	44da      	add	sl, fp
+    if (WrOff == pRing->SizeOfBuffer) {
    1a31a:	d00d      	beq.n	1a338 <SEGGER_RTT_Write+0x144>
+    pRing->WrOff = WrOff;
    1a31c:	626c      	str	r4, [r5, #36]	; 0x24
+  } while (NumBytes);
    1a31e:	f1b9 0f00 	cmp.w	r9, #0
    1a322:	d086      	beq.n	1a232 <SEGGER_RTT_Write+0x3e>
+    RdOff = pRing->RdOff;                         // May be changed by host (debug probe) in the meantime
    1a324:	6aab      	ldr	r3, [r5, #40]	; 0x28
+    if (RdOff > WrOff) {
    1a326:	42a3      	cmp	r3, r4
+      NumBytesToWrite = RdOff - WrOff - 1u;
    1a328:	f103 32ff 	add.w	r2, r3, #4294967295	; 0xffffffff
+    if (RdOff > WrOff) {
    1a32c:	d8dc      	bhi.n	1a2e8 <SEGGER_RTT_Write+0xf4>
+      NumBytesToWrite = pRing->SizeOfBuffer - (WrOff - RdOff + 1u);
    1a32e:	6a2a      	ldr	r2, [r5, #32]
    1a330:	4413      	add	r3, r2
    1a332:	3b01      	subs	r3, #1
    1a334:	1b1b      	subs	r3, r3, r4
    1a336:	e7d9      	b.n	1a2ec <SEGGER_RTT_Write+0xf8>
+    pRing->WrOff = WrOff;
    1a338:	2400      	movs	r4, #0
    1a33a:	626c      	str	r4, [r5, #36]	; 0x24
+  } while (NumBytes);
    1a33c:	f1b9 0f00 	cmp.w	r9, #0
    1a340:	d1cd      	bne.n	1a2de <SEGGER_RTT_Write+0xea>
    1a342:	e776      	b.n	1a232 <SEGGER_RTT_Write+0x3e>
+  RdOff = pRing->RdOff;
    1a344:	6aae      	ldr	r6, [r5, #40]	; 0x28
+  WrOff = pRing->WrOff;
    1a346:	f8d5 b024 	ldr.w	fp, [r5, #36]	; 0x24
+  if (RdOff <= WrOff) {
    1a34a:	455e      	cmp	r6, fp
    1a34c:	d91d      	bls.n	1a38a <SEGGER_RTT_Write+0x196>
+    r = RdOff - WrOff - 1u;
    1a34e:	3e01      	subs	r6, #1
    1a350:	eba6 060b 	sub.w	r6, r6, fp
+    Status = Avail < NumBytes ? Avail : NumBytes;
    1a354:	6a2d      	ldr	r5, [r5, #32]
    1a356:	454e      	cmp	r6, r9
    1a358:	bf28      	it	cs
    1a35a:	464e      	movcs	r6, r9
+  Rem = pRing->SizeOfBuffer - WrOff;
    1a35c:	eba5 020b 	sub.w	r2, r5, fp
+  if (Rem > NumBytes) {
    1a360:	4296      	cmp	r6, r2
    1a362:	d21e      	bcs.n	1a3a2 <SEGGER_RTT_Write+0x1ae>
+    SEGGER_RTT_MEMCPY(pRing->pBuffer + WrOff, pData, NumBytes);
    1a364:	f108 0301 	add.w	r3, r8, #1
    1a368:	eb03 0343 	add.w	r3, r3, r3, lsl #1
    1a36c:	eb07 03c3 	add.w	r3, r7, r3, lsl #3
+    pRing->WrOff = WrOff + NumBytes;
    1a370:	44a0      	add	r8, r4
+    SEGGER_RTT_MEMCPY(pRing->pBuffer + WrOff, pData, NumBytes);
    1a372:	6858      	ldr	r0, [r3, #4]
    1a374:	4632      	mov	r2, r6
    1a376:	4651      	mov	r1, sl
    1a378:	4458      	add	r0, fp
+    pRing->WrOff = WrOff + NumBytes;
    1a37a:	eb07 07c8 	add.w	r7, r7, r8, lsl #3
+    SEGGER_RTT_MEMCPY(pRing->pBuffer + WrOff, pData, NumBytes);
    1a37e:	f000 fa0d 	bl	1a79c <memcpy>
+    pRing->WrOff = WrOff + NumBytes;
    1a382:	eb0b 0206 	add.w	r2, fp, r6
    1a386:	627a      	str	r2, [r7, #36]	; 0x24
    1a388:	e753      	b.n	1a232 <SEGGER_RTT_Write+0x3e>
+    r = pRing->SizeOfBuffer - 1u - WrOff + RdOff;
    1a38a:	6a2d      	ldr	r5, [r5, #32]
    1a38c:	442e      	add	r6, r5
    1a38e:	3e01      	subs	r6, #1
    1a390:	eba6 060b 	sub.w	r6, r6, fp
+    Status = Avail < NumBytes ? Avail : NumBytes;
    1a394:	454e      	cmp	r6, r9
    1a396:	bf28      	it	cs
    1a398:	464e      	movcs	r6, r9
+  Rem = pRing->SizeOfBuffer - WrOff;
    1a39a:	eba5 020b 	sub.w	r2, r5, fp
+  if (Rem > NumBytes) {
    1a39e:	4296      	cmp	r6, r2
    1a3a0:	d3e0      	bcc.n	1a364 <SEGGER_RTT_Write+0x170>
+    SEGGER_RTT_MEMCPY(pRing->pBuffer + WrOff, pData, NumBytesAtOnce);
    1a3a2:	f108 0901 	add.w	r9, r8, #1
    1a3a6:	eb09 0949 	add.w	r9, r9, r9, lsl #1
    1a3aa:	eb07 09c9 	add.w	r9, r7, r9, lsl #3
@@ -1783,28 +3088,42 @@ Disassembly of section .text:
    1a3b4:	9201      	str	r2, [sp, #4]
    1a3b6:	4458      	add	r0, fp
    1a3b8:	f000 f9f0 	bl	1a79c <memcpy>
+    NumBytesAtOnce = NumBytes - Rem;
    1a3bc:	1b75      	subs	r5, r6, r5
+    SEGGER_RTT_MEMCPY(pRing->pBuffer, pData + Rem, NumBytesAtOnce);
    1a3be:	9a01      	ldr	r2, [sp, #4]
    1a3c0:	f8d9 0004 	ldr.w	r0, [r9, #4]
+    pRing->WrOff = NumBytesAtOnce;
    1a3c4:	44a0      	add	r8, r4
+    NumBytesAtOnce = NumBytes - Rem;
    1a3c6:	445d      	add	r5, fp
+    pRing->WrOff = NumBytesAtOnce;
    1a3c8:	eb07 07c8 	add.w	r7, r7, r8, lsl #3
+    SEGGER_RTT_MEMCPY(pRing->pBuffer, pData + Rem, NumBytesAtOnce);
    1a3cc:	eb0a 0102 	add.w	r1, sl, r2
    1a3d0:	462a      	mov	r2, r5
    1a3d2:	f000 f9e3 	bl	1a79c <memcpy>
+    pRing->WrOff = NumBytesAtOnce;
    1a3d6:	627d      	str	r5, [r7, #36]	; 0x24
    1a3d8:	e72b      	b.n	1a232 <SEGGER_RTT_Write+0x3e>
+    SEGGER_RTT_MEMCPY(pRing->pBuffer + WrOff, pData, NumBytesAtOnce);
    1a3da:	6878      	ldr	r0, [r7, #4]
    1a3dc:	4458      	add	r0, fp
+    NumBytesAtOnce = NumBytes - Rem;
    1a3de:	44cb      	add	fp, r9
+    SEGGER_RTT_MEMCPY(pRing->pBuffer + WrOff, pData, NumBytesAtOnce);
    1a3e0:	4632      	mov	r2, r6
    1a3e2:	4651      	mov	r1, sl
+    NumBytesAtOnce = NumBytes - Rem;
    1a3e4:	ebab 0505 	sub.w	r5, fp, r5
+    SEGGER_RTT_MEMCPY(pRing->pBuffer + WrOff, pData, NumBytesAtOnce);
    1a3e8:	f000 f9d8 	bl	1a79c <memcpy>
+    SEGGER_RTT_MEMCPY(pRing->pBuffer, pData + Rem, NumBytesAtOnce);
    1a3ec:	eb0a 0106 	add.w	r1, sl, r6
    1a3f0:	6878      	ldr	r0, [r7, #4]
    1a3f2:	462a      	mov	r2, r5
    1a3f4:	f000 f9d2 	bl	1a79c <memcpy>
+    pRing->WrOff = NumBytesAtOnce;
    1a3f8:	464e      	mov	r6, r9
    1a3fa:	6265      	str	r5, [r4, #36]	; 0x24
    1a3fc:	e719      	b.n	1a232 <SEGGER_RTT_Write+0x3e>
@@ -1817,22 +3136,41 @@ Disassembly of section .text:
    1a414:	0001c238 	.word	0x0001c238
 
 0001a418 <SEGGER_RTT_WriteString>:
+*  Notes
+*    (1) Data is stored according to buffer flags.
+*    (2) String passed to this function has to be \0 terminated
+*    (3) \0 termination character is *not* stored in RTT buffer
+*/
+unsigned SEGGER_RTT_WriteString(unsigned BufferIndex, const char* s) {
    1a418:	e92d 4ff0 	stmdb	sp!, {r4, r5, r6, r7, r8, r9, sl, fp, lr}
+  INIT();
    1a41c:	4f83      	ldr	r7, [pc, #524]	; (1a62c <SEGGER_RTT_WriteString+0x214>)
+unsigned SEGGER_RTT_WriteString(unsigned BufferIndex, const char* s) {
    1a41e:	b085      	sub	sp, #20
    1a420:	4680      	mov	r8, r0
+  unsigned Len;
+
+  Len = STRLEN(s);
    1a422:	4608      	mov	r0, r1
+unsigned SEGGER_RTT_WriteString(unsigned BufferIndex, const char* s) {
    1a424:	468a      	mov	sl, r1
+  Len = STRLEN(s);
    1a426:	f000 fa0b 	bl	1a840 <strlen>
+  INIT();
    1a42a:	783b      	ldrb	r3, [r7, #0]
+  Len = STRLEN(s);
    1a42c:	4681      	mov	r9, r0
+  INIT();
    1a42e:	b1eb      	cbz	r3, 1a46c <SEGGER_RTT_WriteString+0x54>
+  switch (pRing->Flags) {
    1a430:	eb08 0548 	add.w	r5, r8, r8, lsl #1
    1a434:	eb07 05c5 	add.w	r5, r7, r5, lsl #3
+  SEGGER_RTT_LOCK();
    1a438:	f04f 0b00 	mov.w	fp, #0
    1a43c:	f10d 000f 	add.w	r0, sp, #15
    1a440:	f88d b00f 	strb.w	fp, [sp, #15]
    1a444:	f7fe ff98 	bl	19378 <app_util_critical_region_enter>
+  switch (pRing->Flags) {
    1a448:	6aee      	ldr	r6, [r5, #44]	; 0x2c
    1a44a:	2e01      	cmp	r6, #1
    1a44c:	ea4f 0448 	mov.w	r4, r8, lsl #1
@@ -1841,151 +3179,243 @@ Disassembly of section .text:
    1a456:	d04f      	beq.n	1a4f8 <SEGGER_RTT_WriteString+0xe0>
    1a458:	b346      	cbz	r6, 1a4ac <SEGGER_RTT_WriteString+0x94>
    1a45a:	465e      	mov	r6, fp
+  SEGGER_RTT_UNLOCK();
    1a45c:	f89d 000f 	ldrb.w	r0, [sp, #15]
    1a460:	f7fe ffb0 	bl	193c4 <app_util_critical_region_exit>
+  return SEGGER_RTT_Write(BufferIndex, s, Len);
+}
    1a464:	4630      	mov	r0, r6
    1a466:	b005      	add	sp, #20
    1a468:	e8bd 8ff0 	ldmia.w	sp!, {r4, r5, r6, r7, r8, r9, sl, fp, pc}
+  p->MaxNumUpBuffers    = SEGGER_RTT_MAX_NUM_UP_BUFFERS;
    1a46c:	2202      	movs	r2, #2
+  p->aUp[0].RdOff         = 0u;
    1a46e:	62bb      	str	r3, [r7, #40]	; 0x28
+  p->aUp[0].WrOff         = 0u;
    1a470:	627b      	str	r3, [r7, #36]	; 0x24
+  p->aDown[0].RdOff         = 0u;
    1a472:	65bb      	str	r3, [r7, #88]	; 0x58
+  p->aDown[0].WrOff         = 0u;
    1a474:	657b      	str	r3, [r7, #84]	; 0x54
+  p->aUp[0].pBuffer       = _acUpBuffer;
    1a476:	4b6e      	ldr	r3, [pc, #440]	; (1a630 <SEGGER_RTT_WriteString+0x218>)
+  p->aUp[0].sName         = "Terminal";
    1a478:	496e      	ldr	r1, [pc, #440]	; (1a634 <SEGGER_RTT_WriteString+0x21c>)
+  p->aUp[0].Flags         = SEGGER_RTT_MODE_DEFAULT;
    1a47a:	62fa      	str	r2, [r7, #44]	; 0x2c
+  p->MaxNumDownBuffers  = SEGGER_RTT_MAX_NUM_DOWN_BUFFERS;
    1a47c:	e9c7 2204 	strd	r2, r2, [r7, #16]
+  p->aDown[0].Flags         = SEGGER_RTT_MODE_DEFAULT;
    1a480:	65fa      	str	r2, [r7, #92]	; 0x5c
+  p->aUp[0].SizeOfBuffer  = sizeof(_acUpBuffer);
    1a482:	f44f 7000 	mov.w	r0, #512	; 0x200
+  p->aDown[0].pBuffer       = _acDownBuffer;
    1a486:	4a6c      	ldr	r2, [pc, #432]	; (1a638 <SEGGER_RTT_WriteString+0x220>)
+  p->aUp[0].pBuffer       = _acUpBuffer;
    1a488:	61fb      	str	r3, [r7, #28]
+  p->aDown[0].SizeOfBuffer  = sizeof(_acDownBuffer);
    1a48a:	2310      	movs	r3, #16
    1a48c:	653b      	str	r3, [r7, #80]	; 0x50
+  p->aUp[0].sName         = "Terminal";
    1a48e:	61b9      	str	r1, [r7, #24]
+  p->aDown[0].sName         = "Terminal";
    1a490:	64b9      	str	r1, [r7, #72]	; 0x48
+  p->aUp[0].SizeOfBuffer  = sizeof(_acUpBuffer);
    1a492:	6238      	str	r0, [r7, #32]
+  strcpy(&p->acID[7], "RTT");
    1a494:	4969      	ldr	r1, [pc, #420]	; (1a63c <SEGGER_RTT_WriteString+0x224>)
+  p->aDown[0].pBuffer       = _acDownBuffer;
    1a496:	64fa      	str	r2, [r7, #76]	; 0x4c
+  strcpy(&p->acID[7], "RTT");
    1a498:	1df8      	adds	r0, r7, #7
    1a49a:	f000 f9c9 	bl	1a830 <strcpy>
+  strcpy(&p->acID[0], "SEGGER");
    1a49e:	4968      	ldr	r1, [pc, #416]	; (1a640 <SEGGER_RTT_WriteString+0x228>)
    1a4a0:	4638      	mov	r0, r7
    1a4a2:	f000 f9c5 	bl	1a830 <strcpy>
+  p->acID[6] = ' ';
    1a4a6:	2320      	movs	r3, #32
    1a4a8:	71bb      	strb	r3, [r7, #6]
+}
    1a4aa:	e7c1      	b.n	1a430 <SEGGER_RTT_WriteString+0x18>
+  RdOff = pRing->RdOff;
    1a4ac:	6aab      	ldr	r3, [r5, #40]	; 0x28
+  WrOff = pRing->WrOff;
    1a4ae:	f8d5 b024 	ldr.w	fp, [r5, #36]	; 0x24
+  if (RdOff <= WrOff) {
    1a4b2:	455b      	cmp	r3, fp
+    r = pRing->SizeOfBuffer - 1u - WrOff + RdOff;
    1a4b4:	bf9c      	itt	ls
    1a4b6:	6a2a      	ldrls	r2, [r5, #32]
    1a4b8:	189b      	addls	r3, r3, r2
+    r = RdOff - WrOff - 1u;
    1a4ba:	3b01      	subs	r3, #1
    1a4bc:	eba3 030b 	sub.w	r3, r3, fp
+    if (Avail < NumBytes) {
    1a4c0:	4599      	cmp	r9, r3
    1a4c2:	d8cb      	bhi.n	1a45c <SEGGER_RTT_WriteString+0x44>
+  Rem = pRing->SizeOfBuffer - WrOff;
    1a4c4:	4444      	add	r4, r8
    1a4c6:	eb07 04c4 	add.w	r4, r7, r4, lsl #3
+    SEGGER_RTT_MEMCPY(pRing->pBuffer + WrOff, pData, NumBytes);
    1a4ca:	f108 0801 	add.w	r8, r8, #1
+  Rem = pRing->SizeOfBuffer - WrOff;
    1a4ce:	6a25      	ldr	r5, [r4, #32]
    1a4d0:	eba5 060b 	sub.w	r6, r5, fp
+    SEGGER_RTT_MEMCPY(pRing->pBuffer + WrOff, pData, NumBytes);
    1a4d4:	eb08 0848 	add.w	r8, r8, r8, lsl #1
+  if (Rem > NumBytes) {
    1a4d8:	45b1      	cmp	r9, r6
+    SEGGER_RTT_MEMCPY(pRing->pBuffer + WrOff, pData, NumBytes);
    1a4da:	eb07 07c8 	add.w	r7, r7, r8, lsl #3
+  if (Rem > NumBytes) {
    1a4de:	f080 8091 	bcs.w	1a604 <SEGGER_RTT_WriteString+0x1ec>
+    SEGGER_RTT_MEMCPY(pRing->pBuffer + WrOff, pData, NumBytes);
    1a4e2:	6878      	ldr	r0, [r7, #4]
    1a4e4:	4651      	mov	r1, sl
    1a4e6:	464a      	mov	r2, r9
    1a4e8:	4458      	add	r0, fp
    1a4ea:	f000 f957 	bl	1a79c <memcpy>
+    pRing->WrOff = WrOff + NumBytes;
    1a4ee:	eb09 030b 	add.w	r3, r9, fp
    1a4f2:	6263      	str	r3, [r4, #36]	; 0x24
    1a4f4:	464e      	mov	r6, r9
    1a4f6:	e7b1      	b.n	1a45c <SEGGER_RTT_WriteString+0x44>
+  WrOff = pRing->WrOff;
    1a4f8:	f108 0801 	add.w	r8, r8, #1
+    SEGGER_RTT_MEMCPY(pRing->pBuffer + WrOff, pBuffer, NumBytesToWrite);
    1a4fc:	eb08 0848 	add.w	r8, r8, r8, lsl #1
+  WrOff = pRing->WrOff;
    1a500:	6a6c      	ldr	r4, [r5, #36]	; 0x24
+    SEGGER_RTT_MEMCPY(pRing->pBuffer + WrOff, pBuffer, NumBytesToWrite);
    1a502:	ea4f 08c8 	mov.w	r8, r8, lsl #3
+  NumBytesWritten = 0u;
    1a506:	465e      	mov	r6, fp
+    RdOff = pRing->RdOff;                         // May be changed by host (debug probe) in the meantime
    1a508:	6aab      	ldr	r3, [r5, #40]	; 0x28
+    if (RdOff > WrOff) {
    1a50a:	42a3      	cmp	r3, r4
+      NumBytesToWrite = RdOff - WrOff - 1u;
    1a50c:	f103 32ff 	add.w	r2, r3, #4294967295	; 0xffffffff
+    if (RdOff > WrOff) {
    1a510:	d922      	bls.n	1a558 <SEGGER_RTT_WriteString+0x140>
    1a512:	6a29      	ldr	r1, [r5, #32]
+      NumBytesToWrite = RdOff - WrOff - 1u;
    1a514:	1b12      	subs	r2, r2, r4
+    NumBytesToWrite = MIN(NumBytesToWrite, (pRing->SizeOfBuffer - WrOff));      // Number of bytes that can be written until buffer wrap-around
    1a516:	454a      	cmp	r2, r9
+    SEGGER_RTT_MEMCPY(pRing->pBuffer + WrOff, pBuffer, NumBytesToWrite);
    1a518:	eb07 0308 	add.w	r3, r7, r8
+    NumBytesToWrite = MIN(NumBytesToWrite, (pRing->SizeOfBuffer - WrOff));      // Number of bytes that can be written until buffer wrap-around
    1a51c:	eba1 0b04 	sub.w	fp, r1, r4
    1a520:	bf28      	it	cs
    1a522:	464a      	movcs	r2, r9
+    NumBytesToWrite = MIN(NumBytesToWrite, NumBytes);
    1a524:	4593      	cmp	fp, r2
+    SEGGER_RTT_MEMCPY(pRing->pBuffer + WrOff, pBuffer, NumBytesToWrite);
    1a526:	6858      	ldr	r0, [r3, #4]
+    NumBytesToWrite = MIN(NumBytesToWrite, NumBytes);
    1a528:	bf28      	it	cs
    1a52a:	4693      	movcs	fp, r2
+    SEGGER_RTT_MEMCPY(pRing->pBuffer + WrOff, pBuffer, NumBytesToWrite);
    1a52c:	4420      	add	r0, r4
    1a52e:	4651      	mov	r1, sl
    1a530:	465a      	mov	r2, fp
    1a532:	f000 f933 	bl	1a79c <memcpy>
+    if (WrOff == pRing->SizeOfBuffer) {
    1a536:	6a2b      	ldr	r3, [r5, #32]
+    WrOff           += NumBytesToWrite;
    1a538:	445c      	add	r4, fp
+    if (WrOff == pRing->SizeOfBuffer) {
    1a53a:	429c      	cmp	r4, r3
+    NumBytesWritten += NumBytesToWrite;
    1a53c:	445e      	add	r6, fp
+    NumBytes        -= NumBytesToWrite;
    1a53e:	eba9 090b 	sub.w	r9, r9, fp
+    pBuffer         += NumBytesToWrite;
    1a542:	44da      	add	sl, fp
+    if (WrOff == pRing->SizeOfBuffer) {
    1a544:	d00d      	beq.n	1a562 <SEGGER_RTT_WriteString+0x14a>
+    pRing->WrOff = WrOff;
    1a546:	626c      	str	r4, [r5, #36]	; 0x24
+  } while (NumBytes);
    1a548:	f1b9 0f00 	cmp.w	r9, #0
    1a54c:	d086      	beq.n	1a45c <SEGGER_RTT_WriteString+0x44>
+    RdOff = pRing->RdOff;                         // May be changed by host (debug probe) in the meantime
    1a54e:	6aab      	ldr	r3, [r5, #40]	; 0x28
+    if (RdOff > WrOff) {
    1a550:	42a3      	cmp	r3, r4
+      NumBytesToWrite = RdOff - WrOff - 1u;
    1a552:	f103 32ff 	add.w	r2, r3, #4294967295	; 0xffffffff
+    if (RdOff > WrOff) {
    1a556:	d8dc      	bhi.n	1a512 <SEGGER_RTT_WriteString+0xfa>
+      NumBytesToWrite = pRing->SizeOfBuffer - (WrOff - RdOff + 1u);
    1a558:	6a29      	ldr	r1, [r5, #32]
    1a55a:	185a      	adds	r2, r3, r1
    1a55c:	3a01      	subs	r2, #1
    1a55e:	1b12      	subs	r2, r2, r4
    1a560:	e7d9      	b.n	1a516 <SEGGER_RTT_WriteString+0xfe>
+    pRing->WrOff = WrOff;
    1a562:	2400      	movs	r4, #0
    1a564:	626c      	str	r4, [r5, #36]	; 0x24
+  } while (NumBytes);
    1a566:	f1b9 0f00 	cmp.w	r9, #0
    1a56a:	d1cd      	bne.n	1a508 <SEGGER_RTT_WriteString+0xf0>
    1a56c:	e776      	b.n	1a45c <SEGGER_RTT_WriteString+0x44>
+  RdOff = pRing->RdOff;
    1a56e:	6aae      	ldr	r6, [r5, #40]	; 0x28
+  WrOff = pRing->WrOff;
    1a570:	f8d5 b024 	ldr.w	fp, [r5, #36]	; 0x24
+  if (RdOff <= WrOff) {
    1a574:	455e      	cmp	r6, fp
    1a576:	d91d      	bls.n	1a5b4 <SEGGER_RTT_WriteString+0x19c>
+    r = RdOff - WrOff - 1u;
    1a578:	3e01      	subs	r6, #1
    1a57a:	eba6 060b 	sub.w	r6, r6, fp
+    Status = Avail < NumBytes ? Avail : NumBytes;
    1a57e:	6a2d      	ldr	r5, [r5, #32]
    1a580:	454e      	cmp	r6, r9
    1a582:	bf28      	it	cs
    1a584:	464e      	movcs	r6, r9
+  Rem = pRing->SizeOfBuffer - WrOff;
    1a586:	eba5 020b 	sub.w	r2, r5, fp
+  if (Rem > NumBytes) {
    1a58a:	4296      	cmp	r6, r2
    1a58c:	d21e      	bcs.n	1a5cc <SEGGER_RTT_WriteString+0x1b4>
+    SEGGER_RTT_MEMCPY(pRing->pBuffer + WrOff, pData, NumBytes);
    1a58e:	f108 0301 	add.w	r3, r8, #1
    1a592:	eb03 0343 	add.w	r3, r3, r3, lsl #1
    1a596:	eb07 03c3 	add.w	r3, r7, r3, lsl #3
+    pRing->WrOff = WrOff + NumBytes;
    1a59a:	44a0      	add	r8, r4
+    SEGGER_RTT_MEMCPY(pRing->pBuffer + WrOff, pData, NumBytes);
    1a59c:	6858      	ldr	r0, [r3, #4]
    1a59e:	4632      	mov	r2, r6
    1a5a0:	4651      	mov	r1, sl
    1a5a2:	4458      	add	r0, fp
+    pRing->WrOff = WrOff + NumBytes;
    1a5a4:	eb07 07c8 	add.w	r7, r7, r8, lsl #3
+    SEGGER_RTT_MEMCPY(pRing->pBuffer + WrOff, pData, NumBytes);
    1a5a8:	f000 f8f8 	bl	1a79c <memcpy>
+    pRing->WrOff = WrOff + NumBytes;
    1a5ac:	eb0b 0206 	add.w	r2, fp, r6
    1a5b0:	627a      	str	r2, [r7, #36]	; 0x24
    1a5b2:	e753      	b.n	1a45c <SEGGER_RTT_WriteString+0x44>
+    r = pRing->SizeOfBuffer - 1u - WrOff + RdOff;
    1a5b4:	6a2d      	ldr	r5, [r5, #32]
    1a5b6:	442e      	add	r6, r5
    1a5b8:	3e01      	subs	r6, #1
    1a5ba:	eba6 060b 	sub.w	r6, r6, fp
+    Status = Avail < NumBytes ? Avail : NumBytes;
    1a5be:	454e      	cmp	r6, r9
    1a5c0:	bf28      	it	cs
    1a5c2:	464e      	movcs	r6, r9
+  Rem = pRing->SizeOfBuffer - WrOff;
    1a5c4:	eba5 020b 	sub.w	r2, r5, fp
+  if (Rem > NumBytes) {
    1a5c8:	4296      	cmp	r6, r2
    1a5ca:	d3e0      	bcc.n	1a58e <SEGGER_RTT_WriteString+0x176>
+    SEGGER_RTT_MEMCPY(pRing->pBuffer + WrOff, pData, NumBytesAtOnce);
    1a5cc:	f108 0901 	add.w	r9, r8, #1
    1a5d0:	eb09 0949 	add.w	r9, r9, r9, lsl #1
    1a5d4:	eb07 09c9 	add.w	r9, r7, r9, lsl #3
@@ -1994,28 +3424,42 @@ Disassembly of section .text:
    1a5de:	9201      	str	r2, [sp, #4]
    1a5e0:	4458      	add	r0, fp
    1a5e2:	f000 f8db 	bl	1a79c <memcpy>
+    NumBytesAtOnce = NumBytes - Rem;
    1a5e6:	1b75      	subs	r5, r6, r5
+    SEGGER_RTT_MEMCPY(pRing->pBuffer, pData + Rem, NumBytesAtOnce);
    1a5e8:	9a01      	ldr	r2, [sp, #4]
    1a5ea:	f8d9 0004 	ldr.w	r0, [r9, #4]
+    pRing->WrOff = NumBytesAtOnce;
    1a5ee:	44a0      	add	r8, r4
+    NumBytesAtOnce = NumBytes - Rem;
    1a5f0:	445d      	add	r5, fp
+    pRing->WrOff = NumBytesAtOnce;
    1a5f2:	eb07 07c8 	add.w	r7, r7, r8, lsl #3
+    SEGGER_RTT_MEMCPY(pRing->pBuffer, pData + Rem, NumBytesAtOnce);
    1a5f6:	eb0a 0102 	add.w	r1, sl, r2
    1a5fa:	462a      	mov	r2, r5
    1a5fc:	f000 f8ce 	bl	1a79c <memcpy>
+    pRing->WrOff = NumBytesAtOnce;
    1a600:	627d      	str	r5, [r7, #36]	; 0x24
    1a602:	e72b      	b.n	1a45c <SEGGER_RTT_WriteString+0x44>
+    SEGGER_RTT_MEMCPY(pRing->pBuffer + WrOff, pData, NumBytesAtOnce);
    1a604:	6878      	ldr	r0, [r7, #4]
    1a606:	4458      	add	r0, fp
+    NumBytesAtOnce = NumBytes - Rem;
    1a608:	ebab 0b05 	sub.w	fp, fp, r5
+    SEGGER_RTT_MEMCPY(pRing->pBuffer + WrOff, pData, NumBytesAtOnce);
    1a60c:	4632      	mov	r2, r6
    1a60e:	4651      	mov	r1, sl
+    NumBytesAtOnce = NumBytes - Rem;
    1a610:	eb0b 0509 	add.w	r5, fp, r9
+    SEGGER_RTT_MEMCPY(pRing->pBuffer + WrOff, pData, NumBytesAtOnce);
    1a614:	f000 f8c2 	bl	1a79c <memcpy>
+    SEGGER_RTT_MEMCPY(pRing->pBuffer, pData + Rem, NumBytesAtOnce);
    1a618:	eb0a 0106 	add.w	r1, sl, r6
    1a61c:	6878      	ldr	r0, [r7, #4]
    1a61e:	462a      	mov	r2, r5
    1a620:	f000 f8bc 	bl	1a79c <memcpy>
+    pRing->WrOff = NumBytesAtOnce;
    1a624:	464e      	mov	r6, r9
    1a626:	6265      	str	r5, [r4, #36]	; 0x24
    1a628:	e718      	b.n	1a45c <SEGGER_RTT_WriteString+0x44>
@@ -2028,68 +3472,137 @@ Disassembly of section .text:
    1a640:	0001c238 	.word	0x0001c238
 
 0001a644 <nrf_sdh_is_enabled>:
+}
+
+
+bool nrf_sdh_is_enabled(void)
+{
+    return m_nrf_sdh_enabled;
    1a644:	4b01      	ldr	r3, [pc, #4]	; (1a64c <nrf_sdh_is_enabled+0x8>)
+}
    1a646:	7818      	ldrb	r0, [r3, #0]
    1a648:	4770      	bx	lr
    1a64a:	bf00      	nop
    1a64c:	20001498 	.word	0x20001498
 
 0001a650 <SWI2_IRQHandler>:
+
+
+#if (NRF_SDH_DISPATCH_MODEL == NRF_SDH_DISPATCH_MODEL_INTERRUPT)
+
+void SD_EVT_IRQHandler(void)
+{
    1a650:	b500      	push	{lr}
    1a652:	b083      	sub	sp, #12
+    for (nrf_section_iter_init(&iter, &sdh_stack_observers);
    1a654:	4908      	ldr	r1, [pc, #32]	; (1a678 <SWI2_IRQHandler+0x28>)
    1a656:	4668      	mov	r0, sp
    1a658:	f7fe fed6 	bl	19408 <nrf_section_iter_init>
+         nrf_section_iter_get(&iter) != NULL;
    1a65c:	9b01      	ldr	r3, [sp, #4]
+    for (nrf_section_iter_init(&iter, &sdh_stack_observers);
    1a65e:	b143      	cbz	r3, 1a672 <SWI2_IRQHandler+0x22>
+        handler(p_observer->p_context);
    1a660:	e9d3 2000 	ldrd	r2, r0, [r3]
    1a664:	4790      	blx	r2
+         nrf_section_iter_next(&iter))
    1a666:	4668      	mov	r0, sp
    1a668:	f7fe fed8 	bl	1941c <nrf_section_iter_next>
+         nrf_section_iter_get(&iter) != NULL;
    1a66c:	9b01      	ldr	r3, [sp, #4]
+    for (nrf_section_iter_init(&iter, &sdh_stack_observers);
    1a66e:	2b00      	cmp	r3, #0
    1a670:	d1f6      	bne.n	1a660 <SWI2_IRQHandler+0x10>
+    nrf_sdh_evts_poll();
+}
    1a672:	b003      	add	sp, #12
    1a674:	f85d fb04 	ldr.w	pc, [sp], #4
    1a678:	0001c240 	.word	0x0001c240
 
 0001a67c <sd_ble_evt_get>:
+ * @retval ::NRF_SUCCESS Event pulled and stored into the supplied buffer.
+ * @retval ::NRF_ERROR_INVALID_ADDR Invalid or not sufficiently aligned pointer supplied.
+ * @retval ::NRF_ERROR_NOT_FOUND No events ready to be pulled.
+ * @retval ::NRF_ERROR_DATA_SIZE Event ready but could not fit into the supplied buffer.
+ */
+SVCALL(SD_BLE_EVT_GET, uint32_t, sd_ble_evt_get(uint8_t *p_dest, uint16_t *p_len));
    1a67c:	df61      	svc	97	; 0x61
    1a67e:	4770      	bx	lr
 
 0001a680 <nrf_sdh_ble_evts_poll>:
+{
+    UNUSED_VARIABLE(p_context);
+
+    ret_code_t ret_code;
+
+    if (!m_stack_is_enabled)
    1a680:	4b14      	ldr	r3, [pc, #80]	; (1a6d4 <nrf_sdh_ble_evts_poll+0x54>)
    1a682:	781b      	ldrb	r3, [r3, #0]
    1a684:	b32b      	cbz	r3, 1a6d2 <nrf_sdh_ble_evts_poll+0x52>
+{
    1a686:	b530      	push	{r4, r5, lr}
+
+        NRF_LOG_DEBUG("BLE event: 0x%x.", p_ble_evt->header.evt_id);
+
+        // Forward the event to BLE observers.
+        nrf_section_iter_t  iter;
+        for (nrf_section_iter_init(&iter, &sdh_ble_observers);
    1a688:	4d13      	ldr	r5, [pc, #76]	; (1a6d8 <nrf_sdh_ble_evts_poll+0x58>)
+{
    1a68a:	b091      	sub	sp, #68	; 0x44
+        uint16_t    evt_len = (uint16_t)sizeof(evt_buffer);
    1a68c:	2434      	movs	r4, #52	; 0x34
+        ret_code = sd_ble_evt_get(evt_buffer, &evt_len);
    1a68e:	f10d 0102 	add.w	r1, sp, #2
    1a692:	a803      	add	r0, sp, #12
+        uint16_t    evt_len = (uint16_t)sizeof(evt_buffer);
    1a694:	f8ad 4002 	strh.w	r4, [sp, #2]
+        ret_code = sd_ble_evt_get(evt_buffer, &evt_len);
    1a698:	f7ff fff0 	bl	1a67c <sd_ble_evt_get>
+        if (ret_code != NRF_SUCCESS)
    1a69c:	b988      	cbnz	r0, 1a6c2 <nrf_sdh_ble_evts_poll+0x42>
+        for (nrf_section_iter_init(&iter, &sdh_ble_observers);
    1a69e:	4629      	mov	r1, r5
    1a6a0:	a801      	add	r0, sp, #4
    1a6a2:	f7fe feb1 	bl	19408 <nrf_section_iter_init>
+             nrf_section_iter_get(&iter) != NULL;
    1a6a6:	9b02      	ldr	r3, [sp, #8]
+        for (nrf_section_iter_init(&iter, &sdh_ble_observers);
    1a6a8:	2b00      	cmp	r3, #0
    1a6aa:	d0f0      	beq.n	1a68e <nrf_sdh_ble_evts_poll+0xe>
+            nrf_sdh_ble_evt_handler_t    handler;
+
+            p_observer = (nrf_sdh_ble_evt_observer_t *)nrf_section_iter_get(&iter);
+            handler    = p_observer->handler;
+
+            handler(p_ble_evt, p_observer->p_context);
    1a6ac:	e9d3 2100 	ldrd	r2, r1, [r3]
    1a6b0:	a803      	add	r0, sp, #12
    1a6b2:	4790      	blx	r2
+             nrf_section_iter_next(&iter))
    1a6b4:	a801      	add	r0, sp, #4
    1a6b6:	f7fe feb1 	bl	1941c <nrf_section_iter_next>
+             nrf_section_iter_get(&iter) != NULL;
    1a6ba:	9b02      	ldr	r3, [sp, #8]
+        for (nrf_section_iter_init(&iter, &sdh_ble_observers);
    1a6bc:	2b00      	cmp	r3, #0
    1a6be:	d1f5      	bne.n	1a6ac <nrf_sdh_ble_evts_poll+0x2c>
    1a6c0:	e7e5      	b.n	1a68e <nrf_sdh_ble_evts_poll+0xe>
+        }
+    }
+
+    if (ret_code != NRF_ERROR_NOT_FOUND)
    1a6c2:	2805      	cmp	r0, #5
    1a6c4:	d101      	bne.n	1a6ca <nrf_sdh_ble_evts_poll+0x4a>
+    {
+        APP_ERROR_HANDLER(ret_code);
+    }
+}
    1a6c6:	b011      	add	sp, #68	; 0x44
    1a6c8:	bd30      	pop	{r4, r5, pc}
+        APP_ERROR_HANDLER(ret_code);
    1a6ca:	f7fe fe2b 	bl	19324 <app_error_handler_bare>
+}
    1a6ce:	b011      	add	sp, #68	; 0x44
    1a6d0:	bd30      	pop	{r4, r5, pc}
    1a6d2:	4770      	bx	lr
@@ -2097,37 +3610,80 @@ Disassembly of section .text:
    1a6d8:	0001c24c 	.word	0x0001c24c
 
 0001a6dc <sd_evt_get>:
+ * @param[out] p_evt_id Set to one of the values in @ref NRF_SOC_EVTS, if any events are pending.
+ *
+ * @retval ::NRF_SUCCESS An event was pending. The event id is written in the p_evt_id parameter.
+ * @retval ::NRF_ERROR_NOT_FOUND No pending events.
+ */
+SVCALL(SD_EVT_GET, uint32_t, sd_evt_get(uint32_t * p_evt_id));
    1a6dc:	df4b      	svc	75	; 0x4b
    1a6de:	4770      	bx	lr
 
 0001a6e0 <nrf_sdh_soc_evts_poll>:
+/**@brief   Function for polling SoC events.
+ *
+ * @param[in]   p_context   Context of the observer.
+ */
+static void nrf_sdh_soc_evts_poll(void * p_context)
+{
    1a6e0:	b510      	push	{r4, lr}
+
+        NRF_LOG_DEBUG("SoC event: 0x%x.", evt_id);
+
+        // Forward the event to SoC observers.
+        nrf_section_iter_t  iter;
+        for (nrf_section_iter_init(&iter, &sdh_soc_observers);
    1a6e2:	4c11      	ldr	r4, [pc, #68]	; (1a728 <nrf_sdh_soc_evts_poll+0x48>)
+{
    1a6e4:	b084      	sub	sp, #16
+        ret_code = sd_evt_get(&evt_id);
    1a6e6:	a801      	add	r0, sp, #4
    1a6e8:	f7ff fff8 	bl	1a6dc <sd_evt_get>
+        if (ret_code != NRF_SUCCESS)
    1a6ec:	b9a8      	cbnz	r0, 1a71a <nrf_sdh_soc_evts_poll+0x3a>
+        for (nrf_section_iter_init(&iter, &sdh_soc_observers);
    1a6ee:	4621      	mov	r1, r4
    1a6f0:	a802      	add	r0, sp, #8
    1a6f2:	f7fe fe89 	bl	19408 <nrf_section_iter_init>
+             nrf_section_iter_get(&iter) != NULL;
    1a6f6:	9b03      	ldr	r3, [sp, #12]
+        for (nrf_section_iter_init(&iter, &sdh_soc_observers);
    1a6f8:	2b00      	cmp	r3, #0
    1a6fa:	d0f4      	beq.n	1a6e6 <nrf_sdh_soc_evts_poll+0x6>
+            nrf_sdh_soc_evt_handler_t    handler;
+
+            p_observer = (nrf_sdh_soc_evt_observer_t *) nrf_section_iter_get(&iter);
+            handler    = p_observer->handler;
+
+            handler(evt_id, p_observer->p_context);
    1a6fc:	e9d3 2100 	ldrd	r2, r1, [r3]
    1a700:	9801      	ldr	r0, [sp, #4]
    1a702:	4790      	blx	r2
+             nrf_section_iter_next(&iter))
    1a704:	a802      	add	r0, sp, #8
    1a706:	f7fe fe89 	bl	1941c <nrf_section_iter_next>
+             nrf_section_iter_get(&iter) != NULL;
    1a70a:	9b03      	ldr	r3, [sp, #12]
+        for (nrf_section_iter_init(&iter, &sdh_soc_observers);
    1a70c:	2b00      	cmp	r3, #0
    1a70e:	d1f5      	bne.n	1a6fc <nrf_sdh_soc_evts_poll+0x1c>
+        ret_code = sd_evt_get(&evt_id);
    1a710:	a801      	add	r0, sp, #4
    1a712:	f7ff ffe3 	bl	1a6dc <sd_evt_get>
+        if (ret_code != NRF_SUCCESS)
    1a716:	2800      	cmp	r0, #0
    1a718:	d0e9      	beq.n	1a6ee <nrf_sdh_soc_evts_poll+0xe>
+        }
+    }
+
+    if (ret_code != NRF_ERROR_NOT_FOUND)
    1a71a:	2805      	cmp	r0, #5
    1a71c:	d001      	beq.n	1a722 <nrf_sdh_soc_evts_poll+0x42>
+    {
+        APP_ERROR_HANDLER(ret_code);
    1a71e:	f7fe fe01 	bl	19324 <app_error_handler_bare>
+    }
+}
    1a722:	b004      	add	sp, #16
    1a724:	bd10      	pop	{r4, pc}
    1a726:	bf00      	nop

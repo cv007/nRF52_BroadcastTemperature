@@ -101,15 +101,15 @@ SA  read            () {
                         nrf_delay_ms(130);
                         //poll for data ready (up to a point)
                         auto i = 10; //500us * 10 = 5ms
-                        while( not tmp117.isDataReady() and i-- ){ nrf_delay_us(500); }
-                        tmp117.tempRaw(t); //assume it works, if not code below will check
+                        while( not tmp117.isDataReady() and i ){ nrf_delay_us(500); i--; }
+                        bool ok = tmp117.tempRaw(t);
                         tmp117.deinit(); //turn off power to ic
 
                         DebugFuncHeader();
-                        if( t == -32768 ){
-                            Debug("  failed to read, or returned default temp value\n");
-                            return f;
-                        }
+                        if( i == 0 ){ Debug("  timeout, ready bit not set\n"); return f; }
+                        if( not ok ){ Debug("  failed to read temp value\n"); return f; }
+                        if( t == -32768 ){ Debug("  returned default temp value\n"); return f; }
+
                         f = tmp117.x10F( t );
                         f = Temperature<HistSiz_>::addHistory( f );
                         Debug("  tmp117 raw: %d  F: %d\n", t, f);

@@ -303,13 +303,9 @@ SA  waitForStop     () {
 
                     //write,read
                     template<unsigned NT, unsigned NR>
-SA  writeRead       (U8 (&txbuf)[NT], U8 (&rxbuf)[NR]) {
-                        asm("nop"); //sorry, don't know why
-                        //in -O1,-O2,-O3, without the nop anywhere in this
-                        //function the rxbuf will always end up unused even
-                        //though the twi data seen via LA is correct (not 0)
-                        //tried to figure out the reason, but cannot
-                        //the nop disrupts generated code in some way
+                    // [[ gnu::noinline ]]
+SA  writeRead       (U8 (&txbuf)[NT], U8 (&rxbuf)[NR]) {  
+// asm("nop");
                         txBufferSet( txbuf );
                         rxBufferSet( rxbuf );
                         startTxRxStop(); 
