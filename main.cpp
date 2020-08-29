@@ -89,7 +89,7 @@ a si7051 temperature ic
 testing twi - bypass Tmp117 class, use Twi directly, no bluetooth
 
 problem shows up in optimization- -O1,-O2,-O3 
--Os always ok, or if Ywi::writeRead is made noinline
+-Os always ok, or if Twi::writeRead is made noinline
 
 run loop 1 time
 
