@@ -164,8 +164,10 @@ SA  rxBufferSet     (U32 addr, U16 len) {
                         reg.RXD.PTR = addr;
                     }
 
-                    template<unsigned N>
-SA  rxBufferSet     (volatile U8 (&addr)[N]) {
+                    //T so can be volatile or not volatile
+                    template<typename T, unsigned N>
+SA  rxBufferSet     (T (&addr)[N]) {
+                        static_assert(sizeof(T) == 1, "Twi::rxBufferSet needs a byte array");
                         rxBufferSet( (U32)addr, N );
                     }
 
@@ -306,9 +308,9 @@ SA  waitForStop     () {
                     }
 
                     //write,read
-                    template<unsigned NT, unsigned NR>
+                    template<typename T, unsigned NT, unsigned NR>
                     // [[ gnu::noinline ]]
-SA  writeRead       (const U8 (&txbuf)[NT], volatile U8 (&rxbuf)[NR]) {  
+SA  writeRead       (const U8 (&txbuf)[NT], T (&rxbuf)[NR]) {  
                         txBufferSet( txbuf );
                         rxBufferSet( rxbuf );
                         startTxRxStop(); 
@@ -332,8 +334,8 @@ SA  write           (const U8 (&txbuf)[N]) {
                     }
 
                     //read only
-                    template<unsigned N>
-SA  read            (volatile U8 (&rxbuf)[N]) {
+                    template<typename T, unsigned N>
+SA  read            (T (&rxbuf)[N]) {
                         rxBufferSet( rxbuf );
                         startRxStop();
                         if( not waitForStop() ) return false;

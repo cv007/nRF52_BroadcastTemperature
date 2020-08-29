@@ -19,23 +19,24 @@
 #define SI static inline
 #define SCA static constexpr auto
 
+// !!!!! in progress - using Tmp117 as a starting point
+
 
 /*------------------------------------------------------------------------------
-    Tmp117 struct
+    Si7051 struct
 
-    Tmp117<Twi, [address]> tmp117;
+    Si7051<Twi> si7051;
 
-    TMP117 - Texas Instruments temperature IC
+    Si7051 - Silicon Labs temperature IC
 ------------------------------------------------------------------------------*/
-template<typename Twi_, U8 Addr_ = 0x48>
-struct Tmp117 {
-
-    static_assert(Addr_ >= 0x48 and Addr_ <= 0x4B, "invalid Tmp117 address");
+template<typename Twi_>
+struct Si7051 {
 
     //============
         private:
     //============
 
+    SCA Addr_{ 0x40 }; //only one address
     static Twi_& twi_;
     static inline bool isInit_{ false };
 
@@ -49,7 +50,7 @@ struct Tmp117 {
                 template<typename T> //T = U16 or I16
 SA  read        (const U8 r, T& v) {
                     if( not isInit_ ) init();
-                    U8 rbuf[2];
+                    volatile U8 rbuf[2] = { 0, 0 }; //value
                     U8 tbuf[1] = { r }; //register
                     bool tf = false;
                     if( twi_.writeRead( tbuf, rbuf) ){
@@ -158,3 +159,38 @@ SA  x1000C  (I16 v) -> int32_t  { return (v * 125L)>>4; }
 #undef SI
 #undef SCA 
 
+/*
+
+Si7051
+
+1.9v - 3.6v
+-40C to +125C
+
+Tconv 14bit max 10.8ms
+      13bit      6.2ms
+      12bit      3.8ms
+      11bit      2.4ms
+
+Idd conversion in progress - 90-120ua
+    standby range min-max 0.06ua - 3.6ua
+    powerup peak 4ma
+
+powerup time 25C - 18-25ms
+             max - 80ms
+soft reset time - 5-15ms
+
+SCL max 400kHz
+
+address - fixed 0x40
+
+commands-
+    Measure Temperature, Hold Master Mode       0xE3
+    Measure Temperature, No Hold Master Mode    0xF3
+    Reset                                       0xFE
+    Write User Register 1                       0xE6
+    Read User Register 1                        0xE7
+    Read Electronic ID 1st Byte                 0xFA 0x0F
+    Read Electronic ID 2nd Byte                 0xFC 0xC9
+    Read Firmware Revision                      0x84 0xB8
+
+*/
