@@ -132,9 +132,13 @@ struct Twim {
 //--------------------
 //  control
 //--------------------
+private: //have to go through init (or throught init via the constructor)
+         //so will get the address, frequency, pins setup
 SA  enable          ()          { reg.ENABLE = 6; }
-SA  disable         ()          { reg.ENABLE = 0; }
 SA  reEnable        ()          { disable(); clearError(); shortsSetup(ALL_OFF); enable(); }
+
+public:
+SA  disable         ()          { reg.ENABLE = 0; }
 SA  isEnabled       ()          { return reg.ENABLE; }
 SA  frequency       (FREQ e)    { reg.FREQUENCY = e; }
 SA  address         (U8 v)      { reg.ADDRESS = v; } //0-127

@@ -6227,9 +6227,9 @@ static inline Tmp117< twi_ > tmp117;
                     // -999 = failed (and is not added to history)
 SA  read            () {
    1b698:	e92d 4ff0 	stmdb	sp!, {r4, r5, r6, r7, r8, r9, sl, fp, lr}
-SA  enable          ()          { reg.ENABLE = 6; }
+
+public:
 SA  disable         ()          { reg.ENABLE = 0; }
-SA  reEnable        ()          { disable(); clearError(); shortsSetup(ALL_OFF); enable(); }
 SA  isEnabled       ()          { return reg.ENABLE; }
 SA  frequency       (FREQ e)    { reg.FREQUENCY = e; }
 SA  address         (U8 v)      { reg.ADDRESS = v; } //0-127
