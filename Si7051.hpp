@@ -18,7 +18,7 @@
 #define SI static inline
 #define SCA static constexpr auto
 
-//untested - sda/scl pins routed wrong :(
+//untested - sda/scl pins routed wrong on my board :(
 
 /*------------------------------------------------------------------------------
     Si7051 struct
@@ -39,9 +39,19 @@ struct Si7051 {
     static inline bool isInit_{ false };
     static inline bool isConverting_{ false };
 
-    enum COMMANDS { MEASURE_HOLD = 0xE3, MEASURE_NOHOLD = 0xF3, RESET = 0xFE,
-                    WRITE_USER = 0xE6, READ_USER = 0xE7, READ_ID1 = 0xFA0F, 
-                    READ_ID2 = 0xFCC9, READ_REVID = 0x84B8 };
+    enum COMMANDS1 { MEASURE_HOLD = 0xE3, MEASURE_NOHOLD = 0xF3, RESET = 0xFE,
+                     WRITE_USER = 0xE6, READ_USER = 0xE7 };
+    enum COMMANDS2 { READ_ID1 = 0xFA0F, READ_ID2 = 0xFCC9, READ_FIRMREV = 0x84B8 };
+
+SA  readUser    (U8& v)         { U8 tbuf[1]{ READ_USER }; U8 rbuf[1];
+                                  if( not twi_.writeRead(tbuf, rbuf) ) return false; 
+                                  v = rbuf[0];
+                                  return true;
+                                }
+
+SA  command     (COMMANDS1 cmd) { U8 tbuf[1]{ cmd }; 
+                                  return twi_.write(tbuf);
+                                }
 
     //============
         public:
@@ -51,54 +61,76 @@ struct Si7051 {
     enum RESOLUTION { RES_14BIT, RES_12BIT, RES_13BIT = 0x80, RES_11BIT = 0x81 };
 
 
-
-
-SA  init        ()              { twi_.init( Addr_, twi_.K400 );
-                                  //startup time 18-25ms, max 80ms
-                                  //let caller deal with startup time
-                                  isInit_ = true;
+SA  init        ()              { 
+                                twi_.init( Addr_, twi_.K400 );
+                                //startup time 18-25ms, max 80ms
+                                //let caller deal with startup time
+                                isInit_ = true;
                                 }
 
 SA  deinit      ()              { twi_.deinit(); isInit_ = false; }
 
+SA  reset       ()              { return command( RESET ); } //5-15ms
 
-SA  reset       ()              { U8 buf[1]{RESET}; return twi_.write(buf); } //5-15ms
-
-SA  resolution  (RESOLUTION e)  { U8 tbuf[1]{READ_USER}; U8 rbuf[1];
-                                  if( not twi_.writeRead(tbuf, rbuf) ) return false;
-                                  rbuf[0] and_eq compl 0x81; //clear res bits
-                                  return write(WRITE_USER, rbuf[0] bitor e);
+SA  resolution  (RESOLUTION e)  { 
+                                U8 v;
+                                if( not readUser(v) ) return false;
+                                v and_eq compl 0x81; //clear res bits
+                                U8 tbuf[2]{ WRITE_USER, v bitor e };
+                                return twi_.write(tbuf);
                                 }
 
-SA  isPowerOk   ()              { U8 tbuf[1]{READ_USER}; U8 rbuf[1];
-                                  return twi_.writeRead(tbuf, rbuf) and (rbuf[0] bitand 0x40); 
+SA  isPowerOk   ()              { 
+                                U8 v;
+                                if( not readUser(v) ) return false;
+                                return v bitand 0x40; 
                                 }
 
                                 //blocking on clock stretch, up to 10.8ms
-SA  tempWait    (U16& v)        { U8 tbuf[1]{MEASURE_HOLD}; U8 rbuf[2]; 
-                                  if( not twi_.writeRead(tbuf, rbuf) ) return false;
-                                  v = (rbuf[0]<<8) bitor rbuf[1];
-                                  return true; 
+SA  tempWait    (U16& v)        { 
+                                U8 tbuf[1]{ MEASURE_HOLD }; U8 rbuf[2]; 
+                                if( not twi_.writeRead(tbuf, rbuf) ) return false;
+                                v = (rbuf[0]<<8) bitor rbuf[1];
+                                return true; 
                                 }
 
-SA  tempStart   ()              {   U8 tbuf[1]{MEASURE_NOHOLD};
-                                    if( twi_.write(tbuf) ){ //start
-                                        isConverting_ = true;
-                                        return true; //started
-                                    } return false;
+                                //start measurement
+SA  tempStart   ()              {   
+                                if( not command(MEASURE_NOHOLD) ) return false;
+                                isConverting_ = true;
+                                return true; //started
                                 }
 
-SA  isConverting()              { return isConverting_; }
-
-SA  tempPoll    (U16& v)        { if( not isConverting() ) return false;
-                                  U8 rbuf[2];
-                                  if( not twi_.read( rbuf ) ) return false; //not ready
-                                  v = rbuf[0]<<8 bitor rbuf[1];
-                                  isConverting_ = false;
-                                  return true; //you now have a value
+                                //poll for temp (after tempStart)
+SA  tempPoll    (U16& v)        { 
+                                if( not isConverting_ ) return false;
+                                U8 rbuf[2];
+                                if( not twi_.read(rbuf) ) return false; //not ready (nack)
+                                v = (rbuf[0]<<8) bitor rbuf[1];
+                                isConverting_ = false;
+                                return true; //you now have a value
                                 }
 
+                                //serial number, not checking crc values
+SA  esn         (U8 (&buf)[8])  {
+                                U8 tbuf[2]{ READ_ID1>>8, READ_ID1&0xff };
+                                U8 rbuf[8];
+                                if( not twi_.writeRead(tbuf, rbuf) ) return false;
+                                buf[0] = rbuf[0]; buf[1] = rbuf[2]; buf[2] = rbuf[4]; buf[3] = rbuf[6];
+                                tbuf[0] = READ_ID2>>8; tbuf[1] = READ_ID2;
+                                if( not twi_.writeRead(tbuf, rbuf) ) return false;
+                                buf[4] = rbuf[0]; buf[5] = rbuf[2]; buf[6] = rbuf[4]; buf[7] = rbuf[6];
+                                return true;
+                                }
 
+                                //firmware revision (0xFF = 1.0, 0x20 = 2.0)
+SA  firmware    (U8& v)         {
+                                U8 tbuf[2]{ READ_FIRMREV>>8, READ_FIRMREV&0xff };
+                                U8 rbuf[1];
+                                if( not twi_.writeRead(tbuf, rbuf) ) return false;
+                                v = rbuf[0];
+                                return true;
+                                }
 
 /*
 temp code = XXXXXXXX XXXXXX00

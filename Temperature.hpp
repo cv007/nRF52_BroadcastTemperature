@@ -100,15 +100,15 @@ SA  read            () {
                         tmp117.init();
                         //default is continuous conversion, 8 samples, 15.5ms*8 = 124ms
                         nrf_delay_ms(130);
-                        //poll for data ready (up to a point)
+                        //poll for data ready (up to 5ms)
                         auto i = 10; //500us * 10 = 5ms
-                        while( not tmp117.isDataReady() and i ){ nrf_delay_us(500); i--; }
-                        bool ok = tmp117.tempRaw(t);
+                        while( i and not tmp117.isDataReady() ){ nrf_delay_us(500); i--; }
+                        bool ok = i and tmp117.tempRaw(t);
                         tmp117.deinit(); //turn off power to ic
 
                         DebugFuncHeader();
-                        if( i == 0 ){ Debug("  timeout, ready bit not set\n"); return f; }
-                        if( not ok ){ Debug("  failed to read temp value\n"); return f; }
+                        if( not i )      { Debug("  timeout, ready bit not set\n"); return f; }
+                        if( not ok )     { Debug("  failed to read temp value\n"); return f; }
                         if( t == -32768 ){ Debug("  returned default temp value\n"); return f; }
 
                         f = tmp117.x10F( t );
@@ -131,8 +131,7 @@ SA  read            () {
                         int16_t f = -999; //-99.9 = failed to get
                         uint16_t t;
 
-                        //TODO 
-                        //get temp Fx10 into f
+                         //get temp Fx10 into f
                         si7051.init();
                         nrf_delay_ms(80); //max power up time
                         bool ok = si7051.tempWait(t); //10ms
