@@ -84,6 +84,8 @@ a si7051 temperature ic
 -----------------------------------------------------------------------------*/
 int main() {
 
+timerTestTempStart();
+
     Debug( "{normal}{Fgreen}\nBoot...\n" );
     Debug( "{Fmagenta}board.init()...\n" );
 

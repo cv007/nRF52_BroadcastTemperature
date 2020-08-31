@@ -234,10 +234,7 @@ SA  update          ( uint8_t (&buf)[31] ) -> void {
 
                         //new temp reading
                         int16_t f = temp_.read(); //~50us
-//testing/comparing all temp sources
-TemperatureInternal<5>::read();
-TemperatureTmp117<5>::read();
-//testing
+
                         //put current average in first (latest) position of history
                         int16_t avgF = temp_.average();
                         uuidTempLatest( (avgF >= 0) ? (uint16_t)avgF : 0xE000 bitor (uint16_t)-avgF );  //E=negative 
@@ -429,3 +426,22 @@ inline Timer timerAdvUpdate;
 inline void advInitCB(){
     timerAdvUpdate.initRepeated( 60_sec, adv.update ); //init timer that calls avd.update
 }
+
+
+// TESTING
+// checking all temperature sources to compare
+// run every 20 seconds, each function Debug will show info
+// run timerTestTempStart() in main to set timer
+
+inline Timer timerTestTemp;
+inline void timerTestTempStart(){
+    timerTestTemp.initRepeated( 20_sec, 
+        [](void*){ 
+            TemperatureInternal<5>::read();
+            TemperatureTmp117<5>::read();
+            TemperatureSi7051<5>::read(); 
+        } 
+    );
+}
+
+// TESTING
