@@ -20,8 +20,8 @@
 
 #ifdef NRF52810_BL651_TEMP
     #define LAST_PAGE 0x2F000
-    #define TEMPERATURE_TMP117
-    // #define TEMPERATURE_SI7051
+    // #define TEMPERATURE_TMP117
+    #define TEMPERATURE_SI7051
     #include "nRF52810.hpp"
 #endif
 

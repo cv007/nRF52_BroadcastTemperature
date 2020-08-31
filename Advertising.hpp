@@ -234,7 +234,10 @@ SA  update          ( uint8_t (&buf)[31] ) -> void {
 
                         //new temp reading
                         int16_t f = temp_.read(); //~50us
-
+//testing/comparing all temp sources
+TemperatureInternal<5>::read();
+TemperatureTmp117<5>::read();
+//testing
                         //put current average in first (latest) position of history
                         int16_t avgF = temp_.average();
                         uuidTempLatest( (avgF >= 0) ? (uint16_t)avgF : 0xE000 bitor (uint16_t)-avgF );  //E=negative 

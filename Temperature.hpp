@@ -76,7 +76,7 @@ SA  read            () {
                         f = (t*10*9/5+320*4)/4; // Fx10
                         f = Temperature<HistSiz_>::addHistory( f );
                         DebugFuncHeader();
-                        Debug("{Fwhite}  raw: %d\n    F: %02d.%d\n", t, f/10, f%10);
+                        Debug("  internal raw: %d  F: %02d.%d\n", t, f/10, f%10);
                         return f;
                     }
 };
@@ -84,11 +84,11 @@ SA  read            () {
 template<uint8_t HistSiz_>
 struct TemperatureTmp117 : Temperature<HistSiz_> {
 
-using twi_ = Twim0< board.sda.pinNumber(),   
-                    board.scl.pinNumber(), 
-                    board.i2cDevicePwr.pinNumber() >;
+    using twi_ = Twim0< board.sda.pinNumber(),   
+                        board.scl.pinNumber(), 
+                        board.i2cDevicePwr.pinNumber() >;
 
-static inline Tmp117< twi_ > tmp117;
+    static inline Tmp117< twi_ > tmp117;
 
                     // -999 = failed (and is not added to history)
 SA  read            () {
@@ -113,7 +113,7 @@ SA  read            () {
 
                         f = tmp117.x10F( t );
                         f = Temperature<HistSiz_>::addHistory( f );
-                        Debug("  tmp117 raw: %d  F: %d\n", t, f);
+                        Debug("  Tmp117 raw: %d  F: %02d.%d\n", t, f/10, f%10);
                         return f;
                     }
 };
@@ -121,27 +121,37 @@ SA  read            () {
 template<uint8_t HistSiz_>
 struct TemperatureSi7051 : Temperature<HistSiz_> {
 
-using twi_ = Twim0< board.sda.pinNumber(),   
-                    board.scl.pinNumber(), 
-                    board.i2cDevicePwr.pinNumber() >;
+    using twi_ = Twim0< board.sda.pinNumber(),   
+                        board.scl.pinNumber(), 
+                        board.i2cDevicePwr.pinNumber() >;
 
-static inline Si7051< twi_ > si7051;
+    static inline Si7051< twi_ > si7051;
 
 SA  read            () {
                         int16_t f = -999; //-99.9 = failed to get
                         uint16_t t;
 
-                         //get temp Fx10 into f
+                        //get temp Fx10 into f
                         si7051.init();
-                        nrf_delay_ms(80); //max power up time
-                        bool ok = si7051.tempWait(t); //10ms
+                        //we get 2ms delay in .init for power up
+                        //can take up to 80ms for ic to startup at extreme temp
+                        //will just call tempWait until ack'd (true), then is clock 
+                        //stretched and will return a temp value in t,
+                        //conversion time for 14bits is ~10ms, so use 95ms as max time to wait
+                        SCA TIMEOUT_MS{95};
+                        auto ok = false;
+                        for( auto ms = 0; ms < TIMEOUT_MS; ms++, nrf_delay_ms(1) ){ 
+                            if( not si7051.tempWait(t) ) continue;
+                            ok = true;
+                            break;
+                        };
                         si7051.deinit();
-                        if( not ok ) return f;
-                        f = si7051.x10F(t);
-                        
+                        if( not ok ) return f; //timeout, return f (-999)
+
+                        f = si7051.x10F(t);                        
                         f = Temperature<HistSiz_>::addHistory( f );
                         DebugFuncHeader();
-                        Debug("\traw: %d\n\tF: %02d.%d\n", t, f/10, f%10);
+                        Debug("  Si7051 raw: %d  F: %02d.%d\n", t, f/10, f%10);
                         return f;
                     }
 };

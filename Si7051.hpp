@@ -43,6 +43,10 @@ struct Si7051 {
                      WRITE_USER = 0xE6, READ_USER = 0xE7 };
     enum COMMANDS2 { READ_ID1 = 0xFA0F, READ_ID2 = 0xFCC9, READ_FIRMREV = 0x84B8 };
 
+    //user reserved bits, so no need to read when wrting res bits 
+    //to maintain these bit values
+    enum { USER_RSVD_BITS = 0x3A };
+
 SA  readUser    (U8& v)         { U8 tbuf[1]{ READ_USER }; U8 rbuf[1];
                                   if( not twi_.writeRead(tbuf, rbuf) ) return false; 
                                   v = rbuf[0];
@@ -65,6 +69,7 @@ SA  init        ()              {
                                 twi_.init( Addr_, twi_.K400 );
                                 //startup time 18-25ms, max 80ms
                                 //let caller deal with startup time
+                                nrf_delay_ms(2); //but will give time for power to come up
                                 isInit_ = true;
                                 }
 
@@ -72,11 +77,12 @@ SA  deinit      ()              { twi_.deinit(); isInit_ = false; }
 
 SA  reset       ()              { return command( RESET ); } //5-15ms
 
+                                //it seems may take 10-50us after this is done
+                                //before getting temp cpnversion started
+                                //so check return values to temp* functions
 SA  resolution  (RESOLUTION e)  { 
-                                U8 v;
-                                if( not readUser(v) ) return false;
-                                v and_eq compl 0x81; //clear res bits
-                                U8 tbuf[2]{ WRITE_USER, v bitor e };
+                                U8 v = USER_RSVD_BITS bitor e;
+                                U8 tbuf[2]{ WRITE_USER, v };
                                 return twi_.write(tbuf);
                                 }
 
