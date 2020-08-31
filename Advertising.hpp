@@ -437,9 +437,9 @@ inline Timer timerTestTemp;
 inline void timerTestTempStart(){
     timerTestTemp.initRepeated( 20_sec, 
         [](void*){ 
-            TemperatureInternal<5>::read();
-            TemperatureTmp117<5>::read();
-            TemperatureSi7051<5>::read(); 
+            TemperatureInternal<1>::read();
+            TemperatureTmp117<1>::read();
+            TemperatureSi7051<1>::read(); 
         } 
     );
 }

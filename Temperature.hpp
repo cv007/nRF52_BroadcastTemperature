@@ -13,25 +13,29 @@
 #define SA [[gnu::noinline]] static auto
 #define SCA static constexpr auto
 #define SI static inline
+#define A auto
 
 /*------------------------------------------------------------------------------
     Temperature
-        base class only
+    (not static, each use is seperate)
 ------------------------------------------------------------------------------*/
 template<uint8_t HistSiz_>
 struct Temperature {
 
 //============
-    protected:
+    private:
 //============
 
-    Temperature(){} //cannot use this class directly
+    int16_t tempHistory_[HistSiz_ == 0 ? 1 :HistSiz_]{0};
 
-    SI int16_t tempHistory_[HistSiz_];
     SCA TEMP_MAX{ 180*10 };
     SCA TEMP_MIN{ -40*10 };
 
-SA  addHistory      (int16_t v) {
+//===========
+    public:
+//===========
+
+A   addHistory      (int16_t v) {
                         static bool isInit;
                         static uint8_t idx;
 
@@ -47,17 +51,11 @@ SA  addHistory      (int16_t v) {
                         return v; //the min/max limited value
                     }
 
-//===========
-    public:
-//===========
-
-SA  average         () {
+A   average         () {
                         int16_t avg{0};
                         for( auto& i : tempHistory_ ) avg += i;
                         return avg / HistSiz_;
                     }
-
-SA  histSize        () { return HistSiz_; }
 
 };
 
@@ -67,14 +65,23 @@ SA  histSize        () { return HistSiz_; }
     (softdevice takes over temp sensor, so have to use sd)
 ------------------------------------------------------------------------------*/
 template<uint8_t HistSiz_>
-struct TemperatureInternal : Temperature<HistSiz_> {
+struct TemperatureInternal {
+
+    private:
+
+    inline static Temperature<HistSiz_> tempH;
+
+    public:
+
+SA  average         () { return tempH.average(); }
+SA  histSize        () { return HistSiz_; }
 
 SA  read            () {
                         int16_t f = -999; //-99.9 = failed to get
                         int32_t t;
                         if( sd_temp_get(&t) ) return f;
                         f = (t*10*9/5+320*4)/4; // Fx10
-                        f = Temperature<HistSiz_>::addHistory( f );
+                        f = tempH.addHistory( f );
                         DebugFuncHeader();
                         Debug("  internal raw: %d  F: %02d.%d\n", t, f/10, f%10);
                         return f;
@@ -82,13 +89,22 @@ SA  read            () {
 };
 
 template<uint8_t HistSiz_>
-struct TemperatureTmp117 : Temperature<HistSiz_> {
+struct TemperatureTmp117 {
+
+    private:
+
+    inline static Temperature<HistSiz_> tempH;
 
     using twi_ = Twim0< board.sda.pinNumber(),   
                         board.scl.pinNumber(), 
                         board.i2cDevicePwr.pinNumber() >;
 
     static inline Tmp117< twi_ > tmp117;
+
+    public:
+
+SA  average         () { return tempH.average(); }
+SA  histSize        () { return HistSiz_; }
 
                     // -999 = failed (and is not added to history)
 SA  read            () {
@@ -112,20 +128,29 @@ SA  read            () {
                         if( t == -32768 ){ Debug("  returned default temp value\n"); return f; }
 
                         f = tmp117.x10F( t );
-                        f = Temperature<HistSiz_>::addHistory( f );
+                        f = tempH.addHistory( f );
                         Debug("  Tmp117 raw: %d  F: %02d.%d\n", t, f/10, f%10);
                         return f;
                     }
 };
 
 template<uint8_t HistSiz_>
-struct TemperatureSi7051 : Temperature<HistSiz_> {
+struct TemperatureSi7051 {
+
+    private:
+
+    inline static Temperature<HistSiz_> tempH;
 
     using twi_ = Twim0< board.sda.pinNumber(),   
                         board.scl.pinNumber(), 
                         board.i2cDevicePwr.pinNumber() >;
 
     static inline Si7051< twi_ > si7051;
+
+    public:
+
+SA  average         () { return tempH.average(); }
+SA  histSize        () { return HistSiz_; }
 
 SA  read            () {
                         int16_t f = -999; //-99.9 = failed to get
@@ -149,7 +174,7 @@ SA  read            () {
                         if( not ok ) return f; //timeout, return f (-999)
 
                         f = si7051.x10F(t);                        
-                        f = Temperature<HistSiz_>::addHistory( f );
+                        f = tempH.addHistory( f );
                         DebugFuncHeader();
                         Debug("  Si7051 raw: %d  F: %02d.%d\n", t, f/10, f%10);
                         return f;
