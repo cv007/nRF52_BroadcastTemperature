@@ -114,17 +114,19 @@ SA  read            () {
 
                         //init will power on, w/2ms delay time for startup
                         tmp117.init();
-                        //default is continuous conversion, 8 samples, 15.5ms*8 = 124ms
-                        nrf_delay_ms(130);
-                        //poll for data ready (up to 5ms)
-                        auto i = 10; //500us * 10 = 5ms
-                        while( i and not tmp117.isDataReady() ){ nrf_delay_us(500); i--; }
+                        //start conversion, one shot, 1 sample
+                        auto i = 10; //10ms
+                        while( i and not tmp117.oneShot1() ){ nrf_delay_ms(1); i--; }
+                        nrf_delay_ms(16); //~15.5ms for 1 conversion 
+                        //poll for data ready (up to 20ms)
+                        i = 20; //20ms
+                        while( i and not tmp117.isDataReady() ){ nrf_delay_ms(1); i--; }
                         bool ok = i and tmp117.tempRaw(t);
                         tmp117.deinit(); //turn off power to ic
 
                         DebugFuncHeader();
-                        if( not i )      { Debug("  timeout, ready bit not set\n"); return f; }
-                        if( not ok )     { Debug("  failed to read temp value\n"); return f; }
+                        if( not i )      { Debug("  {Fred}timeout, ready bit not set{Fwhite}\n"); return f; }
+                        if( not ok )     { Debug("  {Fred}failed to read temp value{Fwhite}\n"); return f; }
                         if( t == -32768 ){ Debug("  returned default temp value\n"); return f; }
 
                         f = tmp117.x10F( t );

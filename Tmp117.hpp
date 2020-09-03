@@ -114,6 +114,10 @@ SA  reset       ()              { configW( 1<<SOFTRESET ); }
 SA  continuous  ()              { return configWbm( 3<<CONVMODE, 0<<CONVMODE ); }
 SA  shutdown    ()              { return configWbm( 3<<CONVMODE, 1<<CONVMODE ); }
 SA  oneShot     ()              { return configWbm( 3<<CONVMODE, 3<<CONVMODE ); }
+SA  oneShot1     ()             { return configWbm( 3<<CONVMODE|3<<AVERAGE, 3<<CONVMODE|0<<AVERAGE ); }
+SA  oneShot8    ()              { return configWbm( 3<<CONVMODE|3<<AVERAGE, 3<<CONVMODE|1<<AVERAGE ); }
+SA  oneShot32   ()              { return configWbm( 3<<CONVMODE|3<<AVERAGE, 3<<CONVMODE|2<<AVERAGE ); }
+SA  oneShot64   ()              { return configWbm( 3<<CONVMODE|3<<AVERAGE, 3<<CONVMODE|3<<AVERAGE ); }
 
 SA  averageOff  ()              { return configWbm( 3<<AVERAGE, 0<<AVERAGE ); }
 SA  average8    ()              { return configWbm( 3<<AVERAGE, 1<<AVERAGE ); }
