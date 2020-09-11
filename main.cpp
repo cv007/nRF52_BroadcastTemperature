@@ -108,7 +108,7 @@ timerTestTempStart();
 
     while( true ) { 
         DebugFuncHeader();
-        Debug("{Forange}  low power...{Fwhite} \n");
+        Debug("{Fmagenta}  low power...{Fwhite} \n");
         nrf_pwr_mgmt_run();  
     }
 

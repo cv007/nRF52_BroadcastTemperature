@@ -116,8 +116,8 @@ struct BL651tempBoard {
 
             //someone is required to run init to setup pins
 SA  init    () {
-                ledRed.init( OUTPUT );
-                ledGreen.init( OUTPUT );
+                ledRed.init( OUTPUT, S0S1 ); //standard drive 1
+                ledGreen.init( OUTPUT, S0S1 ); //standard drive 1
                 sw1.init( INPUT, PULLUP );
             }
 
@@ -148,7 +148,7 @@ SA  caution (uint16_t ms = 5) {
             }
 
             //show an ok blink
-SA  ok      (uint16_t ms = 1) {
+SA  ok      (uint16_t ms = 5) {
                 ledGreen.blinkN( 1, ms );
             }
 

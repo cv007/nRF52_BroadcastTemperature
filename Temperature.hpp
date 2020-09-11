@@ -116,8 +116,9 @@ SA  read            () {
                         tmp117.init();
                         //start conversion, one shot, 1 sample
                         auto i = 10; //10ms
-                        while( i and not tmp117.oneShot1() ){ nrf_delay_ms(1); i--; }
-                        nrf_delay_ms(16); //~15.5ms for 1 conversion 
+                        // while( i and not tmp117.oneShot1() ){ nrf_delay_ms(1); i--; }
+                        // nrf_delay_ms(16); //~15.5ms for 1 conversion 
+nrf_delay_ms(125);
                         //poll for data ready (up to 20ms)
                         i = 20; //20ms
                         while( i and not tmp117.isDataReady() ){ nrf_delay_ms(1); i--; }
