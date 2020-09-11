@@ -1,23 +1,20 @@
 #pragma once
 
-#include <cstdint>
-#include <cstdbool>
+#include "nRFconfig.hpp"
 
 #include "app_timer.h"
 
 #include "Errors.hpp"   //error
 
-#define SA static auto
-#define SCA static constexpr auto
 #define SI static inline
 
 /*------------------------------------------------------------------------------
     user defined literals use for ms, sec
 ------------------------------------------------------------------------------*/
-#define CUO constexpr uint32_t operator ""
+#define CUO constexpr u32 operator ""
 
-CUO     _ms     (unsigned long long int ms){ return ms; }
-CUO     _sec    (unsigned long long int sec){ return sec * 1000_ms; }
+CUO     _ms     (u64 ms){ return ms; }
+CUO     _sec    (u64 sec){ return sec * 1000_ms; }
 
 #undef CUO
 
@@ -40,7 +37,7 @@ struct Timer {
     SCA RTC_HZ{ 32768 / (APP_TIMER_CONFIG_RTC_FREQUENCY+1) }; // from sdk_config.h, 0=div1, 1=div2, etc.
 
                     //ms to timer ticks - timer uses rtc
-SCA appTimerTicks   (uint32_t ms){
+SCA appTimerTicks   (u32 ms){
                         if( ms > ONEDAY_MS ) ms = ONEDAY_MS;
                         return __builtin_ceil( ms*(RTC_HZ/1000.0) );
                     }
@@ -58,12 +55,12 @@ SA init             () {
                     
                     //for each instance
 
-auto initSingle     ( uint32_t ms, void(*cb)(void*) ) {
+auto initSingle     (u32 ms, void(*cb)(void*)) {
                         init();
                         error.check( app_timer_create(&ptimerId_, APP_TIMER_MODE_SINGLE_SHOT, cb) );
                         error.check( app_timer_start(ptimerId_, appTimerTicks(ms), NULL) );
                     }
-auto initRepeated   ( uint32_t ms, void(*cb)(void*) ) {
+auto initRepeated   (u32 ms, void(*cb)(void*)) {
                         init();
                         error.check( app_timer_create(&ptimerId_, APP_TIMER_MODE_REPEATED, cb) );
                         error.check( app_timer_start(ptimerId_, appTimerTicks(ms), NULL) );
@@ -71,6 +68,4 @@ auto initRepeated   ( uint32_t ms, void(*cb)(void*) ) {
 
 };
 
-#undef SA
-#undef SCA
 #undef SI

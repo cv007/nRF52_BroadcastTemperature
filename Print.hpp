@@ -3,13 +3,13 @@
 /*-----------------------------------------------------------------------------
     includes
 -----------------------------------------------------------------------------*/
-#include <cstdbool>
-#include <cstdint>
+#include "nRFconfig.hpp"
+
 #include <cstdio>
 #include <cstring>
 
 #include "SEGGER_RTT.h"
-#include "nRFconfig.hpp"
+
 
 /*------------------------------------------------------------------------------
     RTT
@@ -131,7 +131,7 @@ static constexpr uint16_t MKhash(const char* str){
 }
 
 using markupCodeT = struct {
-    const uint16_t hash;
+    const u16 hash;
     const char* str;
 };
 
@@ -180,7 +180,7 @@ int Markup(Dev_ dev, const char* str){
         }
 
         //get hash of markup word
-        uint16_t hash = 0;
+        u16 hash = 0;
         bool fg = (*str == 'F');
         bool bg = (*str == 'B');
         if( fg or bg ) str++;

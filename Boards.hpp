@@ -1,14 +1,11 @@
 #pragma once
 
-#include <cstdbool>
-#include <cstdint>
+#include "nRFconfig.hpp"
 
 #include "nrf_delay.h"
 
 #include "Gpio.hpp"
 
-#define SA static auto
-#define SCA static constexpr auto
 #define SI static inline
 
 #ifdef  NRF52840 //for 52840 based boards
@@ -54,10 +51,10 @@ SA  alive   () {
             //show error code via led's, skip leading 0's
             //show 1-15 blinks for each nibble (0x01-0x0f)
             //a zero will be a short blue blink
-SA  error   (uint16_t hex) {
+SA  error   (u16 hex) {
                 bool lz = true;
                 for( auto i = 12; i >= 0; i -= 4 ){
-                    uint8_t v = (hex>>i) bitand 0xf;
+                    u8 v = (hex>>i) bitand 0xf;
                     if( v == 0 and lz == true ) continue; //skip leading 0's
                     lz = false;
                     if( v ) ledRed1.blinkN( v, 500 );
@@ -67,12 +64,12 @@ SA  error   (uint16_t hex) {
             }
 
             //show a caution blink
-SA  caution (uint16_t ms = 1) {
+SA  caution (u16 ms = 1) {
                 ledRed1.blinkN( 1, ms );
             }
 
             //show an ok blink
-SA  ok      (uint16_t ms = 1) {
+SA  ok      (u16 ms = 1) {
                 ledGreen1.blinkN( 1, ms );
             }
 
@@ -130,10 +127,10 @@ SA  alive   () {
             //show error code via led's, skip leading 0's
             //show 1-15 blinks for each nibble (0x01-0x0f)
             //a zero will be a short green blink
-SA  error   (uint16_t hex) {
+SA  error   (u16 hex) {
                 bool lz = true;
                 for( auto i = 12; i >= 0; i -= 4 ){
-                    uint8_t v = (hex>>i) bitand 0xf;
+                    u8 v = (hex>>i) bitand 0xf;
                     if( v == 0 and lz == true ) continue; //skip leading 0's
                     lz = false;
                     if( v ) ledRed.blinkN( v, 500 ); //v times, 500ms on, 0ms off, no post delay
@@ -143,12 +140,12 @@ SA  error   (uint16_t hex) {
             }
 
             //show a caution blink
-SA  caution (uint16_t ms = 5) {
+SA  caution (u16 ms = 5) {
                 ledRed.blinkN( 1, ms );
             }
 
             //show an ok blink
-SA  ok      (uint16_t ms = 5) {
+SA  ok      (u16 ms = 5) {
                 ledGreen.blinkN( 1, ms );
             }
 
@@ -156,8 +153,6 @@ SA  ok      (uint16_t ms = 5) {
 
 #endif
 
-#undef SA
-#undef SCA
 #undef SI
 
 

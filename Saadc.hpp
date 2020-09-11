@@ -1,15 +1,11 @@
 #pragma once
 
-#include <cstdint>
-#include <cstdbool>
+#include "nRFconfig.hpp"
 
-#define U32 uint32_t
-#define U16 uint16_t
-#define I16 int16_t
+#undef SA
 //#define SA [[gnu::always_inline]] static auto
 #define SA [[gnu::noinline]] static auto
 #define SI static inline
-#define SCA static constexpr auto
 
 /*------------------------------------------------------------------------------
     Saadc struct
@@ -31,70 +27,70 @@ struct Saadc {
     #pragma GCC diagnostic ignored "-Wpedantic"
 
     using cfgT = struct {
-                U32 PSELP;
-                U32 PSELN;
-        union { U32 CONFIG;
-        struct{     U32 RESP    : 2;
-                    U32         : 2;
-                    U32 RESN    : 2;
-                    U32         : 2;
-                    U32 GAIN    : 3;
-                    U32         : 1;
-                    U32 REFSEL  : 1;
-                    U32         : 3;
-                    U32 TACQ    : 3;
-                    U32         : 1;
-                    U32 MODE    : 1;
-                    U32         : 3;
-                    U32 BURST   : 1;
+                u32 PSELP;
+                u32 PSELN;
+        union { u32 CONFIG;
+        struct{     u32 RESP    : 2;
+                    u32         : 2;
+                    u32 RESN    : 2;
+                    u32         : 2;
+                    u32 GAIN    : 3;
+                    u32         : 1;
+                    u32 REFSEL  : 1;
+                    u32         : 3;
+                    u32 TACQ    : 3;
+                    u32         : 1;
+                    u32 MODE    : 1;
+                    u32         : 3;
+                    u32 BURST   : 1;
         };};
-                I16 LIMITL;
-                I16 LIMITH;
+                i16 LIMITL;
+                i16 LIMITH;
    };
 
     struct Saadc_ {
         struct {
-                U32 START;        //0x00
-                U32 SAMPLE;
-                U32 STOP;  
-                U32 CALIBRATE;
+                u32 START;        //0x00
+                u32 SAMPLE;
+                u32 STOP;  
+                u32 CALIBRATE;
         } TASKS;
 
-                U32 unused1[(0x100-0x10)/4]; 
+                u32 unused1[(0x100-0x10)/4]; 
 
         struct {
-                U32 STARTED;            //0x100
-                U32 END;
-                U32 DONE;
-                U32 RESULTDONE;
-                U32 CALIBRATEDONE;
-                U32 STOPPED;
-        struct {    U32 H;
-                    U32 L;
+                u32 STARTED;            //0x100
+                u32 END;
+                u32 DONE;
+                u32 RESULTDONE;
+                u32 CALIBRATEDONE;
+                u32 STOPPED;
+        struct {    u32 H;
+                    u32 L;
             }   LIMIT[8];               //0x118-0x154
         } EVENTS;
 
-                U32 unused2[(0x300-0x158)/4];
+                u32 unused2[(0x300-0x158)/4];
 
-                U32 INTEN;              //0x300
-                U32 INTENSET;
-                U32 INTENCLR;
-                U32 unused3[(0x400-0x30C)/4];
-                U32 STATUS;             //0x400
-                U32 unused4[(0x500-0x404)/4];
-                U32 ENABLE;             //0x500
-                U32 unused5[3];
+                u32 INTEN;              //0x300
+                u32 INTENSET;
+                u32 INTENCLR;
+                u32 unused3[(0x400-0x30C)/4];
+                u32 STATUS;             //0x400
+                u32 unused4[(0x500-0x404)/4];
+                u32 ENABLE;             //0x500
+                u32 unused5[3];
 
                 cfgT CHCONFIG[8];       //0x510-0x58C
 
-                U32 unused6[(0x5F0-0x590)/4];
-                U32 RESOLUTION;         //0x5F0
-                U32 OVERSAMPLE;
-                U32 SAMPLERATE;
-                U32 unused7[(0x62C-0x5FC)/4];
-                U32 RESULTPTR;          //0x62C
-                U32 RESULTMAXCNT;
-                U32 RESULTAMOUNT;
+                u32 unused6[(0x5F0-0x590)/4];
+                u32 RESOLUTION;         //0x5F0
+                u32 OVERSAMPLE;
+                u32 SAMPLERATE;
+                u32 unused7[(0x62C-0x5FC)/4];
+                u32 RESULTPTR;          //0x62C
+                u32 RESULTMAXCNT;
+                u32 RESULTAMOUNT;
     };
     #pragma GCC diagnostic pop
 
@@ -192,7 +188,7 @@ SA  irqOffLimitL    (CH e)          { irqOff( ch2int(e,1) ); }
 //  channel config
 //--------------------
 SA  isChannelUsed   (CH e)      { return inuse_ bitand (1<<e); }
-SA  channelSetup    (CH e, U32 cfg, PSEL p, PSEL n = NC) { 
+SA  channelSetup    (CH e, u32 cfg, PSEL p, PSEL n = NC) { 
                                     if( p or n ) inuse_ or_eq (1<<e);
                                     reg.CHCONFIG[e].PSELP = p;
                                     reg.CHCONFIG[e].PSELN = n; 
@@ -209,11 +205,11 @@ SA  channelOnly     (CH e)      {
                                     }
                                 }
 
-SA  limitH          (CH e, I16 v)   { reg.CHCONFIG[e].LIMITH = v; } 
+SA  limitH          (CH e, i16 v)   { reg.CHCONFIG[e].LIMITH = v; } 
 SA  limitH          (CH e)          { return reg.CHCONFIG[e].LIMITH; } 
-SA  limitL          (CH e, I16 v)   { reg.CHCONFIG[e].LIMITL = v; }
+SA  limitL          (CH e, i16 v)   { reg.CHCONFIG[e].LIMITL = v; }
 SA  limitL          (CH e)          { return reg.CHCONFIG[e].LIMITL; } 
-SA  limitHL         (CH e, I16 H, I16 L) { limitH(e,H); limitL(e,L); }
+SA  limitHL         (CH e, i16 H, i16 L) { limitH(e,H); limitL(e,L); }
 
 //--------------------
 //  config
@@ -224,18 +220,18 @@ SA  resolution      ()              { return RES(reg.RESOLUTION); }
 SA  overSample      (OVERSAMP e)    { reg.OVERSAMPLE = e; }
 SA  overSample      ()              { return OVERSAMP(reg.OVERSAMPLE); }
 
-SA  sampleRate      (U16 v)         {   
+SA  sampleRate      (u16 v)         {   
                                         if( v < 80 ) v = 80; 
                                         if( v > 2047 ) v =2047;
                                         reg.SAMPLERATE = v bitor (1<<12);
                                     }
 SA  sampleRateTask  ()              { reg.SAMPLERATE = 0; }
 
-SA  bufferAddr      (U32 v)         { reg.RESULTPTR = v; }
+SA  bufferAddr      (u32 v)         { reg.RESULTPTR = v; }
 SA  bufferAddr      ()              { return reg.RESULTPTR; }
-SA  bufferSize      (U16 v)         { reg.RESULTMAXCNT = v; } //15bits (max 32767)
+SA  bufferSize      (u16 v)         { reg.RESULTMAXCNT = v; } //15bits (max 32767)
 SA  bufferSize      ()              { return reg.RESULTMAXCNT; }
-SA  bufferSet       (U32 v, U16 n)  { bufferAddr(v); bufferSize(n); }
+SA  bufferSet       (u32 v, u16 n)  { bufferAddr(v); bufferSize(n); }
 SA  bufferUsed      ()              { return reg.RESULTAMOUNT; }
 
 
@@ -266,7 +262,7 @@ struct SaadcChan : Saadc {
     SI CH   ch_     { CH0 };
     SI PSEL pselP_  { NC };
     SI PSEL pselN_  { NC };
-    SI U32  config_ { 0 };
+    SI u32  config_ { 0 };
 
                     //positive already set in init values for cfgT
                     //so only need to do PSELN
@@ -345,11 +341,11 @@ SCA init            (CH ch, PSEL p, Ts... ts) {
 
                     //setup our channel config and buffer in Saadc
                     //take exclusive use of Saadc
-SA setConfig        (I16& v) {
+SA setConfig        (i16& v) {
                         if( isBusy() ) return false;        //is in use
                         if( pselP_ == NC and pselN_ == NC ) return false; //or we are not init
                         channelSetup( ch_, config_, pselP_, pselN_ );  //set config and inputs
-                        bufferSet( (U32)&v, 1 );
+                        bufferSet( (u32)&v, 1 );
                         channelOnly( ch_ );                 //disable all other channels
                         return true;
                     }
@@ -375,7 +371,7 @@ SA  result1         () {
 //============
 
                     //get with a specific resolution, and number of samples
-SA  read            (I16& v, RES r, OVERSAMP s = OVEROFF) {
+SA  read            (i16& v, RES r, OVERSAMP s = OVEROFF) {
                         if( not setConfig( v ) ) return false;
                         RES rr = resolution();          //save old
                         OVERSAMP ss = overSample();
@@ -393,9 +389,6 @@ SA  read            (I16& v, RES r, OVERSAMP s = OVEROFF) {
 
 };
 
-#undef U32
-#undef U16
-#undef I16
-#undef SA 
+#undef SA
+#define SA static auto
 #undef SI
-#undef SCA

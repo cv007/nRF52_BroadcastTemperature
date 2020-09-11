@@ -1,15 +1,13 @@
 #pragma once
 
-#include <cstdint>
-#include <cstdbool>
+#include "nRFconfig.hpp"
 
 #include "nrf_delay.h"
 #include "nRFconfig.hpp" //which mcu in use, for PIN enums
 
-#define U32 uint32_t
+#undef SA
 #define SA [[gnu::always_inline]] static auto
 // #define SA [[gnu::noinline]] static auto
-#define SCA static constexpr auto
 
 /*------------------------------------------------------------------------------
     GPIO namespace, for pin properties 
@@ -49,46 +47,46 @@ struct Gpio {
     #pragma GCC diagnostic ignored "-Wpedantic"
     template<uint8_t PinN_>
     struct Gpio_ {
-                U32 unused1[0x504/4];
-    union  {    U32 OUT32; //0x50420
-    struct {        U32         : PinN_;
-                    U32 OUT     : 1;
-                    U32         : 31-PinN_;
+                u32 unused1[0x504/4];
+    union  {    u32 OUT32; //0x50420
+    struct {        u32         : PinN_;
+                    u32 OUT     : 1;
+                    u32         : 31-PinN_;
     };};
-                U32 OUTSET;     //0x508
-                U32 OUTCLR;     //0x50C
-    union  {    U32 IN32;       //0x510
-    struct {        U32         : PinN_;
-                    U32 IN      : 1;
-                    U32         : 31-PinN_;
+                u32 OUTSET;     //0x508
+                u32 OUTCLR;     //0x50C
+    union  {    u32 IN32;       //0x510
+    struct {        u32         : PinN_;
+                    u32 IN      : 1;
+                    u32         : 31-PinN_;
     };};
-    union  {    U32 DIR32;      //0x514
-    struct {        U32         : PinN_;
-                    U32 DIR     : 1;
-                    U32         : 31-PinN_;
+    union  {    u32 DIR32;      //0x514
+    struct {        u32         : PinN_;
+                    u32 DIR     : 1;
+                    u32         : 31-PinN_;
     };};
-                U32 DIRSET;     //0x518
-                U32 DIRCLR;     //0x51C
-    union  {    U32 LATCH32;    //0x520
-    struct {        U32         : PinN_;
-                    U32 LATCH   : 1;
-                    U32         : 31-PinN_;
+                u32 DIRSET;     //0x518
+                u32 DIRCLR;     //0x51C
+    union  {    u32 LATCH32;    //0x520
+    struct {        u32         : PinN_;
+                    u32 LATCH   : 1;
+                    u32         : 31-PinN_;
     };};
-    union  {    U32 DETECTMODE32; //0x524
-    struct {        U32             : PinN_;
-                    U32 DETECTMODE  : 1;
-                    U32             : 31-PinN_;
+    union  {    u32 DETECTMODE32; //0x524
+    struct {        u32             : PinN_;
+                    u32 DETECTMODE  : 1;
+                    u32             : 31-PinN_;
     };};
-                U32 unused2[(0x700-0x528)/4 + PinN_];
+                u32 unused2[(0x700-0x528)/4 + PinN_];
                 //0x700+Pin_*4
-    union  {    U32 PIN_CNF;
-    struct {        U32 DIRP    : 1;
-                    U32 INBUF   : 1; //1 = disable (default)
-                    U32 PULL    : 2;
-                    U32 unused3 : 4;
-                    U32 DRIVE   : 3;
-                    U32 unused4 : 5;
-                    U32 SENSE   : 2;
+    union  {    u32 PIN_CNF;
+    struct {        u32 DIRP    : 1;
+                    u32 INBUF   : 1; //1 = disable (default)
+                    u32 PULL    : 2;
+                    u32 unused3 : 4;
+                    u32 DRIVE   : 3;
+                    u32 unused4 : 5;
+                    u32 SENSE   : 2;
     };};
     };
     #pragma GCC diagnostic pop
@@ -106,14 +104,14 @@ struct Gpio {
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wpedantic"
     using initT = struct {
-        union  { U32 INIT_CNF;
-        struct {    U32 DIRP    : 1;
-                    U32 INBUF   : 1; //1 = disable (default)
-                    U32 PULL    : 2;
-                    U32 unused3 : 4;
-                    U32 DRIVE   : 3;
-                    U32 unused4 : 5;
-                    U32 SENSE   : 2;
+        union  { u32 INIT_CNF;
+        struct {    u32 DIRP    : 1;
+                    u32 INBUF   : 1; //1 = disable (default)
+                    u32 PULL    : 2;
+                    u32 unused3 : 4;
+                    u32 DRIVE   : 3;
+                    u32 unused4 : 5;
+                    u32 SENSE   : 2;
         };};
     };
     #pragma GCC diagnostic pop
@@ -246,6 +244,6 @@ SA  debounce    (uint16_t ms = 50) {
 };
 /*----------------------------------------------------------------------------*/
 
-#undef U32 
-#undef SA 
-#undef SCA 
+#undef SA
+#define SA static auto
+

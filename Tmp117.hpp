@@ -1,23 +1,13 @@
 #pragma once
 
-#include <cstdint>
-#include <cstdbool>
+#include "nRFconfig.hpp"
 
 #include "nrf_delay.h"
 
 #include "Twim.hpp"
 #include "Print.hpp"
 
-#define U32 uint32_t
-#define U16 uint16_t
-#define I16 int16_t
-#define U8 uint8_t
-// #define SA [[gnu::always_inline]] static auto
-// #define SA [[gnu::noinline]] static auto
-#define SA static auto
 #define SI static inline
-#define SCA static constexpr auto
-
 
 /*------------------------------------------------------------------------------
     Tmp117 struct
@@ -26,7 +16,7 @@
 
     TMP117 - Texas Instruments temperature IC
 ------------------------------------------------------------------------------*/
-template<typename Twi_, U8 Addr_ = 0x48>
+template<typename Twi_, u8 Addr_ = 0x48>
 struct Tmp117 {
 
     static_assert(Addr_ >= 0x48 and Addr_ <= 0x4B, "invalid Tmp117 address");
@@ -48,11 +38,11 @@ struct Tmp117 {
     enum    { EEBUSYu = 14, EUN = 15 };
 
 
-                template<typename T> //T = U16 or I16
-SA  read        (const U8 r, T& v) {
+                template<typename T> //T = u16 or i16
+SA  read        (const u8 r, T& v) {
                     if( not isInit_ ) init();
-                    U8 rbuf[2]; //if want to init this for some reason, make it volatile
-                    U8 tbuf[1] = { r }; //register
+                    u8 rbuf[2]; //if want to init this for some reason, make it volatile
+                    u8 tbuf[1] = { r }; //register
                     bool tf = false;
                     if( twi_.writeRead( tbuf, rbuf) ){
                         v = (rbuf[0]<<8) bitor rbuf[1];
@@ -65,23 +55,23 @@ SA  read        (const U8 r, T& v) {
                     return tf;
                 }
 
-                template<typename T> //T = U16 or I16
-SA  write       (const U8 r, const T& v) {
+                template<typename T> //T = u16 or i16
+SA  write       (const u8 r, const T& v) {
                     if( not isInit_ ) init();
-                    U8 vH = v>>8;   //avoid narrowing conversion
-                    U8 vL = v;      //  error in array init
-                    U8 buf[3] = { r, vH, vL };
+                    u8 vH = v>>8;   //avoid narrowing conversion
+                    u8 vL = v;      //  error in array init
+                    u8 buf[3] = { r, vH, vL };
                     bool tf = twi_.write( buf );
                     // DebugFuncHeader();
                     // Debug("  write reg: %d [0x%04X] %s\n", r, v, tf ? "ok" : "failed");
                     return tf;
                 }
 
-SA  configR     (U16& v)        { return read( CONFIG, v ); }
-SA  configW     (U16 v)         { return write( CONFIG, v ); }
+SA  configR     (u16& v)        { return read( CONFIG, v ); }
+SA  configW     (u16 v)         { return write( CONFIG, v ); }
                 //bitmask to clear, new value bitmask
-SA  configWbm   (U16 bm, U16 nvm){
-                    U16 v;
+SA  configWbm   (u16 bm, u16 nvm){
+                    u16 v;
                     if( not configR( v ) ) return false;    //R
                     v  = (v bitand compl bm) bitor nvm;     //M
                     return configW( v );                    //W
@@ -103,8 +93,8 @@ SA  deinit      ()              { twi_.deinit(); isInit_ = false; }
 
                                 //can read and busy flag set = true,
                                 //cannot read or flag clear = false
-SA  isEEbusy    () -> bool      { U16 v; return configR( v ) ? v bitand (1<<EEBUSY) : false ; }
-SA  isDataReady () -> bool      { U16 s = 0; 
+SA  isEEbusy    () -> bool      { u16 v; return configR( v ) ? v bitand (1<<EEBUSY) : false ; }
+SA  isDataReady () -> bool      { u16 s = 0; 
                                   if( not configR(s) ) return false;
                                   return (s bitand (1<<DATAREADY));
                                 } 
@@ -127,10 +117,10 @@ SA  average64   ()              { return configWbm( 3<<AVERAGE, 3<<AVERAGE ); }
 SA  eeUnlock    ()              { return write( EEUNLOCK, 0<<EUN ); }
 SA  eeLock      ()              { return write( EEUNLOCK, 1<<EUN ); }
 
-SA  id          (U16& v)        { return read( DEVICEID, v ); }
-SA  highLimit   (U16& v)        { return write( HIGHLIMIT, v ); }
-SA  lowLimit    (U16& v)        { return write( LOWLIMIT, v ); }
-SA  tempRaw     (I16& v)        { return read( TEMP, v ); }
+SA  id          (u16& v)        { return read( DEVICEID, v ); }
+SA  highLimit   (u16& v)        { return write( HIGHLIMIT, v ); }
+SA  lowLimit    (u16& v)        { return write( LOWLIMIT, v ); }
+SA  tempRaw     (i16& v)        { return read( TEMP, v ); }
 
 
     /*
@@ -145,22 +135,15 @@ SA  tempRaw     (I16& v)        { return read( TEMP, v ); }
     normal mul/div- x100C -> v*78125/100000, x100F -> v*140625/100000 + 3200
     */
 
-SA  x10F    (I16 v) -> I16      { return ((v * 9L)>>6) + 320; }
-SA  x100F   (I16 v) -> I16      { return ((v * 45L)>>5) + 3200; }
-SA  x1000F  (I16 v) -> int32_t  { return ((v * 225L)>>4) + 32000; }
-SA  x10C    (I16 v) -> I16      { return (v * 5L)>>6; }
-SA  x100C   (I16 v) -> I16      { return (v * 25L)>>5; }
-SA  x1000C  (I16 v) -> int32_t  { return (v * 125L)>>4; }
+SA  x10F    (i16 v) -> i16      { return ((v * 9L)>>6) + 320; }
+SA  x100F   (i16 v) -> i16      { return ((v * 45L)>>5) + 3200; }
+SA  x1000F  (i16 v) -> int32_t  { return ((v * 225L)>>4) + 32000; }
+SA  x10C    (i16 v) -> i16      { return (v * 5L)>>6; }
+SA  x100C   (i16 v) -> i16      { return (v * 25L)>>5; }
+SA  x1000C  (i16 v) -> int32_t  { return (v * 125L)>>4; }
 
 };
 
-
-
-#undef U32 
-#undef U16 
-#undef I16 
-#undef U8 
-#undef SA 
 #undef SI
-#undef SCA 
+
 

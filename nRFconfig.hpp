@@ -1,5 +1,33 @@
 #pragma once
 
+//common includes
+#include <cstdbool>
+#include <cstdint>
+
+//our own types, to use include this file
+using u8 = uint8_t;
+using i8 = int8_t;
+using u16 = uint16_t;
+using i16 = int16_t;
+using u32 = uint32_t;
+using i32 = int32_t;
+using u64 = uint64_t;
+using i64 = int64_t;
+
+constexpr auto operator "" _u8  (u64 v) { return (u8)v; }
+constexpr auto operator "" _i8  (u64 v) { return (i8)v; }
+constexpr auto operator "" _u16 (u64 v) { return (u16)v; }
+constexpr auto operator "" _i16 (u64 v) { return (i16)v; }
+constexpr auto operator "" _u32 (u64 v) { return (u32)v; }
+constexpr auto operator "" _i32 (u64 v) { return (i32)v; }
+constexpr auto operator "" _u64 (u64 v) { return (u64)v; }
+constexpr auto operator "" _i64 (u64 v) { return (i64)v; }
+
+#define SA static auto
+#define SCA static constexpr auto
+
+
+
 #include "app_timer.h" //rtc count for Debug
 
 /*------------------------------------------------------------------------------
@@ -43,7 +71,7 @@ inline bool markupON{true};
 #ifdef DEBUG_DEVICE
 #define Debug(...)              Print( DEBUG_DEVICE, __VA_ARGS__ )
 //using app timer rtc1 as system time, is /2 so 16384 per sec
-#define DebugFuncHeader()       do { uint32_t t = app_timer_cnt_get(); \
+#define DebugFuncHeader()       do { u32 t = app_timer_cnt_get(); \
                                 Debug("{Fgreen}[%04d.%06d][%s:%d ::%s]{Fwhite}\n", \
                                 t/16384, (t%16384) * 61, \
                                 __FILE__, __LINE__, __func__); } while(0)

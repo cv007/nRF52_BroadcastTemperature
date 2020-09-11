@@ -1,7 +1,7 @@
 #pragma once
 
-#include <cstdint>
-#include <cstdbool>
+#include "nRFconfig.hpp"
+
 #include <cstdio>
 #include <cstring>
 
@@ -15,8 +15,8 @@
 #include "Saadc.hpp"
 #include "Print.hpp"
 
+#undef SA
 #define SA [[gnu::noinline]] static auto
-#define SCA static constexpr auto
 #define SC static constexpr
 #define SI static inline
 
@@ -399,7 +399,7 @@ SA  stop            () -> void {
 };
 
 #undef SA
-#undef SCA
+#define SA static auto
 #undef SI
 #undef SC
 

@@ -3762,166 +3762,165 @@ SVCALL(SD_BLE_GAP_TX_POWER_SET, uint32_t, sd_ble_gap_tx_power_set(uint8_t role, 
    1a5c0:	df77      	svc	119	; 0x77
    1a5c2:	4770      	bx	lr
 
-0001a5c4 <Errors::check(unsigned short, bool) [clone .constprop.0]>:
+0001a5c4 <Errors::check(short, bool) [clone .constprop.0]>:
 struct Errors {
 
                 //if error, show error code 3 times, 
                 //reset unless also pass in false
-SA  check       (uint16_t err, bool reboot = true) {
+SA  check       (i16 err, bool reboot = true) {
                     if( err == 0 ) return;
    1a5c4:	2800      	cmp	r0, #0
-   1a5c6:	f000 8089 	beq.w	1a6dc <Errors::check(unsigned short, bool) [clone .constprop.0]+0x118>
-SA  check       (uint16_t err, bool reboot = true) {
+   1a5c6:	f000 808a 	beq.w	1a6de <Errors::check(short, bool) [clone .constprop.0]+0x11a>
+SA  check       (i16 err, bool reboot = true) {
    1a5ca:	e92d 4ff8 	stmdb	sp!, {r3, r4, r5, r6, r7, r8, r9, sl, fp, lr}
-   1a5ce:	4e44      	ldr	r6, [pc, #272]	; (1a6e0 <Errors::check(unsigned short, bool) [clone .constprop.0]+0x11c>)
-   1a5d0:	4680      	mov	r8, r0
+   1a5ce:	4e44      	ldr	r6, [pc, #272]	; (1a6e0 <Errors::check(short, bool) [clone .constprop.0]+0x11c>)
+   1a5d0:	fa1f f880 	uxth.w	r8, r0
+   1a5d4:	f046 0601 	orr.w	r6, r6, #1
                     if( err == 0 ) return;
-   1a5d2:	f04f 0903 	mov.w	r9, #3
-   1a5d6:	f046 0601 	orr.w	r6, r6, #1
+   1a5d8:	f04f 0903 	mov.w	r9, #3
 SA  latchOn     ()          { reg.DETECTMODE = 1; }
 
 //------------
 //  status
 //------------
 SA  isOutput    ()          { return reg.DIRP; }
-   1a5da:	f04f 44a0 	mov.w	r4, #1342177280	; 0x50000000
+   1a5dc:	f04f 44a0 	mov.w	r4, #1342177280	; 0x50000000
 
             //show error code via led's, skip leading 0's
             //show 1-15 blinks for each nibble (0x01-0x0f)
             //a zero will be a short green blink
-SA  error   (uint16_t hex) {
+SA  error   (u16 hex) {
                 bool lz = true;
-   1a5de:	2501      	movs	r5, #1
+   1a5e0:	2501      	movs	r5, #1
                 for( auto i = 12; i >= 0; i -= 4 ){
-   1a5e0:	270c      	movs	r7, #12
-                    uint8_t v = (hex>>i) bitand 0xf;
-   1a5e2:	fa48 f307 	asr.w	r3, r8, r7
+   1a5e2:	270c      	movs	r7, #12
+                    u8 v = (hex>>i) bitand 0xf;
+   1a5e4:	fa48 f307 	asr.w	r3, r8, r7
                     if( v == 0 and lz == true ) continue; //skip leading 0's
-   1a5e6:	f013 030f 	ands.w	r3, r3, #15
-   1a5ea:	d04e      	beq.n	1a68a <Errors::check(unsigned short, bool) [clone .constprop.0]+0xc6>
-   1a5ec:	f8d4 271c 	ldr.w	r2, [r4, #1820]	; 0x71c
+   1a5e8:	f013 030f 	ands.w	r3, r3, #15
+   1a5ec:	d04e      	beq.n	1a68c <Errors::check(short, bool) [clone .constprop.0]+0xc8>
+   1a5ee:	f8d4 271c 	ldr.w	r2, [r4, #1820]	; 0x71c
                 //in places that sets a peripheral pin
                 //  PSEL.SCA = board.sca.pinNumber();
 SCA pinNumber   ()          { return Pin_; }
 
 SA  blinkN      (uint16_t n, uint32_t mson, uint32_t msoff = 0, uint32_t lastdelayms = 0) {
                     if( not isOutput() ) return;
-   1a5f0:	07d5      	lsls	r5, r2, #31
-   1a5f2:	d529      	bpl.n	1a648 <Errors::check(unsigned short, bool) [clone .constprop.0]+0x84>
+   1a5f2:	07d5      	lsls	r5, r2, #31
+   1a5f4:	d529      	bpl.n	1a64a <Errors::check(short, bool) [clone .constprop.0]+0x86>
                     if( not msoff ) msoff = mson;
                     while( n-- ){ 
-   1a5f4:	3b01      	subs	r3, #1
-   1a5f6:	b29d      	uxth	r5, r3
+   1a5f6:	3b01      	subs	r3, #1
+   1a5f8:	b29d      	uxth	r5, r3
 SA  high        ()          { reg.OUTSET = bm_; } //register wide write
-   1a5f8:	f04f 0a80 	mov.w	sl, #128	; 0x80
+   1a5fa:	f04f 0a80 	mov.w	sl, #128	; 0x80
 SA  toggle      ()          { if( reg.OUT ) low(); else high(); }
-   1a5fc:	f8d4 3504 	ldr.w	r3, [r4, #1284]	; 0x504
-   1a600:	0618      	lsls	r0, r3, #24
+   1a5fe:	f8d4 3504 	ldr.w	r3, [r4, #1284]	; 0x504
+   1a602:	0618      	lsls	r0, r3, #24
 SA  low         ()          { reg.OUTCLR = bm_; } //register wide write
-   1a602:	bf4c      	ite	mi
-   1a604:	f8c4 a50c 	strmi.w	sl, [r4, #1292]	; 0x50c
+   1a604:	bf4c      	ite	mi
+   1a606:	f8c4 a50c 	strmi.w	sl, [r4, #1292]	; 0x50c
 SA  high        ()          { reg.OUTSET = bm_; } //register wide write
-   1a608:	f8c4 a508 	strpl.w	sl, [r4, #1288]	; 0x508
+   1a60a:	f8c4 a508 	strpl.w	sl, [r4, #1288]	; 0x508
                 for( auto i = 12; i >= 0; i -= 4 ){
-   1a60c:	f44f 7bfa 	mov.w	fp, #500	; 0x1f4
-   1a610:	f44f 407a 	mov.w	r0, #64000	; 0xfa00
-   1a614:	47b0      	blx	r6
+   1a60e:	f44f 7bfa 	mov.w	fp, #500	; 0x1f4
+   1a612:	f44f 407a 	mov.w	r0, #64000	; 0xfa00
+   1a616:	47b0      	blx	r6
         return;
     }
 
     do {
         nrf_delay_us(1000);
     } while (--ms_time);
-   1a616:	f1bb 0b01 	subs.w	fp, fp, #1
-   1a61a:	d1f9      	bne.n	1a610 <Errors::check(unsigned short, bool) [clone .constprop.0]+0x4c>
+   1a618:	f1bb 0b01 	subs.w	fp, fp, #1
+   1a61c:	d1f9      	bne.n	1a612 <Errors::check(short, bool) [clone .constprop.0]+0x4e>
 SA  toggle      ()          { if( reg.OUT ) low(); else high(); }
-   1a61c:	f8d4 3504 	ldr.w	r3, [r4, #1284]	; 0x504
-   1a620:	0619      	lsls	r1, r3, #24
+   1a61e:	f8d4 3504 	ldr.w	r3, [r4, #1284]	; 0x504
+   1a622:	0619      	lsls	r1, r3, #24
 SA  low         ()          { reg.OUTCLR = bm_; } //register wide write
-   1a622:	bf4c      	ite	mi
-   1a624:	f8c4 a50c 	strmi.w	sl, [r4, #1292]	; 0x50c
+   1a624:	bf4c      	ite	mi
+   1a626:	f8c4 a50c 	strmi.w	sl, [r4, #1292]	; 0x50c
 SA  high        ()          { reg.OUTSET = bm_; } //register wide write
-   1a628:	f8c4 a508 	strpl.w	sl, [r4, #1288]	; 0x508
-   1a62c:	f44f 7bfa 	mov.w	fp, #500	; 0x1f4
-   1a630:	f44f 407a 	mov.w	r0, #64000	; 0xfa00
-   1a634:	47b0      	blx	r6
-   1a636:	f1bb 0b01 	subs.w	fp, fp, #1
-   1a63a:	d1f9      	bne.n	1a630 <Errors::check(unsigned short, bool) [clone .constprop.0]+0x6c>
+   1a62a:	f8c4 a508 	strpl.w	sl, [r4, #1288]	; 0x508
+   1a62e:	f44f 7bfa 	mov.w	fp, #500	; 0x1f4
+   1a632:	f44f 407a 	mov.w	r0, #64000	; 0xfa00
+   1a636:	47b0      	blx	r6
+   1a638:	f1bb 0b01 	subs.w	fp, fp, #1
+   1a63c:	d1f9      	bne.n	1a632 <Errors::check(short, bool) [clone .constprop.0]+0x6e>
                     while( n-- ){ 
-   1a63c:	3d01      	subs	r5, #1
-   1a63e:	b2ad      	uxth	r5, r5
-   1a640:	f64f 73ff 	movw	r3, #65535	; 0xffff
-   1a644:	429d      	cmp	r5, r3
-   1a646:	d1d9      	bne.n	1a5fc <Errors::check(unsigned short, bool) [clone .constprop.0]+0x38>
-   1a648:	f44f 75fa 	mov.w	r5, #500	; 0x1f4
-   1a64c:	f44f 407a 	mov.w	r0, #64000	; 0xfa00
-   1a650:	47b0      	blx	r6
-   1a652:	3d01      	subs	r5, #1
-   1a654:	d1fa      	bne.n	1a64c <Errors::check(unsigned short, bool) [clone .constprop.0]+0x88>
-   1a656:	3f04      	subs	r7, #4
-   1a658:	1d3b      	adds	r3, r7, #4
-   1a65a:	d1c2      	bne.n	1a5e2 <Errors::check(unsigned short, bool) [clone .constprop.0]+0x1e>
-   1a65c:	f640 35b8 	movw	r5, #3000	; 0xbb8
-   1a660:	f44f 407a 	mov.w	r0, #64000	; 0xfa00
-   1a664:	47b0      	blx	r6
-   1a666:	3d01      	subs	r5, #1
-   1a668:	d1fa      	bne.n	1a660 <Errors::check(unsigned short, bool) [clone .constprop.0]+0x9c>
+   1a63e:	3d01      	subs	r5, #1
+   1a640:	b2ad      	uxth	r5, r5
+   1a642:	f64f 73ff 	movw	r3, #65535	; 0xffff
+   1a646:	429d      	cmp	r5, r3
+   1a648:	d1d9      	bne.n	1a5fe <Errors::check(short, bool) [clone .constprop.0]+0x3a>
+   1a64a:	f44f 75fa 	mov.w	r5, #500	; 0x1f4
+   1a64e:	f44f 407a 	mov.w	r0, #64000	; 0xfa00
+   1a652:	47b0      	blx	r6
+   1a654:	3d01      	subs	r5, #1
+   1a656:	d1fa      	bne.n	1a64e <Errors::check(short, bool) [clone .constprop.0]+0x8a>
+   1a658:	3f04      	subs	r7, #4
+   1a65a:	1d3b      	adds	r3, r7, #4
+   1a65c:	d1c2      	bne.n	1a5e4 <Errors::check(short, bool) [clone .constprop.0]+0x20>
+   1a65e:	f640 35b8 	movw	r5, #3000	; 0xbb8
+   1a662:	f44f 407a 	mov.w	r0, #64000	; 0xfa00
+   1a666:	47b0      	blx	r6
+   1a668:	3d01      	subs	r5, #1
+   1a66a:	d1fa      	bne.n	1a662 <Errors::check(short, bool) [clone .constprop.0]+0x9e>
                     for( auto i = 0; i < 3; i++ ){
-   1a66a:	f1b9 0901 	subs.w	r9, r9, #1
-   1a66e:	d1b6      	bne.n	1a5de <Errors::check(unsigned short, bool) [clone .constprop.0]+0x1a>
-   1a670:	f3bf 8f4f 	dsb	sy
+   1a66c:	f1b9 0901 	subs.w	r9, r9, #1
+   1a670:	d1b6      	bne.n	1a5e0 <Errors::check(short, bool) [clone .constprop.0]+0x1c>
+   1a672:	f3bf 8f4f 	dsb	sy
                            (SCB->AIRCR & SCB_AIRCR_PRIGROUP_Msk) |
-   1a674:	491b      	ldr	r1, [pc, #108]	; (1a6e4 <Errors::check(unsigned short, bool) [clone .constprop.0]+0x120>)
-   1a676:	4b1c      	ldr	r3, [pc, #112]	; (1a6e8 <Errors::check(unsigned short, bool) [clone .constprop.0]+0x124>)
-   1a678:	68ca      	ldr	r2, [r1, #12]
-   1a67a:	f402 62e0 	and.w	r2, r2, #1792	; 0x700
-   1a67e:	4313      	orrs	r3, r2
+   1a676:	491b      	ldr	r1, [pc, #108]	; (1a6e4 <Errors::check(short, bool) [clone .constprop.0]+0x120>)
+   1a678:	4b1b      	ldr	r3, [pc, #108]	; (1a6e8 <Errors::check(short, bool) [clone .constprop.0]+0x124>)
+   1a67a:	68ca      	ldr	r2, [r1, #12]
+   1a67c:	f402 62e0 	and.w	r2, r2, #1792	; 0x700
+   1a680:	4313      	orrs	r3, r2
   SCB->AIRCR  = (uint32_t)((0x5FAUL << SCB_AIRCR_VECTKEY_Pos)    |
-   1a680:	60cb      	str	r3, [r1, #12]
-   1a682:	f3bf 8f4f 	dsb	sy
+   1a682:	60cb      	str	r3, [r1, #12]
+   1a684:	f3bf 8f4f 	dsb	sy
   __ASM volatile ("nop");
-   1a686:	bf00      	nop
-   1a688:	e7fd      	b.n	1a686 <Errors::check(unsigned short, bool) [clone .constprop.0]+0xc2>
+   1a688:	bf00      	nop
+   1a68a:	e7fd      	b.n	1a688 <Errors::check(short, bool) [clone .constprop.0]+0xc4>
                     if( v == 0 and lz == true ) continue; //skip leading 0's
-   1a68a:	2d00      	cmp	r5, #0
-   1a68c:	d1e3      	bne.n	1a656 <Errors::check(unsigned short, bool) [clone .constprop.0]+0x92>
+   1a68c:	2d00      	cmp	r5, #0
+   1a68e:	d1e3      	bne.n	1a658 <Errors::check(short, bool) [clone .constprop.0]+0x94>
 SA  isOutput    ()          { return reg.DIRP; }
-   1a68e:	f8d4 3720 	ldr.w	r3, [r4, #1824]	; 0x720
+   1a690:	f8d4 3720 	ldr.w	r3, [r4, #1824]	; 0x720
                     if( not isOutput() ) return;
-   1a692:	07da      	lsls	r2, r3, #31
-   1a694:	d5d8      	bpl.n	1a648 <Errors::check(unsigned short, bool) [clone .constprop.0]+0x84>
+   1a694:	07da      	lsls	r2, r3, #31
+   1a696:	d5d8      	bpl.n	1a64a <Errors::check(short, bool) [clone .constprop.0]+0x86>
 SA  toggle      ()          { if( reg.OUT ) low(); else high(); }
-   1a696:	f8d4 3504 	ldr.w	r3, [r4, #1284]	; 0x504
-   1a69a:	f413 7f80 	tst.w	r3, #256	; 0x100
+   1a698:	f8d4 3504 	ldr.w	r3, [r4, #1284]	; 0x504
+   1a69c:	f413 7f80 	tst.w	r3, #256	; 0x100
 SA  low         ()          { reg.OUTCLR = bm_; } //register wide write
-   1a69e:	f44f 7380 	mov.w	r3, #256	; 0x100
-   1a6a2:	bf14      	ite	ne
-   1a6a4:	f8c4 350c 	strne.w	r3, [r4, #1292]	; 0x50c
+   1a6a0:	f44f 7380 	mov.w	r3, #256	; 0x100
+   1a6a4:	bf14      	ite	ne
+   1a6a6:	f8c4 350c 	strne.w	r3, [r4, #1292]	; 0x50c
 SA  high        ()          { reg.OUTSET = bm_; } //register wide write
-   1a6a8:	f8c4 3508 	streq.w	r3, [r4, #1288]	; 0x508
+   1a6aa:	f8c4 3508 	streq.w	r3, [r4, #1288]	; 0x508
                 for( auto i = 12; i >= 0; i -= 4 ){
-   1a6ac:	2532      	movs	r5, #50	; 0x32
-   1a6ae:	f44f 407a 	mov.w	r0, #64000	; 0xfa00
-   1a6b2:	47b0      	blx	r6
-   1a6b4:	3d01      	subs	r5, #1
-   1a6b6:	d1fa      	bne.n	1a6ae <Errors::check(unsigned short, bool) [clone .constprop.0]+0xea>
+   1a6ae:	2532      	movs	r5, #50	; 0x32
+   1a6b0:	f44f 407a 	mov.w	r0, #64000	; 0xfa00
+   1a6b4:	47b0      	blx	r6
+   1a6b6:	3d01      	subs	r5, #1
+   1a6b8:	d1fa      	bne.n	1a6b0 <Errors::check(short, bool) [clone .constprop.0]+0xec>
 SA  toggle      ()          { if( reg.OUT ) low(); else high(); }
-   1a6b8:	f8d4 3504 	ldr.w	r3, [r4, #1284]	; 0x504
-   1a6bc:	f413 7f80 	tst.w	r3, #256	; 0x100
+   1a6ba:	f8d4 3504 	ldr.w	r3, [r4, #1284]	; 0x504
+   1a6be:	f413 7f80 	tst.w	r3, #256	; 0x100
 SA  low         ()          { reg.OUTCLR = bm_; } //register wide write
-   1a6c0:	f44f 7380 	mov.w	r3, #256	; 0x100
-   1a6c4:	bf14      	ite	ne
-   1a6c6:	f8c4 350c 	strne.w	r3, [r4, #1292]	; 0x50c
+   1a6c2:	f44f 7380 	mov.w	r3, #256	; 0x100
+   1a6c6:	bf14      	ite	ne
+   1a6c8:	f8c4 350c 	strne.w	r3, [r4, #1292]	; 0x50c
 SA  high        ()          { reg.OUTSET = bm_; } //register wide write
-   1a6ca:	f8c4 3508 	streq.w	r3, [r4, #1288]	; 0x508
-   1a6ce:	2532      	movs	r5, #50	; 0x32
-   1a6d0:	f44f 407a 	mov.w	r0, #64000	; 0xfa00
-   1a6d4:	47b0      	blx	r6
-   1a6d6:	3d01      	subs	r5, #1
-   1a6d8:	d1fa      	bne.n	1a6d0 <Errors::check(unsigned short, bool) [clone .constprop.0]+0x10c>
-   1a6da:	e7b5      	b.n	1a648 <Errors::check(unsigned short, bool) [clone .constprop.0]+0x84>
-   1a6dc:	4770      	bx	lr
-   1a6de:	bf00      	nop
+   1a6cc:	f8c4 3508 	streq.w	r3, [r4, #1288]	; 0x508
+   1a6d0:	2532      	movs	r5, #50	; 0x32
+   1a6d2:	f44f 407a 	mov.w	r0, #64000	; 0xfa00
+   1a6d6:	47b0      	blx	r6
+   1a6d8:	3d01      	subs	r5, #1
+   1a6da:	d1fa      	bne.n	1a6d2 <Errors::check(short, bool) [clone .constprop.0]+0x10e>
+   1a6dc:	e7b5      	b.n	1a64a <Errors::check(short, bool) [clone .constprop.0]+0x86>
+   1a6de:	4770      	bx	lr
    1a6e0:	0001e800 	.word	0x0001e800
    1a6e4:	e000ed00 	.word	0xe000ed00
    1a6e8:	05fa0004 	.word	0x05fa0004
@@ -4285,7 +4284,7 @@ SA  calibrate       ()          {
 //  channel config
 //--------------------
 SA  isChannelUsed   (CH e)      { return inuse_ bitand (1<<e); }
-SA  channelSetup    (CH e, U32 cfg, PSEL p, PSEL n = NC) { 
+SA  channelSetup    (CH e, u32 cfg, PSEL p, PSEL n = NC) { 
    1a954:	b470      	push	{r4, r5, r6}
                                     if( p or n ) inuse_ or_eq (1<<e);
    1a956:	ea52 0403 	orrs.w	r4, r2, r3
@@ -4394,7 +4393,7 @@ SA  channelOnly     (CH e)      {
    1aa2e:	bf00      	nop
 
 0001aa30 <Saadc::resolution(Saadc::RES)>:
-SA  limitHL         (CH e, I16 H, I16 L) { limitH(e,H); limitL(e,L); }
+SA  limitHL         (CH e, i16 H, i16 L) { limitH(e,H); limitL(e,L); }
 
 //--------------------
 //  config
@@ -4437,7 +4436,7 @@ SA  overSample      ()              { return OVERSAMP(reg.OVERSAMPLE); }
                                     }
 SA  sampleRateTask  ()              { reg.SAMPLERATE = 0; }
 
-SA  bufferAddr      (U32 v)         { reg.RESULTPTR = v; }
+SA  bufferAddr      (u32 v)         { reg.RESULTPTR = v; }
    1aa68:	4b01      	ldr	r3, [pc, #4]	; (1aa70 <Saadc::bufferAddr(unsigned long)+0x8>)
    1aa6a:	f8c3 062c 	str.w	r0, [r3, #1580]	; 0x62c
    1aa6e:	4770      	bx	lr
@@ -4445,7 +4444,7 @@ SA  bufferAddr      (U32 v)         { reg.RESULTPTR = v; }
 
 0001aa74 <Saadc::bufferSize(unsigned short)>:
 SA  bufferAddr      ()              { return reg.RESULTPTR; }
-SA  bufferSize      (U16 v)         { reg.RESULTMAXCNT = v; } //15bits (max 32767)
+SA  bufferSize      (u16 v)         { reg.RESULTMAXCNT = v; } //15bits (max 32767)
    1aa74:	4b01      	ldr	r3, [pc, #4]	; (1aa7c <Saadc::bufferSize(unsigned short)+0x8>)
    1aa76:	f8c3 0630 	str.w	r0, [r3, #1584]	; 0x630
    1aa7a:	4770      	bx	lr
@@ -4453,7 +4452,7 @@ SA  bufferSize      (U16 v)         { reg.RESULTMAXCNT = v; } //15bits (max 3276
 
 0001aa80 <Saadc::bufferSet(unsigned long, unsigned short)>:
 SA  bufferSize      ()              { return reg.RESULTMAXCNT; }
-SA  bufferSet       (U32 v, U16 n)  { bufferAddr(v); bufferSize(n); }
+SA  bufferSet       (u32 v, u16 n)  { bufferAddr(v); bufferSize(n); }
    1aa80:	b510      	push	{r4, lr}
    1aa82:	460c      	mov	r4, r1
    1aa84:	f7ff fff0 	bl	1aa68 <Saadc::bufferAddr(unsigned long)>
@@ -4467,7 +4466,7 @@ SA  bufferSet       (U32 v, U16 n)  { bufferAddr(v); bufferSize(n); }
 
                     //setup our channel config and buffer in Saadc
                     //take exclusive use of Saadc
-SA setConfig        (I16& v) {
+SA setConfig        (i16& v) {
    1aa90:	b538      	push	{r3, r4, r5, lr}
    1aa92:	4604      	mov	r4, r0
                         if( isBusy() ) return false;        //is in use
@@ -4486,7 +4485,7 @@ SA setConfig        (I16& v) {
    1aaac:	7828      	ldrb	r0, [r5, #0]
    1aaae:	6809      	ldr	r1, [r1, #0]
    1aab0:	f7ff ff50 	bl	1a954 <Saadc::channelSetup(Saadc::CH, unsigned long, Saadc::PSEL, Saadc::PSEL)>
-                        bufferSet( (U32)&v, 1 );
+                        bufferSet( (u32)&v, 1 );
    1aab4:	4620      	mov	r0, r4
    1aab6:	2101      	movs	r1, #1
    1aab8:	f7ff ffe2 	bl	1aa80 <Saadc::bufferSet(unsigned long, unsigned short)>
@@ -4533,7 +4532,7 @@ SA  result1         () {
 //============
 
                     //get with a specific resolution, and number of samples
-SA  read            (I16& v, RES r, OVERSAMP s = OVEROFF) {
+SA  read            (i16& v, RES r, OVERSAMP s = OVEROFF) {
    1aaf4:	b5f8      	push	{r3, r4, r5, r6, r7, lr}
    1aaf6:	460e      	mov	r6, r1
    1aaf8:	4615      	mov	r5, r2
@@ -4941,9 +4940,9 @@ SA  sdFlashWrite    (const char ltr) {
                         error.check( sd_flash_page_erase(lastPageFlash_/4096) );
    1ad16:	202f      	movs	r0, #47	; 0x2f
    1ad18:	f7ff fc4a 	bl	1a5b0 <sd_flash_page_erase>
-   1ad1c:	b280      	uxth	r0, r0
+   1ad1c:	b200      	sxth	r0, r0
    1ad1e:	4d17      	ldr	r5, [pc, #92]	; (1ad7c <MyTemperatureAD<TemperatureSi7051<(unsigned char)5> >::sdFlashWrite(char)+0x6c>)
-   1ad20:	f7ff fc50 	bl	1a5c4 <Errors::check(unsigned short, bool) [clone .constprop.0]>
+   1ad20:	f7ff fc50 	bl	1a5c4 <Errors::check(short, bool) [clone .constprop.0]>
    1ad24:	f44f 767a 	mov.w	r6, #1000	; 0x3e8
    1ad28:	f045 0501 	orr.w	r5, r5, #1
    1ad2c:	f44f 407a 	mov.w	r0, #64000	; 0xfa00
@@ -4956,7 +4955,7 @@ SA  sdFlashWrite    (const char ltr) {
    1ad3c:	2bff      	cmp	r3, #255	; 0xff
    1ad3e:	d002      	beq.n	1ad46 <MyTemperatureAD<TemperatureSi7051<(unsigned char)5> >::sdFlashWrite(char)+0x36>
    1ad40:	2003      	movs	r0, #3
-   1ad42:	f7ff fc3f 	bl	1a5c4 <Errors::check(unsigned short, bool) [clone .constprop.0]>
+   1ad42:	f7ff fc3f 	bl	1a5c4 <Errors::check(short, bool) [clone .constprop.0]>
                         error.check( sd_flash_write((uint32_t*)lastPageFlash_, &v, 1 ) );
    1ad46:	2201      	movs	r2, #1
    1ad48:	a901      	add	r1, sp, #4
@@ -4965,8 +4964,8 @@ SA  sdFlashWrite    (const char ltr) {
    1ad4e:	9401      	str	r4, [sp, #4]
                         error.check( sd_flash_write((uint32_t*)lastPageFlash_, &v, 1 ) );
    1ad50:	f7ff fc2c 	bl	1a5ac <sd_flash_write>
-   1ad54:	b280      	uxth	r0, r0
-   1ad56:	f7ff fc35 	bl	1a5c4 <Errors::check(unsigned short, bool) [clone .constprop.0]>
+   1ad54:	b200      	sxth	r0, r0
+   1ad56:	f7ff fc35 	bl	1a5c4 <Errors::check(short, bool) [clone .constprop.0]>
    1ad5a:	f44f 767a 	mov.w	r6, #1000	; 0x3e8
    1ad5e:	f44f 407a 	mov.w	r0, #64000	; 0xfa00
    1ad62:	47a8      	blx	r5
@@ -4978,7 +4977,7 @@ SA  sdFlashWrite    (const char ltr) {
    1ad6e:	42a3      	cmp	r3, r4
    1ad70:	d002      	beq.n	1ad78 <MyTemperatureAD<TemperatureSi7051<(unsigned char)5> >::sdFlashWrite(char)+0x68>
    1ad72:	2003      	movs	r0, #3
-   1ad74:	f7ff fc26 	bl	1a5c4 <Errors::check(unsigned short, bool) [clone .constprop.0]>
+   1ad74:	f7ff fc26 	bl	1a5c4 <Errors::check(short, bool) [clone .constprop.0]>
                     }
    1ad78:	b002      	add	sp, #8
    1ad7a:	bd70      	pop	{r4, r5, r6, pc}
@@ -5359,8 +5358,8 @@ SA  stop            () -> void {
    1b022:	4b06      	ldr	r3, [pc, #24]	; (1b03c <Advertising<MyTemperatureAD<TemperatureSi7051<(unsigned char)5> >, (unsigned short)3000, &(advInitCB())>::stop()+0x24>)
    1b024:	7818      	ldrb	r0, [r3, #0]
    1b026:	f7ff fac9 	bl	1a5bc <sd_ble_gap_adv_stop>
-   1b02a:	b280      	uxth	r0, r0
-   1b02c:	f7ff faca 	bl	1a5c4 <Errors::check(unsigned short, bool) [clone .constprop.0]>
+   1b02a:	b200      	sxth	r0, r0
+   1b02c:	f7ff faca 	bl	1a5c4 <Errors::check(short, bool) [clone .constprop.0]>
                         isActive_ = false;
    1b030:	2300      	movs	r3, #0
    1b032:	7023      	strb	r3, [r4, #0]
@@ -5475,8 +5474,8 @@ SA  power           (uint8_t v) {
                     }
    1b0e2:	e8bd 4008 	ldmia.w	sp!, {r3, lr}
                         error.check( sd_ble_gap_tx_power_set(BLE_GAP_TX_POWER_ROLE_ADV, handle_, SD_TX_LEVELS[v] ) );
-   1b0e6:	b280      	uxth	r0, r0
-   1b0e8:	f7ff ba6c 	b.w	1a5c4 <Errors::check(unsigned short, bool) [clone .constprop.0]>
+   1b0e6:	b200      	sxth	r0, r0
+   1b0e8:	f7ff ba6c 	b.w	1a5c4 <Errors::check(short, bool) [clone .constprop.0]>
    1b0ec:	20001140 	.word	0x20001140
    1b0f0:	0001e7f0 	.word	0x0001e7f0
 
@@ -5495,14 +5494,14 @@ SA  start           () -> void {
    1b102:	493b      	ldr	r1, [pc, #236]	; (1b1f0 <Advertising<MyTemperatureAD<TemperatureSi7051<(unsigned char)5> >, (unsigned short)3000, &(advInitCB())>::start()+0xfc>)
    1b104:	4630      	mov	r0, r6
    1b106:	f7ff fa55 	bl	1a5b4 <sd_ble_gap_adv_set_configure>
-   1b10a:	b280      	uxth	r0, r0
-   1b10c:	f7ff fa5a 	bl	1a5c4 <Errors::check(unsigned short, bool) [clone .constprop.0]>
+   1b10a:	b200      	sxth	r0, r0
+   1b10c:	f7ff fa5a 	bl	1a5c4 <Errors::check(short, bool) [clone .constprop.0]>
                         error.check( sd_ble_gap_adv_start(handle_, BLE_CONN_CFG_TAG_DEFAULT) );
    1b110:	4629      	mov	r1, r5
    1b112:	7830      	ldrb	r0, [r6, #0]
    1b114:	f7ff fa50 	bl	1a5b8 <sd_ble_gap_adv_start>
-   1b118:	b280      	uxth	r0, r0
-   1b11a:	f7ff fa53 	bl	1a5c4 <Errors::check(unsigned short, bool) [clone .constprop.0]>
+   1b118:	b200      	sxth	r0, r0
+   1b11a:	f7ff fa53 	bl	1a5c4 <Errors::check(short, bool) [clone .constprop.0]>
                         power( txPower_ );
    1b11e:	4a35      	ldr	r2, [pc, #212]	; (1b1f4 <Advertising<MyTemperatureAD<TemperatureSi7051<(unsigned char)5> >, (unsigned short)3000, &(advInitCB())>::start()+0x100>)
                         isActive_ = true;
@@ -6238,7 +6237,7 @@ public:
 SA  disable         ()          { reg.ENABLE = 0; }
 SA  isEnabled       ()          { return reg.ENABLE; }
 SA  frequency       (FREQ e)    { reg.FREQUENCY = e; }
-SA  address         (U8 v)      { reg.ADDRESS = v; } //0-127
+SA  address         (u8 v)      { reg.ADDRESS = v; } //0-127
    1b6a4:	4bd2      	ldr	r3, [pc, #840]	; (1b9f0 <TemperatureTmp117<(unsigned char)1>::read()+0x350>)
         (delay_func_t)((((uint32_t)delay_machine_code) | 1));
    1b6a6:	4ed3      	ldr	r6, [pc, #844]	; (1b9f4 <TemperatureTmp117<(unsigned char)1>::read()+0x354>)
@@ -6254,7 +6253,7 @@ SA  init        ()              { twi_.init( Addr_, twi_.K400 );
    1b6ae:	2148      	movs	r1, #72	; 0x48
 SA  frequency       (FREQ e)    { reg.FREQUENCY = e; }
    1b6b0:	f04f 60c8 	mov.w	r0, #104857600	; 0x6400000
-SA  address         (U8 v)      { reg.ADDRESS = v; } //0-127
+SA  address         (u8 v)      { reg.ADDRESS = v; } //0-127
    1b6b4:	f8c3 1588 	str.w	r1, [r3, #1416]	; 0x588
                         reg.PSEL_SCL = e;
                         if( not on ) pinSclDisconnect();
@@ -6304,7 +6303,7 @@ SA  high        ()          { reg.OUTSET = bm_; } //register wide write
    1b70a:	47b0      	blx	r6
    1b70c:	3c01      	subs	r4, #1
    1b70e:	d1fa      	bne.n	1b706 <TemperatureTmp117<(unsigned char)1>::read()+0x66>
-SA  address         (U8 v)      { reg.ADDRESS = v; } //0-127
+SA  address         (u8 v)      { reg.ADDRESS = v; } //0-127
    1b710:	4cb7      	ldr	r4, [pc, #732]	; (1b9f0 <TemperatureTmp117<(unsigned char)1>::read()+0x350>)
    1b712:	f10d 0908 	add.w	r9, sp, #8
    1b716:	f10d 080c 	add.w	r8, sp, #12
@@ -6334,7 +6333,7 @@ SA  startRxStop     ()          { clearEvents(); shortsSetup(LASTRX_STOP); start
 //--------------------
 SA  shortsSetup     (SHORTS e)  { reg.SHORTS = e; }
    1b730:	f44f 5284 	mov.w	r2, #4224	; 0x1080
-                    U8 tbuf[1] = { r }; //register
+                    u8 tbuf[1] = { r }; //register
    1b734:	f88d b008 	strb.w	fp, [sp, #8]
                         reg.TXD.MAXCNT = len;
    1b738:	f8c4 b548 	str.w	fp, [r4, #1352]	; 0x548
@@ -6382,7 +6381,7 @@ SA  isStopped       ()          { return reg.EVENTS.STOPPED; }
    1b780:	d0f7      	beq.n	1b772 <TemperatureTmp117<(unsigned char)1>::read()+0xd2>
 SA  txAmount        ()          { return reg.TXD.AMOUNT; }
    1b782:	f8d4 354c 	ldr.w	r3, [r4, #1356]	; 0x54c
-SA  writeRead       (const U8 (&txbuf)[NT], T (&rxbuf)[NR]) {  
+SA  writeRead       (const u8 (&txbuf)[NT], T (&rxbuf)[NR]) {  
                         txBufferSet( txbuf );
                         rxBufferSet( rxbuf );
                         startTxRxStop(); 
@@ -6437,7 +6436,7 @@ SA  deinit      ()              { twi_.deinit(); isInit_ = false; }
    1b7de:	eb03 0181 	add.w	r1, r3, r1, lsl #2
    1b7e2:	4a88      	ldr	r2, [pc, #544]	; (1ba04 <TemperatureTmp117<(unsigned char)1>::read()+0x364>)
    1b7e4:	0b80      	lsrs	r0, r0, #14
-   1b7e6:	2380      	movs	r3, #128	; 0x80
+   1b7e6:	237f      	movs	r3, #127	; 0x7f
    1b7e8:	f7ff ff2c 	bl	1b644 <int Print<DevRtt<0>, unsigned long, unsigned long, char const*, int, char const*>(DevRtt<0>, char const*, unsigned long, unsigned long, char const*, int, char const*) [clone .constprop.0]>
                         if( not i )      { Debug("  {Fred}timeout, ready bit not set{Fwhite}\n"); return f; }
    1b7ec:	4886      	ldr	r0, [pc, #536]	; (1ba08 <TemperatureTmp117<(unsigned char)1>::read()+0x368>)
@@ -6457,7 +6456,7 @@ SA  isStopped       ()          { return reg.EVENTS.STOPPED; }
    1b808:	f04f 43a0 	mov.w	r3, #1342177280	; 0x50000000
 SA  frequency       (FREQ e)    { reg.FREQUENCY = e; }
    1b80c:	f04f 61c8 	mov.w	r1, #104857600	; 0x6400000
-SA  address         (U8 v)      { reg.ADDRESS = v; } //0-127
+SA  address         (u8 v)      { reg.ADDRESS = v; } //0-127
    1b810:	f8c4 a588 	str.w	sl, [r4, #1416]	; 0x588
 SA  init        (Ts... ts)  { initT it{2}; init_(it, ts...); }
    1b814:	f240 620c 	movw	r2, #1548	; 0x60c
@@ -6505,7 +6504,7 @@ SA  rxAmount        ()          { return reg.RXD.AMOUNT; }
                         while( i and not tmp117.isDataReady() ){ nrf_delay_ms(1); i--; }
    1b868:	0692      	lsls	r2, r2, #26
    1b86a:	d59b      	bpl.n	1b7a4 <TemperatureTmp117<(unsigned char)1>::read()+0x104>
-                    U8 tbuf[1] = { r }; //register
+                    u8 tbuf[1] = { r }; //register
    1b86c:	2000      	movs	r0, #0
 SA  clearError      ()          { reg.ERRORSRC = 7; reg.EVENTS.ERROR = 0; }
    1b86e:	2607      	movs	r6, #7
@@ -6600,7 +6599,7 @@ SA  deinit      ()              { twi_.deinit(); isInit_ = false; }
    1b916:	ebc3 1103 	rsb	r1, r3, r3, lsl #4
    1b91a:	eb03 0181 	add.w	r1, r3, r1, lsl #2
    1b91e:	4a39      	ldr	r2, [pc, #228]	; (1ba04 <TemperatureTmp117<(unsigned char)1>::read()+0x364>)
-   1b920:	2380      	movs	r3, #128	; 0x80
+   1b920:	237f      	movs	r3, #127	; 0x7f
    1b922:	0b80      	lsrs	r0, r0, #14
    1b924:	f7ff fe8e 	bl	1b644 <int Print<DevRtt<0>, unsigned long, unsigned long, char const*, int, char const*>(DevRtt<0>, char const*, unsigned long, unsigned long, char const*, int, char const*) [clone .constprop.0]>
                         if( not ok )     { Debug("  {Fred}failed to read temp value{Fwhite}\n"); return f; }
@@ -6642,7 +6641,7 @@ SA  deinit      ()              { twi_.deinit(); isInit_ = false; }
                         v = (rbuf[0]<<8) bitor rbuf[1];
    1b97c:	b22d      	sxth	r5, r5
    1b97e:	0b80      	lsrs	r0, r0, #14
-   1b980:	2380      	movs	r3, #128	; 0x80
+   1b980:	237f      	movs	r3, #127	; 0x7f
    1b982:	f7ff fe5f 	bl	1b644 <int Print<DevRtt<0>, unsigned long, unsigned long, char const*, int, char const*>(DevRtt<0>, char const*, unsigned long, unsigned long, char const*, int, char const*) [clone .constprop.0]>
                         if( t == -32768 ){ Debug("  returned default temp value\n"); return f; }
    1b986:	f515 4f00 	cmn.w	r5, #32768	; 0x8000
@@ -6654,7 +6653,7 @@ SA  deinit      ()              { twi_.deinit(); isInit_ = false; }
     normal mul/div- x100C -> v*78125/100000, x100F -> v*140625/100000 + 3200
     */
 
-SA  x10F    (I16 v) -> I16      { return ((v * 9L)>>6) + 320; }
+SA  x10F    (i16 v) -> i16      { return ((v * 9L)>>6) + 320; }
    1b98e:	eb05 04c5 	add.w	r4, r5, r5, lsl #3
    1b992:	11a4      	asrs	r4, r4, #6
    1b994:	781a      	ldrb	r2, [r3, #0]
@@ -6738,7 +6737,7 @@ SA  isStopped       ()          { return reg.EVENTS.STOPPED; }
 SA  read            () {
    1ba4c:	e92d 43f0 	stmdb	sp!, {r4, r5, r6, r7, r8, r9, lr}
    1ba50:	f04f 43a0 	mov.w	r3, #1342177280	; 0x50000000
-SA  address         (U8 v)      { reg.ADDRESS = v; } //0-127
+SA  address         (u8 v)      { reg.ADDRESS = v; } //0-127
    1ba54:	4e7e      	ldr	r6, [pc, #504]	; (1bc50 <TemperatureSi7051<(unsigned char)1>::read()+0x204>)
         (delay_func_t)((((uint32_t)delay_machine_code) | 1));
    1ba56:	4c7f      	ldr	r4, [pc, #508]	; (1bc54 <TemperatureSi7051<(unsigned char)1>::read()+0x208>)
@@ -6754,7 +6753,7 @@ SA  init        (Ts... ts)  { initT it{2}; init_(it, ts...); }
    1ba5e:	2240      	movs	r2, #64	; 0x40
 SA  frequency       (FREQ e)    { reg.FREQUENCY = e; }
    1ba60:	f04f 65c8 	mov.w	r5, #104857600	; 0x6400000
-SA  address         (U8 v)      { reg.ADDRESS = v; } //0-127
+SA  address         (u8 v)      { reg.ADDRESS = v; } //0-127
    1ba64:	f8c6 2588 	str.w	r2, [r6, #1416]	; 0x588
                         reg.PSEL_SDA = e;
    1ba68:	f04f 0c0d 	mov.w	ip, #13
@@ -6800,8 +6799,8 @@ SA  enable          ()          { reg.ENABLE = 6; }
                                 }
 
                                 //blocking on clock stretch, up to 10.8ms
-SA  tempWait    (U16& v)        { 
-                                U8 tbuf[1]{ MEASURE_HOLD }; U8 rbuf[2]; 
+SA  tempWait    (u16& v)        { 
+                                u8 tbuf[1]{ MEASURE_HOLD }; u8 rbuf[2]; 
    1baba:	22e3      	movs	r2, #227	; 0xe3
                         reg.TXD.PTR = addr;
    1babc:	a902      	add	r1, sp, #8
@@ -6927,21 +6926,21 @@ SA  rxAmount        ()          { return reg.RXD.AMOUNT; }
 26796 = 25C = 77C
 */
 
-SA  x100C   (U16 v) -> I16      { return ((v * 17572L)>>16) - 4685; }
-SA  x10C    (U16 v) -> I16      { return x100C(v) / 10; }
-SA  x100F   (U16 v) -> I16      { return x100C(v) * 9L / 5 + 3200; }
+SA  x100C   (u16 v) -> i16      { return ((v * 17572L)>>16) - 4685; }
+SA  x10C    (u16 v) -> i16      { return x100C(v) / 10; }
+SA  x100F   (u16 v) -> i16      { return x100C(v) * 9L / 5 + 3200; }
    1bb84:	4c36      	ldr	r4, [pc, #216]	; (1bc60 <TemperatureSi7051<(unsigned char)1>::read()+0x214>)
                         if( not isInit ){ //first time, populate all with same value
    1bb86:	4a37      	ldr	r2, [pc, #220]	; (1bc64 <TemperatureSi7051<(unsigned char)1>::read()+0x218>)
                                 v = (rbuf[0]<<8) bitor rbuf[1];
    1bb88:	ea45 2503 	orr.w	r5, r5, r3, lsl #8
-SA  x100C   (U16 v) -> I16      { return ((v * 17572L)>>16) - 4685; }
+SA  x100C   (u16 v) -> i16      { return ((v * 17572L)>>16) - 4685; }
    1bb8c:	f244 43a4 	movw	r3, #17572	; 0x44a4
    1bb90:	fb03 f305 	mul.w	r3, r3, r5
    1bb94:	141b      	asrs	r3, r3, #16
    1bb96:	f5a3 5392 	sub.w	r3, r3, #4672	; 0x1240
    1bb9a:	3b0d      	subs	r3, #13
-SA  x100F   (U16 v) -> I16      { return x100C(v) * 9L / 5 + 3200; }
+SA  x100F   (u16 v) -> i16      { return x100C(v) * 9L / 5 + 3200; }
    1bb9c:	b21b      	sxth	r3, r3
    1bb9e:	eb03 03c3 	add.w	r3, r3, r3, lsl #3
    1bba2:	fb84 ec03 	smull	lr, ip, r4, r3
@@ -6955,7 +6954,7 @@ SA  low         ()          { reg.OUTCLR = bm_; } //register wide write
    1bbb8:	f503 6348 	add.w	r3, r3, #3200	; 0xc80
    1bbbc:	f44f 3600 	mov.w	r6, #131072	; 0x20000
    1bbc0:	f8cc 650c 	str.w	r6, [ip, #1292]	; 0x50c
-SA  x10F    (U16 v) -> I16      { return x100F(v) / 10; }
+SA  x10F    (u16 v) -> i16      { return x100F(v) / 10; }
    1bbc4:	b21b      	sxth	r3, r3
                     reg.PIN_CNF = it.INIT_CNF;
    1bbc6:	f8cc 0734 	str.w	r0, [ip, #1844]	; 0x734
@@ -6965,7 +6964,7 @@ SA  x10F    (U16 v) -> I16      { return x100F(v) / 10; }
    1bbd4:	7813      	ldrb	r3, [r2, #0]
 SA  deinit      ()              { twi_.deinit(); isInit_ = false; }
    1bbd6:	f887 e000 	strb.w	lr, [r7]
-SA  x10F    (U16 v) -> I16      { return x100F(v) / 10; }
+SA  x10F    (u16 v) -> i16      { return x100F(v) / 10; }
    1bbda:	ebc4 04a0 	rsb	r4, r4, r0, asr #2
    1bbde:	b224      	sxth	r4, r4
    1bbe0:	b903      	cbnz	r3, 1bbe4 <TemperatureSi7051<(unsigned char)1>::read()+0x198>
@@ -7002,7 +7001,7 @@ SA  x10F    (U16 v) -> I16      { return x100F(v) / 10; }
    1bc1c:	4a16      	ldr	r2, [pc, #88]	; (1bc78 <TemperatureSi7051<(unsigned char)1>::read()+0x22c>)
    1bc1e:	eb03 0181 	add.w	r1, r3, r1, lsl #2
    1bc22:	0b80      	lsrs	r0, r0, #14
-   1bc24:	23b5      	movs	r3, #181	; 0xb5
+   1bc24:	23b4      	movs	r3, #180	; 0xb4
    1bc26:	f7ff fd0d 	bl	1b644 <int Print<DevRtt<0>, unsigned long, unsigned long, char const*, int, char const*>(DevRtt<0>, char const*, unsigned long, unsigned long, char const*, int, char const*) [clone .constprop.0]>
                         Debug("  Si7051 raw: %d  F: %02d.%d\n", t, f/10, f%10);
    1bc2a:	4b0d      	ldr	r3, [pc, #52]	; (1bc60 <TemperatureSi7051<(unsigned char)1>::read()+0x214>)
@@ -7036,7 +7035,7 @@ SA  x10F    (U16 v) -> I16      { return x100F(v) / 10; }
 SA  read            () {
    1bc7c:	e92d 43f0 	stmdb	sp!, {r4, r5, r6, r7, r8, r9, lr}
    1bc80:	f04f 43a0 	mov.w	r3, #1342177280	; 0x50000000
-SA  address         (U8 v)      { reg.ADDRESS = v; } //0-127
+SA  address         (u8 v)      { reg.ADDRESS = v; } //0-127
    1bc84:	4c85      	ldr	r4, [pc, #532]	; (1be9c <TemperatureSi7051<(unsigned char)5>::read()+0x220>)
         (delay_func_t)((((uint32_t)delay_machine_code) | 1));
    1bc86:	4d86      	ldr	r5, [pc, #536]	; (1bea0 <TemperatureSi7051<(unsigned char)5>::read()+0x224>)
@@ -7047,7 +7046,7 @@ SA  init        (Ts... ts)  { initT it{2}; init_(it, ts...); }
    1bc8e:	2240      	movs	r2, #64	; 0x40
 SA  frequency       (FREQ e)    { reg.FREQUENCY = e; }
    1bc90:	f04f 67c8 	mov.w	r7, #104857600	; 0x6400000
-SA  address         (U8 v)      { reg.ADDRESS = v; } //0-127
+SA  address         (u8 v)      { reg.ADDRESS = v; } //0-127
    1bc94:	f8c4 2588 	str.w	r2, [r4, #1416]	; 0x588
                         reg.PSEL_SDA = e;
    1bc98:	f04f 0c0d 	mov.w	ip, #13
@@ -7089,7 +7088,7 @@ SA  enable          ()          { reg.ENABLE = 6; }
    1bce2:	7033      	strb	r3, [r6, #0]
    1bce4:	461a      	mov	r2, r3
    1bce6:	f04f 095f 	mov.w	r9, #95	; 0x5f
-                                U8 tbuf[1]{ MEASURE_HOLD }; U8 rbuf[2]; 
+                                u8 tbuf[1]{ MEASURE_HOLD }; u8 rbuf[2]; 
    1bcea:	21e3      	movs	r1, #227	; 0xe3
                         reg.TXD.PTR = addr;
    1bcec:	a802      	add	r0, sp, #8
@@ -7202,19 +7201,19 @@ SA  rxAmount        ()          { return reg.RXD.AMOUNT; }
                                 v = (rbuf[0]<<8) bitor rbuf[1];
    1bdb0:	f89d 200c 	ldrb.w	r2, [sp, #12]
    1bdb4:	f89d 500d 	ldrb.w	r5, [sp, #13]
-SA  x100F   (U16 v) -> I16      { return x100C(v) * 9L / 5 + 3200; }
+SA  x100F   (u16 v) -> i16      { return x100C(v) * 9L / 5 + 3200; }
    1bdb8:	4b3c      	ldr	r3, [pc, #240]	; (1beac <TemperatureSi7051<(unsigned char)5>::read()+0x230>)
                         if( not isInit ){ //first time, populate all with same value
    1bdba:	493d      	ldr	r1, [pc, #244]	; (1beb0 <TemperatureSi7051<(unsigned char)5>::read()+0x234>)
                                 v = (rbuf[0]<<8) bitor rbuf[1];
    1bdbc:	ea45 2502 	orr.w	r5, r5, r2, lsl #8
-SA  x100C   (U16 v) -> I16      { return ((v * 17572L)>>16) - 4685; }
+SA  x100C   (u16 v) -> i16      { return ((v * 17572L)>>16) - 4685; }
    1bdc0:	f244 42a4 	movw	r2, #17572	; 0x44a4
    1bdc4:	fb02 f205 	mul.w	r2, r2, r5
    1bdc8:	1412      	asrs	r2, r2, #16
    1bdca:	f5a2 5292 	sub.w	r2, r2, #4672	; 0x1240
    1bdce:	3a0d      	subs	r2, #13
-SA  x100F   (U16 v) -> I16      { return x100C(v) * 9L / 5 + 3200; }
+SA  x100F   (u16 v) -> i16      { return x100C(v) * 9L / 5 + 3200; }
    1bdd0:	b212      	sxth	r2, r2
    1bdd2:	eb02 02c2 	add.w	r2, r2, r2, lsl #3
    1bdd6:	fb83 ec02 	smull	lr, ip, r3, r2
@@ -7228,7 +7227,7 @@ SA  low         ()          { reg.OUTCLR = bm_; } //register wide write
    1bdec:	f502 6248 	add.w	r2, r2, #3200	; 0xc80
    1bdf0:	f44f 3400 	mov.w	r4, #131072	; 0x20000
    1bdf4:	f8cc 450c 	str.w	r4, [ip, #1292]	; 0x50c
-SA  x10F    (U16 v) -> I16      { return x100F(v) / 10; }
+SA  x10F    (u16 v) -> i16      { return x100F(v) / 10; }
    1bdf8:	b212      	sxth	r2, r2
                     reg.PIN_CNF = it.INIT_CNF;
    1bdfa:	f8cc 7734 	str.w	r7, [ip, #1844]	; 0x734
@@ -7238,7 +7237,7 @@ SA  x10F    (U16 v) -> I16      { return x100F(v) / 10; }
    1be08:	780a      	ldrb	r2, [r1, #0]
 SA  deinit      ()              { twi_.deinit(); isInit_ = false; }
    1be0a:	f886 e000 	strb.w	lr, [r6]
-SA  x10F    (U16 v) -> I16      { return x100F(v) / 10; }
+SA  x10F    (u16 v) -> i16      { return x100F(v) / 10; }
    1be0e:	ebc3 03a4 	rsb	r3, r3, r4, asr #2
    1be12:	b21b      	sxth	r3, r3
    1be14:	2a00      	cmp	r2, #0
@@ -7275,7 +7274,7 @@ SA  x10F    (U16 v) -> I16      { return x100F(v) / 10; }
    1be52:	4a1c      	ldr	r2, [pc, #112]	; (1bec4 <TemperatureSi7051<(unsigned char)5>::read()+0x248>)
    1be54:	eb03 0181 	add.w	r1, r3, r1, lsl #2
    1be58:	0b80      	lsrs	r0, r0, #14
-   1be5a:	23b5      	movs	r3, #181	; 0xb5
+   1be5a:	23b4      	movs	r3, #180	; 0xb4
    1be5c:	f7ff fbf2 	bl	1b644 <int Print<DevRtt<0>, unsigned long, unsigned long, char const*, int, char const*>(DevRtt<0>, char const*, unsigned long, unsigned long, char const*, int, char const*) [clone .constprop.0]>
                         Debug("  Si7051 raw: %d  F: %02d.%d\n", t, f/10, f%10);
    1be60:	4b12      	ldr	r3, [pc, #72]	; (1beac <TemperatureSi7051<(unsigned char)5>::read()+0x230>)
@@ -7569,15 +7568,15 @@ SA init             () {
                         error.check( app_timer_create(&ptimerId_, APP_TIMER_MODE_SINGLE_SHOT, cb) );
                         error.check( app_timer_start(ptimerId_, appTimerTicks(ms), NULL) );
                     }
-auto initRepeated   ( uint32_t ms, void(*cb)(void*) ) {
+auto initRepeated   (u32 ms, void(*cb)(void*)) {
                         init();
                         error.check( app_timer_create(&ptimerId_, APP_TIMER_MODE_REPEATED, cb) );
    1c0c2:	4a0d      	ldr	r2, [pc, #52]	; (1c0f8 <Advertising<MyTemperatureAD<TemperatureSi7051<(unsigned char)5> >, (unsigned short)3000, &(advInitCB())>::init()+0x64>)
    1c0c4:	480d      	ldr	r0, [pc, #52]	; (1c0fc <Advertising<MyTemperatureAD<TemperatureSi7051<(unsigned char)5> >, (unsigned short)3000, &(advInitCB())>::init()+0x68>)
    1c0c6:	2101      	movs	r1, #1
    1c0c8:	f7fd fb20 	bl	1970c <app_timer_create>
-   1c0cc:	b280      	uxth	r0, r0
-   1c0ce:	f7fe fa79 	bl	1a5c4 <Errors::check(unsigned short, bool) [clone .constprop.0]>
+   1c0cc:	b200      	sxth	r0, r0
+   1c0ce:	f7fe fa79 	bl	1a5c4 <Errors::check(short, bool) [clone .constprop.0]>
                         error.check( app_timer_start(ptimerId_, appTimerTicks(ms), NULL) );
    1c0d2:	4b0b      	ldr	r3, [pc, #44]	; (1c100 <Advertising<MyTemperatureAD<TemperatureSi7051<(unsigned char)5> >, (unsigned short)3000, &(advInitCB())>::init()+0x6c>)
    1c0d4:	2200      	movs	r2, #0
@@ -7586,8 +7585,8 @@ auto initRepeated   ( uint32_t ms, void(*cb)(void*) ) {
    1c0dc:	f7fd fb24 	bl	19728 <app_timer_start>
                     }
    1c0e0:	e8bd 4038 	ldmia.w	sp!, {r3, r4, r5, lr}
-   1c0e4:	b280      	uxth	r0, r0
-   1c0e6:	f7fe ba6d 	b.w	1a5c4 <Errors::check(unsigned short, bool) [clone .constprop.0]>
+   1c0e4:	b200      	sxth	r0, r0
+   1c0e6:	f7fe ba6d 	b.w	1a5c4 <Errors::check(short, bool) [clone .constprop.0]>
    1c0ea:	bf00      	nop
    1c0ec:	2000139c 	.word	0x2000139c
    1c0f0:	20001128 	.word	0x20001128
@@ -7629,16 +7628,16 @@ int main() {
    1c11e:	4c31      	ldr	r4, [pc, #196]	; (1c1e4 <main+0xe0>)
    1c120:	2101      	movs	r1, #1
    1c122:	f7fd faf3 	bl	1970c <app_timer_create>
-   1c126:	b280      	uxth	r0, r0
-   1c128:	f7fe fa4c 	bl	1a5c4 <Errors::check(unsigned short, bool) [clone .constprop.0]>
+   1c126:	b200      	sxth	r0, r0
+   1c128:	f7fe fa4c 	bl	1a5c4 <Errors::check(short, bool) [clone .constprop.0]>
                         error.check( app_timer_start(ptimerId_, appTimerTicks(ms), NULL) );
    1c12c:	4b2e      	ldr	r3, [pc, #184]	; (1c1e8 <main+0xe4>)
    1c12e:	f44f 21a0 	mov.w	r1, #327680	; 0x50000
    1c132:	6a18      	ldr	r0, [r3, #32]
    1c134:	2200      	movs	r2, #0
    1c136:	f7fd faf7 	bl	19728 <app_timer_start>
-   1c13a:	b280      	uxth	r0, r0
-   1c13c:	f7fe fa42 	bl	1a5c4 <Errors::check(unsigned short, bool) [clone .constprop.0]>
+   1c13a:	b200      	sxth	r0, r0
+   1c13c:	f7fe fa42 	bl	1a5c4 <Errors::check(short, bool) [clone .constprop.0]>
     Debug( "{normal}{Fgreen}\nBoot...\n" );
    1c140:	482a      	ldr	r0, [pc, #168]	; (1c1ec <main+0xe8>)
    1c142:	f7ff f989 	bl	1b458 <int Print<DevRtt<0>>(DevRtt<0>, char const*) [clone .isra.0]>
@@ -7654,8 +7653,8 @@ int main() {
    1c156:	f7ff f97f 	bl	1b458 <int Print<DevRtt<0>>(DevRtt<0>, char const*) [clone .isra.0]>
     error.check( nrf_pwr_mgmt_init() );
    1c15a:	f7fd fd4b 	bl	19bf4 <nrf_pwr_mgmt_init>
-   1c15e:	b280      	uxth	r0, r0
-   1c160:	f7fe fa30 	bl	1a5c4 <Errors::check(unsigned short, bool) [clone .constprop.0]>
+   1c15e:	b200      	sxth	r0, r0
+   1c160:	f7fe fa30 	bl	1a5c4 <Errors::check(short, bool) [clone .constprop.0]>
 #endif
 
 #if NRF_POWER_HAS_DCDCEN
@@ -7678,19 +7677,19 @@ SA  init            () {
    1c176:	9703      	str	r7, [sp, #12]
                         error.check( nrf_sdh_enable_request() );
    1c178:	f000 fb76 	bl	1c868 <nrf_sdh_enable_request>
-   1c17c:	b280      	uxth	r0, r0
-   1c17e:	f7fe fa21 	bl	1a5c4 <Errors::check(unsigned short, bool) [clone .constprop.0]>
+   1c17c:	b200      	sxth	r0, r0
+   1c17e:	f7fe fa21 	bl	1a5c4 <Errors::check(short, bool) [clone .constprop.0]>
                         error.check( nrf_sdh_ble_default_cfg_set(BLE_CONN_CFG_TAG_DEFAULT, &ram_start) );
    1c182:	a903      	add	r1, sp, #12
    1c184:	4638      	mov	r0, r7
    1c186:	f000 fc4b 	bl	1ca20 <nrf_sdh_ble_default_cfg_set>
-   1c18a:	b280      	uxth	r0, r0
-   1c18c:	f7fe fa1a 	bl	1a5c4 <Errors::check(unsigned short, bool) [clone .constprop.0]>
+   1c18a:	b200      	sxth	r0, r0
+   1c18c:	f7fe fa1a 	bl	1a5c4 <Errors::check(short, bool) [clone .constprop.0]>
                         error.check( nrf_sdh_ble_enable(&ram_start) );
    1c190:	a803      	add	r0, sp, #12
    1c192:	f000 fc9b 	bl	1cacc <nrf_sdh_ble_enable>
-   1c196:	b280      	uxth	r0, r0
-   1c198:	f7fe fa14 	bl	1a5c4 <Errors::check(unsigned short, bool) [clone .constprop.0]>
+   1c196:	b200      	sxth	r0, r0
+   1c198:	f7fe fa14 	bl	1a5c4 <Errors::check(short, bool) [clone .constprop.0]>
     Debug( "adv.init()...\n" );
    1c19c:	4817      	ldr	r0, [pc, #92]	; (1c1fc <main+0xf8>)
    1c19e:	f7ff f95b 	bl	1b458 <int Print<DevRtt<0>>(DevRtt<0>, char const*) [clone .isra.0]>
@@ -7702,7 +7701,7 @@ SA  init            () {
    1c1ae:	ebc3 1103 	rsb	r1, r3, r3, lsl #4
    1c1b2:	eb03 0181 	add.w	r1, r3, r1, lsl #2
    1c1b6:	462a      	mov	r2, r5
-   1c1b8:	236e      	movs	r3, #110	; 0x6e
+   1c1b8:	236d      	movs	r3, #109	; 0x6d
    1c1ba:	9600      	str	r6, [sp, #0]
    1c1bc:	0b80      	lsrs	r0, r0, #14
    1c1be:	f7ff fa41 	bl	1b644 <int Print<DevRtt<0>, unsigned long, unsigned long, char const*, int, char const*>(DevRtt<0>, char const*, unsigned long, unsigned long, char const*, int, char const*) [clone .constprop.0]>
@@ -7824,7 +7823,7 @@ SA  read            () {
    1c2b8:	4a13      	ldr	r2, [pc, #76]	; (1c308 <TemperatureInternal<(unsigned char)1>::read()+0xb4>)
    1c2ba:	eb03 0181 	add.w	r1, r3, r1, lsl #2
    1c2be:	0b80      	lsrs	r0, r0, #14
-   1c2c0:	2355      	movs	r3, #85	; 0x55
+   1c2c0:	2354      	movs	r3, #84	; 0x54
    1c2c2:	f7ff f9bf 	bl	1b644 <int Print<DevRtt<0>, unsigned long, unsigned long, char const*, int, char const*>(DevRtt<0>, char const*, unsigned long, unsigned long, char const*, int, char const*) [clone .constprop.0]>
                         Debug("  internal raw: %d  F: %02d.%d\n", t, f/10, f%10);
    1c2c6:	4b11      	ldr	r3, [pc, #68]	; (1c30c <TemperatureInternal<(unsigned char)1>::read()+0xb8>)

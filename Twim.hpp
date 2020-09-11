@@ -1,22 +1,13 @@
 #pragma once
 
-#include <cstdint>
-#include <cstdbool>
+#include "nRFconfig.hpp"
 
 #include "nrf_delay.h"
 
 #include "Gpio.hpp"
 #include "Print.hpp"
 
-#define U32 uint32_t
-#define U16 uint16_t
-#define I16 int16_t
-#define U8 uint8_t
-// #define SA [[gnu::always_inline]] static auto
-// #define SA [[gnu::noinline]] static auto
-#define SA static auto
 #define SI static inline
-#define SCA static constexpr auto
 
 /*------------------------------------------------------------------------------
     Twim struct (TWI master)
@@ -32,7 +23,7 @@
     Easy-DMA) using ENABLE = 5, that the nRF52810 does not show, but they
     most likely both will work with the code below (only tested on a nRF52810)
 ------------------------------------------------------------------------------*/
-template<U32 BaseAddr_, PIN Sda_, PIN Scl_, PIN Pwr_>
+template<u32 BaseAddr_, PIN Sda_, PIN Scl_, PIN Pwr_>
 struct Twim {
 
 //============
@@ -48,65 +39,65 @@ struct Twim {
 
     struct Twim_ {
         struct {
-                U32 STARTRX;        //0x00
-                U32 unused1;
-                U32 STARTTX;        //0x08
-                U32 unused2[2];
-                U32 STOP;           //0x14
-                U32 unused3;
-                U32 SUSPEND;        //0x1C
-                U32 RESUME;         //0x20
+                u32 STARTRX;        //0x00
+                u32 unused1;
+                u32 STARTTX;        //0x08
+                u32 unused2[2];
+                u32 STOP;           //0x14
+                u32 unused3;
+                u32 SUSPEND;        //0x1C
+                u32 RESUME;         //0x20
         }   TASKS;
 
-        U32 unused4[(0x104-0x24)/4]; 
+        u32 unused4[(0x104-0x24)/4]; 
 
         struct {
-                U32 STOPPED;            //0x104
-                U32 unused5[(0x124-0x108)/4];
-                U32 ERROR;              //0x124
-                U32 unused6[(0x148-0x128)/4];
-                U32 SUSPENDED;          //0x148
-                U32 RXSTARTED;          //0x14C
-                U32 TXSTARTED;          //0x150
-                U32 unused7[2];
-                U32 LASTRX;             //0x15C
-                U32 LASTTX;             //0x160
+                u32 STOPPED;            //0x104
+                u32 unused5[(0x124-0x108)/4];
+                u32 ERROR;              //0x124
+                u32 unused6[(0x148-0x128)/4];
+                u32 SUSPENDED;          //0x148
+                u32 RXSTARTED;          //0x14C
+                u32 TXSTARTED;          //0x150
+                u32 unused7[2];
+                u32 LASTRX;             //0x15C
+                u32 LASTTX;             //0x160
         }   EVENTS;
 
-        U32 unused8[(0x200-0x164)/4];
+        u32 unused8[(0x200-0x164)/4];
 
-        U32 SHORTS;             //0x200
-        U32 unused9[(0x300-0x204)/4];
-        U32 INTEN;              //0x300
-        U32 INTENSET;           //0x304
-        U32 INTENCLR;           //0x308
-        U32 unused10[(0x4C4-0x30C)/4];
-        U32 ERRORSRC;           //0x4C4
-        U32 unused11[(0x500-0x4C8)/4];
-        U32 ENABLE;             //0x500
-        U32 unused12;
-        U32 PSEL_SCL;           //0x508
-        U32 PSEL_SDA;           //0x50C
-        U32 unused13[(0x524-0x510)/4];
-        U32 FREQUENCY;          //0x524
+        u32 SHORTS;             //0x200
+        u32 unused9[(0x300-0x204)/4];
+        u32 INTEN;              //0x300
+        u32 INTENSET;           //0x304
+        u32 INTENCLR;           //0x308
+        u32 unused10[(0x4C4-0x30C)/4];
+        u32 ERRORSRC;           //0x4C4
+        u32 unused11[(0x500-0x4C8)/4];
+        u32 ENABLE;             //0x500
+        u32 unused12;
+        u32 PSEL_SCL;           //0x508
+        u32 PSEL_SDA;           //0x50C
+        u32 unused13[(0x524-0x510)/4];
+        u32 FREQUENCY;          //0x524
 
-        U32 unused14[(0x534-0x528)/4];
+        u32 unused14[(0x534-0x528)/4];
 
         struct {
-                U32 PTR;        //0x534
-                U32 MAXCNT;
-                U32 AMOUNT;     //RO
-                U32 LIST;
+                u32 PTR;        //0x534
+                u32 MAXCNT;
+                u32 AMOUNT;     //RO
+                u32 LIST;
         }   RXD;
         struct {
-                U32 PTR;        //0x544
-                U32 MAXCNT;
-                U32 AMOUNT;     //RO
-                U32 LIST;
+                u32 PTR;        //0x544
+                u32 MAXCNT;
+                u32 AMOUNT;     //RO
+                u32 LIST;
         }   TXD;
 
-        U32 unused15[(0x588-0x554)/4];
-        U32 ADDRESS;            //0x588
+        u32 unused15[(0x588-0x554)/4];
+        u32 ADDRESS;            //0x588
     };
     #pragma GCC diagnostic pop
 
@@ -141,7 +132,7 @@ public:
 SA  disable         ()          { reg.ENABLE = 0; }
 SA  isEnabled       ()          { return reg.ENABLE; }
 SA  frequency       (FREQ e)    { reg.FREQUENCY = e; }
-SA  address         (U8 v)      { reg.ADDRESS = v; } //0-127
+SA  address         (u8 v)      { reg.ADDRESS = v; } //0-127
 
 //--------------------
 //  Easy-DMA buffers
@@ -149,17 +140,17 @@ SA  address         (U8 v)      { reg.ADDRESS = v; } //0-127
                     //nRF52840 max len = 0xFFFF, nRF52810 = 0x3FFF
                     //caller will have to know what is max, and len
                     //is used as-is
-SA  txBufferSet     (U32 addr, U16 len) {
+SA  txBufferSet     (u32 addr, u16 len) {
                         reg.TXD.MAXCNT = len;
                         reg.TXD.PTR = addr;
                     }
 
                     template<unsigned N>
-SA  txBufferSet     (const U8 (&addr)[N]) {
-                        txBufferSet( (U32)addr, N );
+SA  txBufferSet     (const u8 (&addr)[N]) {
+                        txBufferSet( (u32)addr, N );
                     }
 
-SA  rxBufferSet     (U32 addr, U16 len) {
+SA  rxBufferSet     (u32 addr, u16 len) {
                         reg.RXD.MAXCNT = len;
                         reg.RXD.PTR = addr;
                     }
@@ -168,7 +159,7 @@ SA  rxBufferSet     (U32 addr, U16 len) {
                     template<typename T, unsigned N>
 SA  rxBufferSet     (T (&addr)[N]) {
                         static_assert(sizeof(T) == 1, "Twi::rxBufferSet needs a byte array");
-                        rxBufferSet( (U32)addr, N );
+                        rxBufferSet( (u32)addr, N );
                     }
 
 SA  txAmount        ()          { return reg.TXD.AMOUNT; }
@@ -257,7 +248,7 @@ SA  isDataNack      ()          { return reg.ERRORSRC bitand 4; }
 //--------------------
 //  init/constructors
 //--------------------
-SA  init            (U8 addr, FREQ f = K400) { 
+SA  init            (u8 addr, FREQ f = K400) { 
                         address( addr );
                         frequency( f );  
                         //when twi not enabled, set pins gpio state like twi
@@ -285,7 +276,7 @@ SA  deinit          () {
                         }
                     }
 
-    Twim            (U8 addr, FREQ f = K100) { init( addr, f ); }
+    Twim            (u8 addr, FREQ f = K100) { init( addr, f ); }
     Twim            (){} //call init manually
 
 
@@ -311,7 +302,7 @@ SA  waitForStop     () {
                     //write,read
                     template<typename T, unsigned NT, unsigned NR>
                     // [[ gnu::noinline ]]
-SA  writeRead       (const U8 (&txbuf)[NT], T (&rxbuf)[NR]) {  
+SA  writeRead       (const u8 (&txbuf)[NT], T (&rxbuf)[NR]) {  
                         txBufferSet( txbuf );
                         rxBufferSet( rxbuf );
                         startTxRxStop(); 
@@ -324,7 +315,7 @@ SA  writeRead       (const U8 (&txbuf)[NT], T (&rxbuf)[NR]) {
 
                     //write only
                     template<unsigned N>
-SA  write           (const U8 (&txbuf)[N]) {
+SA  write           (const u8 (&txbuf)[N]) {
                         txBufferSet( txbuf );
                         startTxStop();
                         if( not waitForStop() ) return false;
@@ -347,13 +338,8 @@ SA  read            (T (&rxbuf)[N]) {
                     }
 };
 
-#undef U32
-#undef U16
-#undef I16
-#undef U8
-#undef SA 
 #undef SI
-#undef SCA
+
 
 template<PIN Sda_, PIN Scl_, PIN Pwr_ = PIN(-1)>
 using Twim0 = Twim<0x40003000, Sda_, Scl_, Pwr_>; //all

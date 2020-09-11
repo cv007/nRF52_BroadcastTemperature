@@ -1,24 +1,17 @@
 #pragma once
 
-#include <cstdint>
-#include <cstdbool>
+#include "nRFconfig.hpp"
 
 #include "nrf_delay.h"
 
 #include "Twim.hpp"
 #include "Print.hpp"
 
-#define U32 uint32_t
-#define U16 uint16_t
-#define I16 int16_t
-#define U8 uint8_t
 // #define SA [[gnu::always_inline]] static auto
 // #define SA [[gnu::noinline]] static auto
-#define SA static auto
 #define SI static inline
-#define SCA static constexpr auto
 
-//untested - sda/scl pins routed wrong on my board :(
+//sda/scl pins routed wrong on CR2 board :(
 
 /*------------------------------------------------------------------------------
     Si7051 struct
@@ -47,13 +40,13 @@ struct Si7051 {
     //to maintain these bit values
     enum { USER_RSVD_BITS = 0x3A };
 
-SA  readUser    (U8& v)         { U8 tbuf[1]{ READ_USER }; U8 rbuf[1];
+SA  readUser    (u8& v)         { u8 tbuf[1]{ READ_USER }; u8 rbuf[1];
                                   if( not twi_.writeRead(tbuf, rbuf) ) return false; 
                                   v = rbuf[0];
                                   return true;
                                 }
 
-SA  command     (COMMANDS1 cmd) { U8 tbuf[1]{ cmd }; 
+SA  command     (COMMANDS1 cmd) { u8 tbuf[1]{ cmd }; 
                                   return twi_.write(tbuf);
                                 }
 
@@ -81,20 +74,20 @@ SA  reset       ()              { return command( RESET ); } //5-15ms
                                 //before getting temp cpnversion started
                                 //so check return values to temp* functions
 SA  resolution  (RESOLUTION e)  { 
-                                U8 v = USER_RSVD_BITS bitor e;
-                                U8 tbuf[2]{ WRITE_USER, v };
+                                u8 v = USER_RSVD_BITS bitor e;
+                                u8 tbuf[2]{ WRITE_USER, v };
                                 return twi_.write(tbuf);
                                 }
 
 SA  isPowerOk   ()              { 
-                                U8 v;
+                                u8 v;
                                 if( not readUser(v) ) return false;
                                 return v bitand 0x40; 
                                 }
 
                                 //blocking on clock stretch, up to 10.8ms
-SA  tempWait    (U16& v)        { 
-                                U8 tbuf[1]{ MEASURE_HOLD }; U8 rbuf[2]; 
+SA  tempWait    (u16& v)        { 
+                                u8 tbuf[1]{ MEASURE_HOLD }; u8 rbuf[2]; 
                                 if( not twi_.writeRead(tbuf, rbuf) ) return false;
                                 v = (rbuf[0]<<8) bitor rbuf[1];
                                 return true; 
@@ -108,9 +101,9 @@ SA  tempStart   ()              {
                                 }
 
                                 //poll for temp (after tempStart)
-SA  tempPoll    (U16& v)        { 
+SA  tempPoll    (u16& v)        { 
                                 if( not isConverting_ ) return false;
-                                U8 rbuf[2];
+                                u8 rbuf[2];
                                 if( not twi_.read(rbuf) ) return false; //not ready (nack)
                                 v = (rbuf[0]<<8) bitor rbuf[1];
                                 isConverting_ = false;
@@ -118,9 +111,9 @@ SA  tempPoll    (U16& v)        {
                                 }
 
                                 //serial number, not checking crc values
-SA  esn         (U8 (&buf)[8])  {
-                                U8 tbuf[2]{ READ_ID1>>8, READ_ID1&0xff };
-                                U8 rbuf[8];
+SA  esn         (u8 (&buf)[8])  {
+                                u8 tbuf[2]{ READ_ID1>>8, READ_ID1&0xff };
+                                u8 rbuf[8];
                                 if( not twi_.writeRead(tbuf, rbuf) ) return false;
                                 buf[0] = rbuf[0]; buf[1] = rbuf[2]; buf[2] = rbuf[4]; buf[3] = rbuf[6];
                                 tbuf[0] = READ_ID2>>8; tbuf[1] = READ_ID2;
@@ -130,9 +123,9 @@ SA  esn         (U8 (&buf)[8])  {
                                 }
 
                                 //firmware revision (0xFF = 1.0, 0x20 = 2.0)
-SA  firmware    (U8& v)         {
-                                U8 tbuf[2]{ READ_FIRMREV>>8, READ_FIRMREV&0xff };
-                                U8 rbuf[1];
+SA  firmware    (u8& v)         {
+                                u8 tbuf[2]{ READ_FIRMREV>>8, READ_FIRMREV&0xff };
+                                u8 rbuf[1];
                                 if( not twi_.writeRead(tbuf, rbuf) ) return false;
                                 v = rbuf[0];
                                 return true;
@@ -144,22 +137,15 @@ temp C = (175.72 * temp code / 65536) - 46.85
 26796 = 25C = 77C
 */
 
-SA  x100C   (U16 v) -> I16      { return ((v * 17572L)>>16) - 4685; }
-SA  x10C    (U16 v) -> I16      { return x100C(v) / 10; }
-SA  x100F   (U16 v) -> I16      { return x100C(v) * 9L / 5 + 3200; }
-SA  x10F    (U16 v) -> I16      { return x100F(v) / 10; }
+SA  x100C   (u16 v) -> i16      { return ((v * 17572L)>>16) - 4685; }
+SA  x10C    (u16 v) -> i16      { return x100C(v) / 10; }
+SA  x100F   (u16 v) -> i16      { return x100C(v) * 9L / 5 + 3200; }
+SA  x10F    (u16 v) -> i16      { return x100F(v) / 10; }
 
 };
 
-
-
-#undef U32 
-#undef U16 
-#undef I16 
-#undef U8 
-#undef SA 
 #undef SI
-#undef SCA 
+
 
 /*
 

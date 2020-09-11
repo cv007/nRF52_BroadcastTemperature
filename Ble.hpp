@@ -3,19 +3,13 @@
 /*-----------------------------------------------------------------------------
     includes
 -----------------------------------------------------------------------------*/
-#include <cstdbool>
-#include <cstdint>
+#include "nRFconfig.hpp"
 
 #include "nrf_sdh_ble.h"
 
 #include "Boards.hpp" //board
 #include "Errors.hpp" //error
 
-/*-----------------------------------------------------------------------------
-    misc defines
------------------------------------------------------------------------------*/
-#define SA static auto
-#define SCA static constexpr auto
 #define SI static inline
 
 /*------------------------------------------------------------------------------
@@ -48,8 +42,6 @@ SA  init            () {
 
 };
 
-#undef SA
-#undef SCA
 #undef SI
 
 

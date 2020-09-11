@@ -1,7 +1,6 @@
 #pragma once
 
-#include <cstdint>
-#include <cstdbool>
+#include "nRFconfig.hpp"
 
 #include "nrf_sdh.h"
 #include "nrf_delay.h"
@@ -10,8 +9,8 @@
 #include "Tmp117.hpp"
 #include "Si7051.hpp"
 
+#undef SA
 #define SA [[gnu::noinline]] static auto
-#define SCA static constexpr auto
 #define SI static inline
 #define A auto
 
@@ -19,14 +18,14 @@
     Temperature
     (not static, each use is seperate)
 ------------------------------------------------------------------------------*/
-template<uint8_t HistSiz_>
+template<u8 HistSiz_>
 struct Temperature {
 
 //============
     private:
 //============
 
-    int16_t tempHistory_[HistSiz_ == 0 ? 1 :HistSiz_]{0};
+    i16 tempHistory_[HistSiz_ == 0 ? 1 :HistSiz_]{0};
 
     SCA TEMP_MAX{ 180*10 };
     SCA TEMP_MIN{ -40*10 };
@@ -35,9 +34,9 @@ struct Temperature {
     public:
 //===========
 
-A   addHistory      (int16_t v) {
+A   addHistory      (i16 v) {
                         static bool isInit;
-                        static uint8_t idx;
+                        static u8 idx;
 
                         if( not isInit ){ //first time, populate all with same value
                             for( auto& i : tempHistory_ ) i = v;
@@ -52,7 +51,7 @@ A   addHistory      (int16_t v) {
                     }
 
 A   average         () {
-                        int16_t avg{0};
+                        i16 avg{0};
                         for( auto& i : tempHistory_ ) avg += i;
                         return avg / HistSiz_;
                     }
@@ -64,7 +63,7 @@ A   average         () {
     assuming softdevice in use 
     (softdevice takes over temp sensor, so have to use sd)
 ------------------------------------------------------------------------------*/
-template<uint8_t HistSiz_>
+template<u8 HistSiz_>
 struct TemperatureInternal {
 
     private:
@@ -77,7 +76,7 @@ SA  average         () { return tempH.average(); }
 SA  histSize        () { return HistSiz_; }
 
 SA  read            () {
-                        int16_t f = -999; //-99.9 = failed to get
+                        i16 f = -999; //-99.9 = failed to get
                         int32_t t;
                         if( sd_temp_get(&t) ) return f;
                         f = (t*10*9/5+320*4)/4; // Fx10
@@ -88,7 +87,7 @@ SA  read            () {
                     }
 };
 
-template<uint8_t HistSiz_>
+template<u8 HistSiz_>
 struct TemperatureTmp117 {
 
     private:
@@ -108,8 +107,8 @@ SA  histSize        () { return HistSiz_; }
 
                     // -999 = failed (and is not added to history)
 SA  read            () {
-                        int16_t f = -999;
-                        int16_t t = -32768;
+                        i16 f = -999;
+                        i16 t = -32768;
                         //get temp Fx10 into f
 
                         //init will power on, w/2ms delay time for startup
@@ -137,7 +136,7 @@ nrf_delay_ms(125);
                     }
 };
 
-template<uint8_t HistSiz_>
+template<u8 HistSiz_>
 struct TemperatureSi7051 {
 
     private:
@@ -156,8 +155,8 @@ SA  average         () { return tempH.average(); }
 SA  histSize        () { return HistSiz_; }
 
 SA  read            () {
-                        int16_t f = -999; //-99.9 = failed to get
-                        uint16_t t;
+                        i16 f = -999; //-99.9 = failed to get
+                        u16 t;
 
                         //get temp Fx10 into f
                         si7051.init();
@@ -185,8 +184,9 @@ SA  read            () {
 };
 
 #undef SA
-#undef SCA
+#define SA static auto
 #undef SI
+#undef A
 
 
 

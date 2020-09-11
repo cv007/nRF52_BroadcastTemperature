@@ -66,8 +66,7 @@ a si7051 temperature ic
 /*-----------------------------------------------------------------------------
     includes
 -----------------------------------------------------------------------------*/
-#include <cstdbool>
-#include <cstdint>
+#include "nRFconfig.hpp"
 
 #include "nrf_power.h"
 #include "nrf_pwr_mgmt.h"

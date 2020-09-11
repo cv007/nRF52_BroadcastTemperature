@@ -1,12 +1,12 @@
 #pragma once
 
-#include <cstdint>
-#include <cstdbool>
+#include "nRFconfig.hpp"
 
 #include "nrf_sdh.h"    //reset via sd
 
 #include "Boards.hpp"   //board
 
+#undef SA
 #define SA [[ gnu::noinline ]] static auto
 
 /*------------------------------------------------------------------------------
@@ -17,7 +17,7 @@ struct Errors {
 
                 //if error, show error code 3 times, 
                 //reset unless also pass in false
-SA  check       (uint16_t err, bool reboot = true) {
+SA  check       (i16 err, bool reboot = true) {
                     if( err == 0 ) return;
                     for( auto i = 0; i < 3; i++ ){
                         board.error( err ); //let board put out error codes however it wants
@@ -29,6 +29,7 @@ SA  check       (uint16_t err, bool reboot = true) {
 };
 
 #undef SA
+#define SA static auto
 
 
 //for all who include this file
