@@ -4,27 +4,30 @@
 #include <cstdbool>
 #include <cstdint>
 
-//our own types, to use include this file
-using u8 = uint8_t;
-using i8 = int8_t;
-using u16 = uint16_t;
-using i16 = int16_t;
-using u32 = uint32_t;
-using i32 = int32_t;
-using u64 = uint64_t;
-using i64 = int64_t;
-
-constexpr auto operator "" _u8  (u64 v) { return (u8)v; }
-constexpr auto operator "" _i8  (u64 v) { return (i8)v; }
-constexpr auto operator "" _u16 (u64 v) { return (u16)v; }
-constexpr auto operator "" _i16 (u64 v) { return (i16)v; }
-constexpr auto operator "" _u32 (u64 v) { return (u32)v; }
-constexpr auto operator "" _i32 (u64 v) { return (i32)v; }
-constexpr auto operator "" _u64 (u64 v) { return (u64)v; }
-constexpr auto operator "" _i64 (u64 v) { return (i64)v; }
-
+//common function types
 #define SA static auto
 #define SCA static constexpr auto
+
+//our own types, to use include this file
+using u8  = uint8_t;
+using i8  =  int8_t;
+using u16 = uint16_t;
+using i16 =  int16_t;
+using u32 = uint32_t;
+using i32 =  int32_t;
+using u64 = uint64_t;
+using i64 =  int64_t;
+
+SCA operator "" _0b  (u64 v) { return (bool)v; }
+SCA operator "" _u8  (u64 v) { return ( u8)v; }
+SCA operator "" _i8  (u64 v) { return ( i8)v; }
+SCA operator "" _u16 (u64 v) { return (u16)v; }
+SCA operator "" _i16 (u64 v) { return (i16)v; }
+SCA operator "" _u32 (u64 v) { return (u32)v; }
+SCA operator "" _i32 (u64 v) { return (i32)v; }
+SCA operator "" _u64 (u64 v) { return (u64)v; }
+SCA operator "" _i64 (u64 v) { return (i64)v; }
+
 
 
 
