@@ -62,7 +62,6 @@ a si7051 temperature ic
 
 -----------------------------------------------------------------------------*/
 
-
 /*-----------------------------------------------------------------------------
     includes
 -----------------------------------------------------------------------------*/
@@ -78,12 +77,26 @@ a si7051 temperature ic
 #include "Ble.hpp"          //provides inline class var 'ble'
 #include "Print.hpp"
 
+
+// TESTING
+// checking all temperature sources to compare
+// run every 20 seconds, each function Debug will show info
+// (using constructor, although board led's not up yet so no
+//  error output via led's)
+Timer timerTestTemp{
+    20_sec, 
+    [](void*){ 
+        TemperatureInternal<1>::read();
+        TemperatureTmp117<1>::read();
+        TemperatureSi7051<1>::read(); 
+    }, 
+    timerTestTemp.REPEATED 
+};
+
 /*-----------------------------------------------------------------------------
     functions
 -----------------------------------------------------------------------------*/
 int main() {
-
-timerTestTempStart();
 
     Debug( "{normal}{Fgreen}\nBoot...\n" );
     Debug( "{Fmagenta}board.init()...\n" );

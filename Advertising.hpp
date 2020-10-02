@@ -423,25 +423,7 @@ void advInitCB(); //called from adv.init()
 
 #include "Timer.hpp"
 inline Timer timerAdvUpdate;
+ //init timer that calls avd.update
 inline void advInitCB(){
-    timerAdvUpdate.initRepeated( 60_sec, adv.update ); //init timer that calls avd.update
+    timerAdvUpdate.init( 60_sec, adv.update, timerAdvUpdate.REPEATED );
 }
-
-
-// TESTING
-// checking all temperature sources to compare
-// run every 20 seconds, each function Debug will show info
-// run timerTestTempStart() in main to set timer
-
-inline Timer timerTestTemp;
-inline void timerTestTempStart(){
-    timerTestTemp.initRepeated( 20_sec, 
-        [](void*){ 
-            TemperatureInternal<1>::read();
-            TemperatureTmp117<1>::read();
-            TemperatureSi7051<1>::read(); 
-        } 
-    );
-}
-
-// TESTING

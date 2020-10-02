@@ -52,17 +52,21 @@ SA init             () {
 //============
     public:
 //============
+
+    enum TIMER_TYPE { ONCE, REPEATED };
+
+    Timer           (u32 ms, void(*cb)(void*), TIMER_TYPE typ = ONCE){ 
+                        init(ms, cb, typ);
+                    }
+    Timer           (){}
                     
                     //for each instance
-
-auto initSingle     (u32 ms, void(*cb)(void*)) {
+auto init           (u32 ms, void(*cb)(void*), TIMER_TYPE typ = ONCE) -> void {
                         init();
-                        error.check( app_timer_create(&ptimerId_, APP_TIMER_MODE_SINGLE_SHOT, cb) );
-                        error.check( app_timer_start(ptimerId_, appTimerTicks(ms), NULL) );
-                    }
-auto initRepeated   (u32 ms, void(*cb)(void*)) {
-                        init();
-                        error.check( app_timer_create(&ptimerId_, APP_TIMER_MODE_REPEATED, cb) );
+                        error.check( app_timer_create(&ptimerId_, 
+                            typ == ONCE ? APP_TIMER_MODE_SINGLE_SHOT : 
+                                APP_TIMER_MODE_REPEATED, cb) 
+                        );
                         error.check( app_timer_start(ptimerId_, appTimerTicks(ms), NULL) );
                     }
 

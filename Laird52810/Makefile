@@ -261,7 +261,7 @@ nrf52810_xxaa: ASMFLAGS += -D__STACK_SIZE=2048
 # Add standard libraries at the very end of the linker input, after all objects
 # that may need symbols provided by these libraries.
 LIB_FILES += -lc -lnosys -lm
-
+#LIB_FILES += -lstdc++
 
 .PHONY: default help
 
