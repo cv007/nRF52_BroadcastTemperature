@@ -1,5 +1,11 @@
 #pragma once
 
+//TODO - clearing events and clearing interrupts can take up to 4 cycles
+//so I guess can get into situation where exit isr before event is cleared
+//or irq is cleared, although seems unlikely
+//
+
+
 #include "nRFconfig.hpp"
 
 #include "nrf_delay.h"

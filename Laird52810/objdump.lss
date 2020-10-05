@@ -4696,7 +4696,7 @@ Disassembly of section .text:
    1c17c:	ebc3 1103 	rsb	r1, r3, r3, lsl #4
    1c180:	eb03 0181 	add.w	r1, r3, r1, lsl #2
    1c184:	462a      	mov	r2, r5
-   1c186:	237a      	movs	r3, #122	; 0x7a
+   1c186:	237b      	movs	r3, #123	; 0x7b
    1c188:	9600      	str	r6, [sp, #0]
    1c18a:	0b80      	lsrs	r0, r0, #14
    1c18c:	f7ff fa5a 	bl	1b644 <int Print<DevRtt<0>, unsigned long, unsigned long, char const*, int, char const*>(DevRtt<0>, char const*, unsigned long, unsigned long, char const*, int, char const*) [clone .constprop.0]>
