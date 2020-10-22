@@ -25,15 +25,15 @@ SRC_FILES += $(SDK_ROOT)/components/libraries/timer/app_timer2.c
 SRC_FILES += $(SDK_ROOT)/components/libraries/util/app_util_platform.c
 SRC_FILES += $(SDK_ROOT)/components/libraries/timer/drv_rtc.c
 SRC_FILES += $(SDK_ROOT)/components/libraries/hardfault/hardfault_implementation.c
-SRC_FILES += $(SDK_ROOT)/components/libraries/util/nrf_assert.c
+# SRC_FILES += $(SDK_ROOT)/components/libraries/util/nrf_assert.c
 SRC_FILES += $(SDK_ROOT)/components/libraries/atomic_fifo/nrf_atfifo.c
-SRC_FILES += $(SDK_ROOT)/components/libraries/atomic/nrf_atomic.c
-SRC_FILES += $(SDK_ROOT)/components/libraries/balloc/nrf_balloc.c
+# SRC_FILES += $(SDK_ROOT)/components/libraries/atomic/nrf_atomic.c
+# SRC_FILES += $(SDK_ROOT)/components/libraries/balloc/nrf_balloc.c
 # SRC_FILES += $(SDK_ROOT)/external/fprintf/nrf_fprintf.c
 # SRC_FILES += $(SDK_ROOT)/external/fprintf/nrf_fprintf_format.c
-SRC_FILES += $(SDK_ROOT)/components/libraries/memobj/nrf_memobj.c
+# SRC_FILES += $(SDK_ROOT)/components/libraries/memobj/nrf_memobj.c
 SRC_FILES += $(SDK_ROOT)/components/libraries/pwr_mgmt/nrf_pwr_mgmt.c
-SRC_FILES += $(SDK_ROOT)/components/libraries/ringbuf/nrf_ringbuf.c
+# SRC_FILES += $(SDK_ROOT)/components/libraries/ringbuf/nrf_ringbuf.c
 SRC_FILES += $(SDK_ROOT)/components/libraries/experimental_section_vars/nrf_section_iter.c
 SRC_FILES += $(SDK_ROOT)/components/libraries/sortlist/nrf_sortlist.c
 SRC_FILES += $(SDK_ROOT)/components/libraries/strerror/nrf_strerror.c
@@ -43,7 +43,7 @@ SRC_FILES += $(SDK_ROOT)/integration/nrfx/legacy/nrf_drv_clock.c
 # SRC_FILES += $(SDK_ROOT)/integration/nrfx/legacy/nrf_drv_uart.c
 SRC_FILES += $(SDK_ROOT)/modules/nrfx/soc/nrfx_atomic.c
 SRC_FILES += $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_clock.c
-SRC_FILES += $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_gpiote.c
+# SRC_FILES += $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_gpiote.c
 SRC_FILES += $(SDK_ROOT)/modules/nrfx/drivers/src/prs/nrfx_prs.c
 # SRC_FILES += $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_uart.c
 # SRC_FILES += $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_uarte.c
@@ -261,7 +261,7 @@ nrf52810_xxaa: ASMFLAGS += -D__STACK_SIZE=2048
 # Add standard libraries at the very end of the linker input, after all objects
 # that may need symbols provided by these libraries.
 LIB_FILES += -lc -lnosys -lm
-#LIB_FILES += -lstdc++
+# LIB_FILES += -lstdc++
 
 .PHONY: default help
 
