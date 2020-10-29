@@ -83,6 +83,7 @@ a si7051 temperature ic
 // run every 20 seconds, each function Debug will show info
 // (using constructor, although board led's not up yet so no
 //  error output via led's)
+#if 1
 Timer timerTestTemp{
     20_sec, 
     [](void*){ 
@@ -92,7 +93,7 @@ Timer timerTestTemp{
     }, 
     timerTestTemp.REPEATED 
 };
-
+#endif
 
 /*-----------------------------------------------------------------------------
     functions

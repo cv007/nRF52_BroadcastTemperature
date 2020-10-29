@@ -19,80 +19,9 @@ struct Saadc {
     SCA         base_   { 0x40007000 };
     SI uint8_t  inuse_  { 0 }; //channels in use 0b00000000
 
-//------------
-//  registers
-//------------
+    struct cfgT;
+    struct Saadc_; //forward declare register struct, at end
 
-    #pragma GCC diagnostic push
-    #pragma GCC diagnostic ignored "-Wpedantic"
-
-    using cfgT = struct {
-                u32 PSELP;
-                u32 PSELN;
-        union { u32 CONFIG;
-        struct{     u32 RESP    : 2;
-                    u32         : 2;
-                    u32 RESN    : 2;
-                    u32         : 2;
-                    u32 GAIN    : 3;
-                    u32         : 1;
-                    u32 REFSEL  : 1;
-                    u32         : 3;
-                    u32 TACQ    : 3;
-                    u32         : 1;
-                    u32 MODE    : 1;
-                    u32         : 3;
-                    u32 BURST   : 1;
-        };};
-                i16 LIMITL;
-                i16 LIMITH;
-   };
-
-    struct Saadc_ {
-        struct {
-                u32 START;        //0x00
-                u32 SAMPLE;
-                u32 STOP;  
-                u32 CALIBRATE;
-        } TASKS;
-
-                u32 unused1[(0x100-0x10)/4]; 
-
-        struct {
-                u32 STARTED;            //0x100
-                u32 END;
-                u32 DONE;
-                u32 RESULTDONE;
-                u32 CALIBRATEDONE;
-                u32 STOPPED;
-        struct {    u32 H;
-                    u32 L;
-            }   LIMIT[8];               //0x118-0x154
-        } EVENTS;
-
-                u32 unused2[(0x300-0x158)/4];
-
-                u32 INTEN;              //0x300
-                u32 INTENSET;
-                u32 INTENCLR;
-                u32 unused3[(0x400-0x30C)/4];
-                u32 STATUS;             //0x400
-                u32 unused4[(0x500-0x404)/4];
-                u32 ENABLE;             //0x500
-                u32 unused5[3];
-
-                cfgT CHCONFIG[8];       //0x510-0x58C
-
-                u32 unused6[(0x5F0-0x590)/4];
-                u32 RESOLUTION;         //0x5F0
-                u32 OVERSAMPLE;
-                u32 SAMPLERATE;
-                u32 unused7[(0x62C-0x5FC)/4];
-                u32 RESULTPTR;          //0x62C
-                u32 RESULTMAXCNT;
-                u32 RESULTAMOUNT;
-    };
-    #pragma GCC diagnostic pop
 
 //============
     public:
@@ -245,6 +174,85 @@ SA  deinit          (CH e) {
                         clearLimitHigh( e );
                         channelRelease( e );
                     }
+
+//============
+    protected:
+//============
+
+//------------
+//  registers
+//------------
+
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wpedantic"
+
+    struct cfgT {
+                u32 PSELP;
+                u32 PSELN;
+        union { u32 CONFIG;
+        struct{     u32 RESP    : 2;
+                    u32         : 2;
+                    u32 RESN    : 2;
+                    u32         : 2;
+                    u32 GAIN    : 3;
+                    u32         : 1;
+                    u32 REFSEL  : 1;
+                    u32         : 3;
+                    u32 TACQ    : 3;
+                    u32         : 1;
+                    u32 MODE    : 1;
+                    u32         : 3;
+                    u32 BURST   : 1;
+        };};
+                i16 LIMITL;
+                i16 LIMITH;
+   };
+
+    struct Saadc_ {
+        struct {
+                u32 START;        //0x00
+                u32 SAMPLE;
+                u32 STOP;  
+                u32 CALIBRATE;
+        } TASKS;
+
+                u32 unused1[(0x100-0x10)/4]; 
+
+        struct {
+                u32 STARTED;            //0x100
+                u32 END;
+                u32 DONE;
+                u32 RESULTDONE;
+                u32 CALIBRATEDONE;
+                u32 STOPPED;
+        struct {    u32 H;
+                    u32 L;
+            }   LIMIT[8];               //0x118-0x154
+        } EVENTS;
+
+                u32 unused2[(0x300-0x158)/4];
+
+                u32 INTEN;              //0x300
+                u32 INTENSET;
+                u32 INTENCLR;
+                u32 unused3[(0x400-0x30C)/4];
+                u32 STATUS;             //0x400
+                u32 unused4[(0x500-0x404)/4];
+                u32 ENABLE;             //0x500
+                u32 unused5[3];
+
+                cfgT CHCONFIG[8];       //0x510-0x58C
+
+                u32 unused6[(0x5F0-0x590)/4];
+                u32 RESOLUTION;         //0x5F0
+                u32 OVERSAMPLE;
+                u32 SAMPLERATE;
+                u32 unused7[(0x62C-0x5FC)/4];
+                u32 RESULTPTR;          //0x62C
+                u32 RESULTMAXCNT;
+                u32 RESULTAMOUNT;
+    };
+    #pragma GCC diagnostic pop
 
 };
 

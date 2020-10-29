@@ -3,7 +3,7 @@
 #include "nRFconfig.hpp"
 
 #include "nrf_delay.h"
-#include "nRFconfig.hpp" //which mcu in use, for PIN enums
+
 
 #undef SA
 #define SA [[gnu::always_inline]] static auto
@@ -39,57 +39,8 @@ struct Gpio {
     SCA     bm_     { 1<<pin_ };        //pin bitmask for multipin registers
     SCA     inv_    { Inv_ == LOWISON };//invert? (low=on?)
 
-//------------
-//  registers
-//------------
-
-    #pragma GCC diagnostic push
-    #pragma GCC diagnostic ignored "-Wpedantic"
-    template<uint8_t PinN_>
-    struct Gpio_ {
-                u32 unused1[0x504/4];
-    union  {    u32 OUT32; //0x50420
-    struct {        u32         : PinN_;
-                    u32 OUT     : 1;
-                    u32         : 31-PinN_;
-    };};
-                u32 OUTSET;     //0x508
-                u32 OUTCLR;     //0x50C
-    union  {    u32 IN32;       //0x510
-    struct {        u32         : PinN_;
-                    u32 IN      : 1;
-                    u32         : 31-PinN_;
-    };};
-    union  {    u32 DIR32;      //0x514
-    struct {        u32         : PinN_;
-                    u32 DIR     : 1;
-                    u32         : 31-PinN_;
-    };};
-                u32 DIRSET;     //0x518
-                u32 DIRCLR;     //0x51C
-    union  {    u32 LATCH32;    //0x520
-    struct {        u32         : PinN_;
-                    u32 LATCH   : 1;
-                    u32         : 31-PinN_;
-    };};
-    union  {    u32 DETECTMODE32; //0x524
-    struct {        u32             : PinN_;
-                    u32 DETECTMODE  : 1;
-                    u32             : 31-PinN_;
-    };};
-                u32 unused2[(0x700-0x528)/4 + PinN_];
-                //0x700+Pin_*4
-    union  {    u32 PIN_CNF;
-    struct {        u32 DIRP    : 1;
-                    u32 INBUF   : 1; //1 = disable (default)
-                    u32 PULL    : 2;
-                    u32 unused3 : 4;
-                    u32 DRIVE   : 3;
-                    u32 unused4 : 5;
-                    u32 SENSE   : 2;
-    };};
-    };
-    #pragma GCC diagnostic pop
+    template<u8 PinN_>
+    struct Gpio_; //forward declare register struct, they are at end
 
 //------------
 //  init
@@ -101,20 +52,7 @@ struct Gpio {
     will get default values if anything is not specified
     DETECT and LATCH are unchanged so will need to be set with other functions
     */
-    #pragma GCC diagnostic push
-    #pragma GCC diagnostic ignored "-Wpedantic"
-    using initT = struct {
-        union  { u32 INIT_CNF;
-        struct {    u32 DIRP    : 1;
-                    u32 INBUF   : 1; //1 = disable (default)
-                    u32 PULL    : 2;
-                    u32 unused3 : 4;
-                    u32 DRIVE   : 3;
-                    u32 unused4 : 5;
-                    u32 SENSE   : 2;
-        };};
-    };
-    #pragma GCC diagnostic pop
+    struct initT; //forward declare init struct, they are at end
 
                 template<typename ...Ts>
 SCA init_       (initT& it, MODE e, Ts... ts) {
@@ -240,6 +178,83 @@ SA  debounce    (uint16_t ms = 50) {
                         if( isOn() ) offcount = ms;
                     }
                 }
+
+//============
+    private:
+//============
+
+//------------
+//  registers
+//------------
+
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wpedantic"
+    template<u8 PinN_>
+    struct Gpio_ {
+                u32 unused1[0x504/4];
+    union  {    u32 OUT32; //0x50420
+    struct {        u32         : PinN_;
+                    u32 OUT     : 1;
+                    u32         : 31-PinN_;
+    };};
+                u32 OUTSET;     //0x508
+                u32 OUTCLR;     //0x50C
+    union  {    u32 IN32;       //0x510
+    struct {        u32         : PinN_;
+                    u32 IN      : 1;
+                    u32         : 31-PinN_;
+    };};
+    union  {    u32 DIR32;      //0x514
+    struct {        u32         : PinN_;
+                    u32 DIR     : 1;
+                    u32         : 31-PinN_;
+    };};
+                u32 DIRSET;     //0x518
+                u32 DIRCLR;     //0x51C
+    union  {    u32 LATCH32;    //0x520
+    struct {        u32         : PinN_;
+                    u32 LATCH   : 1;
+                    u32         : 31-PinN_;
+    };};
+    union  {    u32 DETECTMODE32; //0x524
+    struct {        u32             : PinN_;
+                    u32 DETECTMODE  : 1;
+                    u32             : 31-PinN_;
+    };};
+                u32 unused2[(0x700-0x528)/4 + PinN_];
+                //0x700+Pin_*4
+    union  {    u32 PIN_CNF;
+    struct {        u32 DIRP    : 1;
+                    u32 INBUF   : 1; //1 = disable (default)
+                    u32 PULL    : 2;
+                    u32 unused3 : 4;
+                    u32 DRIVE   : 3;
+                    u32 unused4 : 5;
+                    u32 SENSE   : 2;
+    };};
+    };
+    #pragma GCC diagnostic pop
+
+    /*
+    for init() function or constructor, provide enum values in GPIO
+    namespace to arguments in any order to set pin config
+    will get default values if anything is not specified
+    DETECT and LATCH are unchanged so will need to be set with other functions
+    */
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wpedantic"
+    struct initT {
+        union  { u32 INIT_CNF;
+        struct {    u32 DIRP    : 1;
+                    u32 INBUF   : 1; //1 = disable (default)
+                    u32 PULL    : 2;
+                    u32 unused3 : 4;
+                    u32 DRIVE   : 3;
+                    u32 unused4 : 5;
+                    u32 SENSE   : 2;
+        };};
+    };
+    #pragma GCC diagnostic pop
 
 };
 /*----------------------------------------------------------------------------*/

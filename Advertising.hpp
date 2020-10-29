@@ -411,7 +411,7 @@ SA  stop            () -> void {
     call below timer init function to start a 60s timer to run update
 */
 void advInitCB(); //called from adv.init()
-#ifdef TEMPERTURE_INTERNAL
+#ifdef TEMPERATURE_INTERNAL
     inline Advertising< MyTemperatureAD<TemperatureInternal<5> >, 3000, advInitCB > adv; 
 #elif defined TEMPERATURE_TMP117
     inline Advertising< MyTemperatureAD<TemperatureTmp117<5> >, 3000, advInitCB > adv; 

@@ -36,76 +36,7 @@ struct Twim {
     protected:
 //============
 
-//------------
-//  registers
-//------------
-
-    #pragma GCC diagnostic push
-    #pragma GCC diagnostic ignored "-Wpedantic"
-
-    struct Twim_ {
-        struct {
-                u32 STARTRX;        //0x00
-                u32 unused1;
-                u32 STARTTX;        //0x08
-                u32 unused2[2];
-                u32 STOP;           //0x14
-                u32 unused3;
-                u32 SUSPEND;        //0x1C
-                u32 RESUME;         //0x20
-        }   TASKS;
-
-        u32 unused4[(0x104-0x24)/4]; 
-
-        struct {
-                u32 STOPPED;            //0x104
-                u32 unused5[(0x124-0x108)/4];
-                u32 ERROR;              //0x124
-                u32 unused6[(0x148-0x128)/4];
-                u32 SUSPENDED;          //0x148
-                u32 RXSTARTED;          //0x14C
-                u32 TXSTARTED;          //0x150
-                u32 unused7[2];
-                u32 LASTRX;             //0x15C
-                u32 LASTTX;             //0x160
-        }   EVENTS;
-
-        u32 unused8[(0x200-0x164)/4];
-
-        u32 SHORTS;             //0x200
-        u32 unused9[(0x300-0x204)/4];
-        u32 INTEN;              //0x300
-        u32 INTENSET;           //0x304
-        u32 INTENCLR;           //0x308
-        u32 unused10[(0x4C4-0x30C)/4];
-        u32 ERRORSRC;           //0x4C4
-        u32 unused11[(0x500-0x4C8)/4];
-        u32 ENABLE;             //0x500
-        u32 unused12;
-        u32 PSEL_SCL;           //0x508
-        u32 PSEL_SDA;           //0x50C
-        u32 unused13[(0x524-0x510)/4];
-        u32 FREQUENCY;          //0x524
-
-        u32 unused14[(0x534-0x528)/4];
-
-        struct {
-                u32 PTR;        //0x534
-                u32 MAXCNT;
-                u32 AMOUNT;     //RO
-                u32 LIST;
-        }   RXD;
-        struct {
-                u32 PTR;        //0x544
-                u32 MAXCNT;
-                u32 AMOUNT;     //RO
-                u32 LIST;
-        }   TXD;
-
-        u32 unused15[(0x588-0x554)/4];
-        u32 ADDRESS;            //0x588
-    };
-    #pragma GCC diagnostic pop
+    struct Twim_; //forward declare register struct, at end
 
 //============
     public:
@@ -342,6 +273,82 @@ SA  read            (T (&rxbuf)[N]) {
                         reEnable();
                         return false;
                     }
+
+//============
+    protected:
+//============
+
+//------------
+//  registers
+//------------
+
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wpedantic"
+
+    struct Twim_ {
+        struct {
+                u32 STARTRX;        //0x00
+                u32 unused1;
+                u32 STARTTX;        //0x08
+                u32 unused2[2];
+                u32 STOP;           //0x14
+                u32 unused3;
+                u32 SUSPEND;        //0x1C
+                u32 RESUME;         //0x20
+        }   TASKS;
+
+        u32 unused4[(0x104-0x24)/4]; 
+
+        struct {
+                u32 STOPPED;            //0x104
+                u32 unused5[(0x124-0x108)/4];
+                u32 ERROR;              //0x124
+                u32 unused6[(0x148-0x128)/4];
+                u32 SUSPENDED;          //0x148
+                u32 RXSTARTED;          //0x14C
+                u32 TXSTARTED;          //0x150
+                u32 unused7[2];
+                u32 LASTRX;             //0x15C
+                u32 LASTTX;             //0x160
+        }   EVENTS;
+
+        u32 unused8[(0x200-0x164)/4];
+
+        u32 SHORTS;             //0x200
+        u32 unused9[(0x300-0x204)/4];
+        u32 INTEN;              //0x300
+        u32 INTENSET;           //0x304
+        u32 INTENCLR;           //0x308
+        u32 unused10[(0x4C4-0x30C)/4];
+        u32 ERRORSRC;           //0x4C4
+        u32 unused11[(0x500-0x4C8)/4];
+        u32 ENABLE;             //0x500
+        u32 unused12;
+        u32 PSEL_SCL;           //0x508
+        u32 PSEL_SDA;           //0x50C
+        u32 unused13[(0x524-0x510)/4];
+        u32 FREQUENCY;          //0x524
+
+        u32 unused14[(0x534-0x528)/4];
+
+        struct {
+                u32 PTR;        //0x534
+                u32 MAXCNT;
+                u32 AMOUNT;     //RO
+                u32 LIST;
+        }   RXD;
+        struct {
+                u32 PTR;        //0x544
+                u32 MAXCNT;
+                u32 AMOUNT;     //RO
+                u32 LIST;
+        }   TXD;
+
+        u32 unused15[(0x588-0x554)/4];
+        u32 ADDRESS;            //0x588
+    };
+    #pragma GCC diagnostic pop
+
 };
 
 #undef SI
