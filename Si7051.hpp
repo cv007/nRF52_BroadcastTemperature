@@ -134,7 +134,7 @@ SA  firmware    (u8& v)         {
 /*
 temp code = XXXXXXXX XXXXXX00
 temp C = (175.72 * temp code / 65536) - 46.85
-26796 = 25C = 77C
+26796 = 25.0C = 77.0F
 */
 
 SA  x100C   (u16 v) -> i16      { return ((v * 17572L)>>16) - 4685; }
