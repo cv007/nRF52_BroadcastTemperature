@@ -34,7 +34,7 @@ SA  eventHandler    (ble_evt_t const * p_ble_evt, void * p_context) {
                                     uint8_t buf[len+1];
                                     sd_ble_gap_device_name_get( buf, &len );
                                     buf[len] = 0; //0 terminate string
-flash.updateName( (const char*)buf );
+                                    flash.updateName( (const char*)buf );
                                     Debug("%s\n", buf);
                                 }
                                 break;

@@ -121,7 +121,8 @@ int main() {
     conn.init();            //connection init
     adv.init();             //advertising init
     power.loop();           //power.sleep() loop
-    //should not return
+
+    //power.loop will not return
 
 }
 
