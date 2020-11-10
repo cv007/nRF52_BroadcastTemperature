@@ -51,6 +51,7 @@ SRC_FILES += $(SDK_ROOT)/modules/nrfx/drivers/src/prs/nrfx_prs.c
 SRC_FILES += $(SDK_ROOT)/modules/nrfx/hal/nrf_nvmc.c
 # SRC_FILES += $(SDK_ROOT)/components/libraries/bsp/bsp.c
 SRC_FILES += $(PROJ_DIR)/main.cpp
+SRC_FILES += $(SDK_ROOT)/components/ble/common/ble_conn_params.c
 
 #to use Segger RTT
 SRC_FILES += $(SDK_ROOT)/external/segger_rtt/SEGGER_RTT.c
@@ -193,6 +194,7 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/nfc/ndef/conn_hand_parser/ac_rec_parser \
   $(SDK_ROOT)/components/libraries/stack_guard \
   $(SDK_ROOT)/components/libraries/log/src \
+
 
 # Libraries common to all targets
 LIB_FILES += \

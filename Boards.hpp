@@ -5,8 +5,7 @@
 #include "nrf_delay.h"
 
 #include "Gpio.hpp"
-
-#define SI static inline
+#include "Print.hpp"
 
 #ifdef  NRF52840 //for 52840 based boards
 /*------------------------------------------------------------------------------
@@ -33,6 +32,7 @@ struct Pca10059 {
 
             //someone is required to run init to setup pins
 SA  init    () {
+                Debug( "Pca10059::init...\n" );
                 led1G.init( OUTPUT );
                 led2G.init( OUTPUT );
                 led2R.init( OUTPUT );
@@ -113,6 +113,7 @@ struct BL651tempBoard {
 
             //someone is required to run init to setup pins
 SA  init    () {
+                Debug( "BL651tempBoard::init...\n" );
                 ledRed.init( OUTPUT, S0S1 ); //standard drive 1
                 ledGreen.init( OUTPUT, S0S1 ); //standard drive 1
                 sw1.init( INPUT, PULLUP );
@@ -152,9 +153,6 @@ SA  ok      (u16 ms = 5) {
 };
 
 #endif
-
-#undef SI
-
 
 
 //choose board in nrfConfig.hpp

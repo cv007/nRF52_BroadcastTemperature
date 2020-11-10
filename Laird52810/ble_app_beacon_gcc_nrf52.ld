@@ -6,7 +6,11 @@ GROUP(-lgcc -lc -lnosys)
 MEMORY
 {
   FLASH (rx) : ORIGIN = 0x19000, LENGTH = 0x17000
-  RAM (rwx) :  ORIGIN = 0x20001118, LENGTH = 0x4ee8
+  /* RAM (rwx) :  ORIGIN = 0x20001118, LENGTH = 0x4ee8 */
+  /* increased ram for soft device due to link count
+    #define NRF_SDH_BLE_PERIPHERAL_LINK_COUNT 1
+  */
+  RAM (rwx) :  ORIGIN = 0x20001800, LENGTH = 0x4800
 }
 
 SECTIONS

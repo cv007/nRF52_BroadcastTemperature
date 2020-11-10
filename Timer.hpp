@@ -6,8 +6,6 @@
 
 #include "Errors.hpp"   //error
 
-#define SI static inline
-
 /*------------------------------------------------------------------------------
     user defined literals use for ms, sec
 ------------------------------------------------------------------------------*/
@@ -70,6 +68,6 @@ auto init           (u32 ms, void(*cb)(void*), TIMER_TYPE typ = ONCE) -> void {
                         error.check( app_timer_start(ptimerId_, appTimerTicks(ms), NULL) );
                     }
 
-};
+auto stop           (){ error.check( app_timer_stop(ptimerId_) ); }
 
-#undef SI
+};

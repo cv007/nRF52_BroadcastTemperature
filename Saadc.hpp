@@ -5,7 +5,6 @@
 #undef SA
 //#define SA [[gnu::always_inline]] static auto
 #define SA [[gnu::noinline]] static auto
-#define SI static inline
 
 /*------------------------------------------------------------------------------
     Saadc struct
@@ -399,4 +398,4 @@ SA  read            (i16& v, RES r, OVERSAMP s = OVEROFF) {
 
 #undef SA
 #define SA static auto
-#undef SI
+

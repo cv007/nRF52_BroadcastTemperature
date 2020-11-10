@@ -9,11 +9,6 @@
 #include "Tmp117.hpp"
 #include "Si7051.hpp"
 
-#undef SA
-#define SA [[gnu::noinline]] static auto
-#define SI static inline
-#define A auto
-
 /*------------------------------------------------------------------------------
     Temperature
     (not static, each use is seperate)
@@ -34,7 +29,7 @@ struct Temperature {
     public:
 //===========
 
-A   addHistory      (i16 v) {
+auto    addHistory  (i16 v) {
                         static bool isInit;
                         static u8 idx;
 
@@ -50,7 +45,7 @@ A   addHistory      (i16 v) {
                         return v; //the min/max limited value
                     }
 
-A   average         () {
+auto    average     () {
                         i16 avg{0};
                         for( auto& i : tempHistory_ ) avg += i;
                         return avg / HistSiz_;
@@ -87,6 +82,7 @@ SA  read            () {
                     }
 };
 
+#ifdef NRF52810_BL651_TEMP
 template<u8 HistSiz_>
 struct TemperatureTmp117 {
 
@@ -182,11 +178,9 @@ SA  read            () {
                         return f;
                     }
 };
+#endif //#ifdef NRF52810_BL651_TEMP
 
-#undef SA
-#define SA static auto
-#undef SI
-#undef A
+
 
 
 

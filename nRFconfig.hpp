@@ -7,6 +7,7 @@
 //common function types
 #define SA static auto
 #define SCA static constexpr auto
+#define SI static inline
 
 //our own types, to use include this file
 using u8  = uint8_t;
@@ -37,7 +38,7 @@ SCA operator "" _i64 (u64 v) { return (i64)v; }
     specify board in use, choose 1
 ------------------------------------------------------------------------------*/
 #define NRF52810_BL651_TEMP
-//#define NRF52840_DONGLE
+// #define NRF52840_DONGLE
 
 
 /*------------------------------------------------------------------------------
@@ -68,7 +69,9 @@ SCA operator "" _i64 (u64 v) { return (i64)v; }
         comment out DEBUG_DEVICE to turn off debug output
         set markupON to false if markup code not wanted (markup code bypassed)
 ------------------------------------------------------------------------------*/
+#ifdef NRF52810_BL651_TEMP
 #define DEBUG_DEVICE            DevRtt<0>{} //change as needed, or comment out
+#endif
 inline bool markupON{true}; 
 
 #ifdef DEBUG_DEVICE

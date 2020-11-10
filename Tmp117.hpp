@@ -7,8 +7,6 @@
 #include "Twim.hpp"
 #include "Print.hpp"
 
-#define SI static inline
-
 /*------------------------------------------------------------------------------
     Tmp117 struct
 
@@ -143,7 +141,5 @@ SA  x100C   (i16 v) -> i16      { return (v * 25L)>>5; }
 SA  x1000C  (i16 v) -> int32_t  { return (v * 125L)>>4; }
 
 };
-
-#undef SI
 
 

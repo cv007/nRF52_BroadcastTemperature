@@ -13,8 +13,6 @@
 #include "Gpio.hpp"
 #include "Print.hpp"
 
-#define SI static inline
-
 /*------------------------------------------------------------------------------
     Twim struct (TWI master)
     BaseAddr_ = peripheral base address
@@ -350,9 +348,6 @@ SA  read            (T (&rxbuf)[N]) {
     #pragma GCC diagnostic pop
 
 };
-
-#undef SI
-
 
 template<PIN Sda_, PIN Scl_, PIN Pwr_ = PIN(-1)>
 using Twim0 = Twim<0x40003000, Sda_, Scl_, Pwr_>; //all

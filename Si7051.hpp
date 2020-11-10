@@ -9,7 +9,6 @@
 
 // #define SA [[gnu::always_inline]] static auto
 // #define SA [[gnu::noinline]] static auto
-#define SI static inline
 
 //sda/scl pins routed wrong on CR2 board :(
 
@@ -144,7 +143,6 @@ SA  x10F    (u16 v) -> i16      { return x100F(v) / 10; }
 
 };
 
-#undef SI
 
 
 /*
