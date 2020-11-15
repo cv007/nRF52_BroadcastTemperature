@@ -62,8 +62,8 @@ SA  dump            () -> void {
                             if( (i bitand 15) == 15 ){
                                 Debug(" ");
                                 for( auto j = i-15; j <= i; j++ ){
-                                    char c = fullnameFlash_[j] > ' ' and fullnameFlash_[j] < 128 ? fullnameFlash_[j] : '.';
-                                    Debug("%c", c);
+                                    Debug("%c", fullnameFlash_[j] > ' ' and fullnameFlash_[j] < 128 ? 
+                                                fullnameFlash_[j] : '.');                                    
                                 }
                                 Debug("\n    ");
                             }

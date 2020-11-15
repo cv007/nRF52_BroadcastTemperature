@@ -51,7 +51,7 @@ SRC_FILES += $(SDK_ROOT)/modules/nrfx/drivers/src/prs/nrfx_prs.c
 SRC_FILES += $(SDK_ROOT)/modules/nrfx/hal/nrf_nvmc.c
 # SRC_FILES += $(SDK_ROOT)/components/libraries/bsp/bsp.c
 SRC_FILES += $(PROJ_DIR)/main.cpp
-# SRC_FILES += $(SDK_ROOT)/external/segger_rtt/SEGGER_RTT.c
+SRC_FILES += $(SDK_ROOT)/external/segger_rtt/SEGGER_RTT.c
 # SRC_FILES += $(SDK_ROOT)/external/segger_rtt/SEGGER_RTT_Syscalls_GCC.c
 # SRC_FILES += $(SDK_ROOT)/external/segger_rtt/SEGGER_RTT_printf.c
 SRC_FILES += $(SDK_ROOT)/components/ble/common/ble_advdata.c
@@ -60,6 +60,7 @@ SRC_FILES += $(SDK_ROOT)/external/utf_converter/utf.c
 SRC_FILES += $(SDK_ROOT)/components/softdevice/common/nrf_sdh.c
 SRC_FILES += $(SDK_ROOT)/components/softdevice/common/nrf_sdh_ble.c
 SRC_FILES += $(SDK_ROOT)/components/softdevice/common/nrf_sdh_soc.c
+SRC_FILES += $(SDK_ROOT)/components/ble/common/ble_conn_params.c
 
 # Include folders common to all targets
 INC_FOLDERS += \
@@ -210,6 +211,8 @@ CFLAGS += -DNRF52840_XXAA
 CFLAGS += -DNRF_SD_BLE_API_VERSION=7
 CFLAGS += -DS140
 CFLAGS += -DSOFTDEVICE_PRESENT
+# for selecting which device
+CFLAGS += -DNRF52840_DONGLE
 CFLAGS += -mcpu=cortex-m4
 CFLAGS += -mthumb -mabi=aapcs
 CFLAGS += -Wall -Werror
@@ -246,10 +249,10 @@ LDFLAGS += -Wl,--gc-sections
 # use newlib in nano version
 LDFLAGS += --specs=nano.specs
 
-nrf52840_xxaa: CFLAGS += -D__HEAP_SIZE=8192
-nrf52840_xxaa: CFLAGS += -D__STACK_SIZE=8192
-nrf52840_xxaa: ASMFLAGS += -D__HEAP_SIZE=8192
-nrf52840_xxaa: ASMFLAGS += -D__STACK_SIZE=8192
+nrf52840_xxaa: CFLAGS += -D__HEAP_SIZE=4096
+nrf52840_xxaa: CFLAGS += -D__STACK_SIZE=4096
+nrf52840_xxaa: ASMFLAGS += -D__HEAP_SIZE=4096
+nrf52840_xxaa: ASMFLAGS += -D__STACK_SIZE=4096
 
 # Add standard libraries at the very end of the linker input, after all objects
 # that may need symbols provided by these libraries.

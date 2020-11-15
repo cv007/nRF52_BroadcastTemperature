@@ -37,8 +37,9 @@ SCA operator "" _i64 (u64 v) { return (i64)v; }
 /*------------------------------------------------------------------------------
     specify board in use, choose 1
 ------------------------------------------------------------------------------*/
-#define NRF52810_BL651_TEMP
-// #define NRF52840_DONGLE
+//these are now set in makefile
+//#define NRF52810_BL651_TEMP
+//#define NRF52840_DONGLE
 
 
 /*------------------------------------------------------------------------------
@@ -54,8 +55,8 @@ SCA operator "" _i64 (u64 v) { return (i64)v; }
 #ifdef NRF52810_BL651_TEMP
     #define LAST_PAGE_ADDR 0x2F000
     #define LAST_PAGE (LAST_PAGE_ADDR/4096)
-    // #define TEMPERATURE_TMP117
-    #define TEMPERATURE_SI7051
+    #define TEMPERATURE_TMP117
+    // #define TEMPERATURE_SI7051
     #include "nRF52810.hpp"
 #endif
 
@@ -72,7 +73,7 @@ SCA operator "" _i64 (u64 v) { return (i64)v; }
         set markupON to false if markup code not wanted (markup code bypassed)
 ------------------------------------------------------------------------------*/
 #ifdef NRF52810_BL651_TEMP
-#define DEBUG_DEVICE            DevRtt<0>{} //change as needed, or comment out
+// #define DEBUG_DEVICE            DevRtt<0>{} //change as needed, or comment out
 #endif
 inline bool markupON{true}; 
 

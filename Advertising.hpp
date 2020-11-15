@@ -179,7 +179,7 @@ struct Advertising {
 
     SI bool isActive_{false};
     SI bool isConnectable_{true}; //start out connectable so can change name
-    SI u8   connectableTimeout_{6}; //disable connectable after some number of updates
+    SI u8   connectableTimeout_{20}; //disable connectable after some number of updates
 
     //update data interval
     SI Timer timerAdvUpdate_;
