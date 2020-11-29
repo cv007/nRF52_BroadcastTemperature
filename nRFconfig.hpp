@@ -73,7 +73,7 @@ SCA operator "" _i64 (u64 v) { return (i64)v; }
         set markupON to false if markup code not wanted (markup code bypassed)
 ------------------------------------------------------------------------------*/
 #ifdef NRF52810_BL651_TEMP
-// #define DEBUG_DEVICE            DevRtt<0>{} //change as needed, or comment out
+#define DEBUG_DEVICE            DevRtt<0>{} //change as needed, or comment out
 #endif
 inline bool markupON{true}; 
 

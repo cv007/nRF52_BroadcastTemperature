@@ -86,9 +86,9 @@ struct BL651tempBoard {
     //SDA - P0_13 - input, S0D1
     //SCL - P0_15 - input, SOD1
     //PWR - P0_17 - output, power to i2c devices tmp117/si7051
-    SI Gpio<P0_13>  sda; 
-    SI Gpio<P0_15>  scl;
-    SI Gpio<P0_17>  i2cDevicePwr; 
+    Gpio<P0_13>  sda; 
+    Gpio<P0_15>  scl;
+    Gpio<P0_17>  i2cDevicePwr; 
 
 //taken care of in Twim
 // SA  i2cInit () {
