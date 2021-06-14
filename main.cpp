@@ -87,7 +87,7 @@ BL651 module (nRF52810)-
 // TESTING
 // checking all temperature sources to compare
 // run every 20 seconds, each function Debug will show info
-#if defined(NRF52810_BL651_TEMP) && 0
+#if defined(NRF52810_BL651_TEMP) && 1
 Timer timerTestTemp{
     20_sec, 
     [](void*){ 
@@ -109,7 +109,7 @@ Timer timerTestTemp{
 -----------------------------------------------------------------------------*/
 int main() {
 
-    Debug( "{normal}{Fgreen}\nBoot start...\n" );
+    Debug( ANSI_NORMAL FG HOT_PINK "\nBoot start...\n\n" ANSI_NORMAL );
 
     board.init();           //init board pins
     board.alive();          //blink led's to show boot
@@ -120,6 +120,9 @@ int main() {
     gap.init();             //gap init
     conn.init();            //connection init
     adv.init();             //advertising init
+
+    Debug( FG HOT_PINK "\nBoot end...\n\n" ANSI_NORMAL );
+
     power.loop();           //power.sleep() loop
 
     //power.loop will not return

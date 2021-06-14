@@ -20,7 +20,7 @@ struct Errors {
                 //reset unless also pass in false
 SA  check       (i16 err, bool reboot = true) {
                     if( err == 0 ) return;
-                    Debug( "{Fred}Error: %d{normal}\n", err );
+                    Debug( FG RED "Error: %d\n" ANSI_NORMAL, err );
                     for( auto i = 0; i < 3; i++ ){
                         board.error( err ); //let board put out error codes however it wants
                         nrf_delay_ms(3000);

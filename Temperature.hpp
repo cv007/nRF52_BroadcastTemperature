@@ -121,8 +121,8 @@ nrf_delay_ms(125);
                         tmp117.deinit(); //turn off power to ic
 
                         DebugFuncHeader();
-                        if( not i )      { Debug("  {Fred}timeout, ready bit not set{Fwhite}\n"); return f; }
-                        if( not ok )     { Debug("  {Fred}failed to read temp value{Fwhite}\n"); return f; }
+                        if( not i )      { Debug(FG RED "  timeout, ready bit not set\n" FG WHITE); return f; }
+                        if( not ok )     { Debug(FG RED "  failed to read temp value\n" FG WHITE); return f; }
                         if( t == -32768 ){ Debug("  returned default temp value\n"); return f; }
 
                         f = tmp117.x10F( t );

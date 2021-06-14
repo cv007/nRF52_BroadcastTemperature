@@ -22,7 +22,7 @@ struct Ble {
 
 SA  eventHandler    (ble_evt_t const * p_ble_evt, void * p_context) {
                         DebugFuncHeader();
-                        Debug( "{normal}header.event_id: %d\n", p_ble_evt->header.evt_id );
+                        Debug( ANSI_NORMAL "header.event_id: %d\n", p_ble_evt->header.evt_id );
                         switch (p_ble_evt->header.evt_id){
 
                             case BLE_GATTS_EVT_WRITE:
@@ -62,7 +62,7 @@ SA  eventHandler    (ble_evt_t const * p_ble_evt, void * p_context) {
                                 break;
 
                             default:
-                                Debug( "{Fred}unhandled event\n{normal}" );
+                                Debug( FG RED "unhandled event\n" ANSI_NORMAL );
                                 board.caution(); //red blink
                                 break;
                         }

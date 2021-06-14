@@ -208,7 +208,7 @@ SA  update          (void* pcontext = nullptr) -> void {
 
                         //=== Debug ===
                         DebugFuncHeader();
-                        Debug( "{Fcyan}  -advertising packet-{Fwhite}\n" );
+                        Debug( FG CYAN "  -advertising packet-\n" FG WHITE );
                         auto i = 0;
                         while( buffer_[i] ){
                             auto len = buffer_[i++];

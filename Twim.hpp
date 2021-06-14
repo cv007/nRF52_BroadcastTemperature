@@ -227,7 +227,7 @@ SA  waitForStop     () {
                                 stop();
                                 while( not isStopped() ){}
                                 //DebugFuncHeader();
-                                //Debug("  {Forange}twim xfer ERRORSRC:{Fwhite} 0x%08X\n", reg.ERRORSRC);
+                                //Debug(FG ORANGE "  twim xfer ERRORSRC:" WHITE " 0x%08X\n", reg.ERRORSRC);
                                 return false;
                             }
                         }
