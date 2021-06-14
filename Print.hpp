@@ -41,12 +41,13 @@ struct DevRtt {
 ------------------------------------------------------------------------------*/
 template<typename Dev, typename...Ts>
 int Print(Dev dev, const char* fmt, Ts...ts){
-    char buf[512];
-    int n = snprintf( buf, 512, fmt, ts... );
+    char buf[256];
+    int n = snprintf( buf, 256, fmt, ts... );
     if( n == 0 ) return 0;
     dev.write( buf );
     return n;
 }
+
 
 
 /*-------------------------------------------------------------
@@ -56,12 +57,11 @@ int Print(Dev dev, const char* fmt, Ts...ts){
     << CLS << FG BLUE << BG WHITE << "fg blue, bg white"
     << ITALIC << FG RGB(200,100,50) << "italic rgb(200,100,50)"
 --------------------------------------------------------------*/
-#if 1
-#define ANSI_CSI             "\033["
+#define ANSI_CSI            "\033["
 
-#define FG              ANSI_CSI "38;2;"
-#define BG              ANSI_CSI "48;2;"
-#define RGB(r,g,b)      #r";"#g";"#b"m"
+#define FG                  ANSI_CSI "38;2;"
+#define BG                  ANSI_CSI "48;2;"
+#define RGB(r,g,b)          #r";"#g";"#b"m"
 
 
 #define ANSI_CLS             ANSI_CSI "2J"
@@ -213,4 +213,4 @@ int Print(Dev dev, const char* fmt, Ts...ts){
 #define WHITE_SMOKE              RGB(245,245,245)
 #define YELLOW                   RGB(255,255,0)
 #define YELLOW_GREEN             RGB(154,205,50)
-#endif
+
