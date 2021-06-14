@@ -3987,7 +3987,7 @@ SA  high        ()          { reg.OUTSET = bm_; } //register wide write
    2873a:	47b0      	blx	r6
    2873c:	3d01      	subs	r5, #1
    2873e:	d1fa      	bne.n	28736 <Errors::check(short, bool) [clone .constprop.0]+0x9e>
-                    Debug( "{Fred}Error: %d{normal}\n", err );
+                    Debug( FG RED "Error: %d\n" ANSI_NORMAL, err );
                     for( auto i = 0; i < 3; i++ ){
    28740:	f1b9 0901 	subs.w	r9, r9, #1
    28744:	d1b6      	bne.n	286b4 <Errors::check(short, bool) [clone .constprop.0]+0x1c>
@@ -5707,7 +5707,7 @@ SA  eventHandler    (ble_evt_t const * p_ble_evt, void * p_context) {
    29318:	b5b0      	push	{r4, r5, r7, lr}
    2931a:	b082      	sub	sp, #8
                         DebugFuncHeader();
-                        Debug( "{normal}header.event_id: %d\n", p_ble_evt->header.evt_id );
+                        Debug( ANSI_NORMAL "header.event_id: %d\n", p_ble_evt->header.evt_id );
                         switch (p_ble_evt->header.evt_id){
    2931c:	8803      	ldrh	r3, [r0, #0]
    2931e:	2b21      	cmp	r3, #33	; 0x21
@@ -5743,7 +5743,7 @@ SA  stop        () { error.check( ble_conn_params_stop() ); }
                                 adv.timerOn(); //restart adv update timer
    29344:	f7ff fd74 	bl	28e30 <Advertising<MyTemperatureAD<TemperatureInternal<(unsigned char)5> >, (unsigned short)3000, 20000ul>::timerOn()>
                             default:
-                                Debug( "{Fred}unhandled event\n{normal}" );
+                                Debug( FG RED "unhandled event\n" ANSI_NORMAL );
                                 board.caution(); //red blink
                                 break;
                         }
@@ -5905,7 +5905,7 @@ int main() {
    2945c:	b530      	push	{r4, r5, lr}
    2945e:	b089      	sub	sp, #36	; 0x24
 
-    Debug( "{normal}{Fgreen}\nBoot start...\n" );
+    Debug( ANSI_NORMAL FG HOT_PINK "\nBoot start...\n\n" ANSI_NORMAL );
 
     board.init();           //init board pins
    29460:	f7ff f9ae 	bl	287c0 <Pca10059::init()>
@@ -6036,6 +6036,7 @@ SA  sleep       () {
    29522:	6813      	ldr	r3, [r2, #0]
    29524:	f013 0301 	ands.w	r3, r3, #1
    29528:	d117      	bne.n	2955a <_GLOBAL__sub_I_main+0x76>
+
     power.loop();           //power.sleep() loop
 
     //power.loop will not return
