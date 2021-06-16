@@ -102,7 +102,7 @@ SA  make            (u8* buf) {
                         //percentage will be mV/10 from 2-3v (77% = 2.77v)
                         u16 bv = battery.read();
                         DebugFuncHeader();
-                        Debug( "  battery: %dmV\n", bv );
+                        DebugRtt << "  battery: " << bv << "mV" << endl;
                         u8 dat = bv > 3000 ? 100 :
                                  bv < 2000 ? 0 :
                                  (bv - 2000)/10;
@@ -129,16 +129,16 @@ struct MyTemperatureAD {
 //===========
 
 SA  update          ( u8 (&buf)[31] ) -> void {
-                        //new temp reading
+                        // new temp reading
                         i16 f = temp_.read(); //~50us
                         //making our own decimal point, so %10 needs to be positive
                         u8 f10 = (f < 0) ? -f%10 : f%10;
                         f = f/10;
-                        char nambuf[22+1]; //add 1 for 0 terminator for snprintf
-                        snprintf( nambuf, 23, "%d.%uF %s", f, f10, flash.readName() );
+                        BufPrinter<22+1> nambuf; //add 1 for 0 terminator
+                        nambuf << f << "." << f10 << "F " << flash.readName();
                         u8 idx = Flags01::make( buf, BLE_GAP_ADV_FLAG_BR_EDR_NOT_SUPPORTED ); //3
                         idx += BatteryService180F::make( &buf[idx] ); //4
-                        idx += CompleteName09::make( &buf[idx], nambuf, 31-7-2 ); // up to 22 chars
+                        idx += CompleteName09::make( &buf[idx], nambuf.buf(), 31-7-2 ); // up to 22 chars
                         if( idx < 31 ) buf[idx] = 0;
                     }
 
@@ -208,21 +208,29 @@ SA  update          (void* pcontext = nullptr) -> void {
 
                         //=== Debug ===
                         DebugFuncHeader();
-                        Debug( FG CYAN "  -advertising packet-\n" FG WHITE );
+                        DebugRtt << FG CYAN "  -advertising packet-" << endl << FG WHITE;
                         auto i = 0;
                         while( buffer_[i] ){
-                            auto len = buffer_[i++];
+                            u32 len = buffer_[i++];
                             auto typ = buffer_[i++];
-                            Debug( "  len: %2u  type: %02x  data: ", len--, typ );
+                            DebugRtt
+                                << clear
+                                << "  len: " << setfill(' ') << setw(2) << len-- 
+                                << "  type: " << hex << setfill('0') << setw(2) << uppercase << typ
+                                << "  data: ";
                             //name
-                            if( typ == 9 ){ Debug( "%.*s ", len, &buffer_[i] ); }
+                            if( typ == 9 ){ 
+                                DebugRtt << setwmax(len) << (char*)&buffer_[i] << ' ' << setwmax(0);
+                                }
                             else {
-                                for( auto j = 0; j < len; j++ ){ Debug( "%02X ", buffer_[i+j] ); }
+                                for( u32 j = 0; j < len; j++ ){ 
+                                    DebugRtt << setw(2) << setfill('0') << hex << uppercase << buffer_[i+j] << ' ';
+                                    }
                             }
                             i += len;
-                            Debug( "\n" );
+                            DebugRtt << endl;
                         }
-                        Debug( "\n" );
+                        DebugRtt << endl << clear;
                         //=== Debug ===
 
                         start();
@@ -240,7 +248,7 @@ SA  timerInterval   (u32 ms) {
                     }
 
 SA  init            () {
-                        Debug( "Advertising::init...\n" );
+                        DebugRtt << "Advertising::init..." << endl;
                         params_.interval = paramInterval_;
                         update();
                         timerOn();

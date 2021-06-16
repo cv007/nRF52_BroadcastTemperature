@@ -72,12 +72,14 @@ SA  histSize        () { return HistSiz_; }
 
 SA  read            () {
                         i16 f = -999; //-99.9 = failed to get
-                        int32_t t;
+                        i32 t;
                         if( sd_temp_get(&t) ) return f;
                         f = (t*10*9/5+320*4)/4; // Fx10
                         f = tempH.addHistory( f );
+                        i16 f10 = f/10;
+                        i16 f1 = __builtin_abs(f)%10;
                         DebugFuncHeader();
-                        Debug("  internal raw: %d  F: %02d.%d\n", t, f/10, f%10);
+                        DebugRtt << "  internal raw: " << t << "  F: " << setfill('0') << setw(2) << f10 << "." << f1 << endl;
                         return f;
                     }
 };
@@ -121,13 +123,15 @@ nrf_delay_ms(125);
                         tmp117.deinit(); //turn off power to ic
 
                         DebugFuncHeader();
-                        if( not i )      { Debug(FG RED "  timeout, ready bit not set\n" FG WHITE); return f; }
-                        if( not ok )     { Debug(FG RED "  failed to read temp value\n" FG WHITE); return f; }
-                        if( t == -32768 ){ Debug("  returned default temp value\n"); return f; }
+                        if( not i )      { DebugRtt << FG RED "  timeout, ready bit not set" FG WHITE << endl; return f; }
+                        if( not ok )     { DebugRtt << FG RED "  failed to read temp value" FG WHITE << endl; return f; }
+                        if( t == -32768 ){ DebugRtt << "  returned default temp value" << endl; return f; }
 
                         f = tmp117.x10F( t );
                         f = tempH.addHistory( f );
-                        Debug("  Tmp117 raw: %d  F: %02d.%d\n", t, f/10, f%10);
+                        i16 f10 = f/10;
+                        i16 f1 = __builtin_abs(f)%10;
+                        DebugRtt << "  Tmp117 raw: " << t << "  F: " << setfill('0') << setw(2) << f10 << "." << f1 << endl;
                         return f;
                     }
 };
@@ -173,8 +177,10 @@ SA  read            () {
 
                         f = si7051.x10F(t);                        
                         f = tempH.addHistory( f );
+                        i16 f10 = f/10;
+                        i16 f1 = __builtin_abs(f)%10;
                         DebugFuncHeader();
-                        Debug("  Si7051 raw: %d  F: %02d.%d\n", t, f/10, f%10);
+                        DebugRtt << "  Si7051 raw: " << t << "  F: " << setfill('0') << setw(2) << f10 << "." << f1 << endl;
                         return f;
                     }
 };

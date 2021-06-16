@@ -32,7 +32,8 @@ struct Pca10059 {
 
             //someone is required to run init to setup pins
 SA  init    () {
-                Debug( "Pca10059::init...\n" );
+                DebugRtt << "Pca10059::init..." << endl;
+                // Debug( "Pca10059::init...\n" );
                 led1G.init( OUTPUT );
                 led2G.init( OUTPUT );
                 led2R.init( OUTPUT );
@@ -113,7 +114,7 @@ struct BL651tempBoard {
 
             //someone is required to run init to setup pins
 SA  init    () {
-                Debug( "BL651tempBoard::init...\n" );
+                DebugRtt << "BL651tempBoard::init..." << endl;
                 ledRed.init( OUTPUT, S0S1 ); //standard drive 1
                 ledGreen.init( OUTPUT, S0S1 ); //standard drive 1
                 sw1.init( INPUT, PULLUP );

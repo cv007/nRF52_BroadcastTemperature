@@ -18,7 +18,7 @@
 struct Conn {
 
 SA  init        () {
-                    Debug( "Conn::init...\n" );                    
+                    DebugRtt << "Conn::init..." << endl;                  
                     ble_conn_params_init_t cp_init;
 
                     memset(&cp_init, 0, sizeof(cp_init));

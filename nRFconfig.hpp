@@ -62,29 +62,29 @@ SCA operator "" _i64 (u64 v) { return (i64)v; }
 
 
 /*------------------------------------------------------------------------------
-    set debug device, create Debug alias to Print
-
-        Debug("[%s:%d] %s\n", __FILE__, __LINE__, __func__);
-        DebugFuncHeader(); //same as above
-        Debug("\tmyVar: %d", myVar);
-
-        debug device in Print.hpp
-        comment out DEBUG_DEVICE to turn off debug output
-        set markupON to false if markup code not wanted (markup code bypassed)
+    set debug device, debug device in Print.hpp
 ------------------------------------------------------------------------------*/
-#ifdef NRF52810_BL651_TEMP
-#define DEBUG_DEVICE            DevRtt<0>{} //change as needed, or comment out
-#endif
+#include "Print.hpp"
+using namespace prn;
 
-#ifdef DEBUG_DEVICE
-#define Debug(...)              Print( DEBUG_DEVICE, __VA_ARGS__ )
-//using app timer rtc1 as system time, is /2 so 16384 per sec
-#define DebugFuncHeader()       do { u32 t = app_timer_cnt_get(); \
-                                Debug( FG SEA_GREEN "[%04d.%06d][%s:%d ::%s]\n" FG WHITE, \
-                                t/16384, (t%16384) * 61, \
-                                __FILE__, __LINE__, __func__); } while(0)
+#ifdef NRF52810_BL651_TEMP
+
+inline DevRtt<0> DebugRtt{};
+
+                // using app timer rtc1 as system time, is /2 so 16384 per sec
+                [[ gnu::noinline ]] inline void 
+DebugFuncHeader (){
+                u32 t = app_timer_cnt_get();
+                DebugRtt 
+                    << FG SEA_GREEN << clear
+                    << setfill('0') 
+                    << '[' << setw(4) << t/16384 << '.' << setw(6) << (t%16384)*61 << ']'
+                    << '[' << __FILE__ << ':' << (u32)__LINE__ << " ::" << __func__ << ']' 
+                    << endl << ANSI_NORMAL << clear;
+                }
+
 #else
-#define Debug(...)
+inline NullPrinter DebugRtt{};
 #define DebugFuncHeader()
 #endif
 

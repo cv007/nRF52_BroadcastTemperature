@@ -38,14 +38,14 @@ struct Flash {
 
                     //sd soc event handler to get success/error from erase/write
 SA  evtHandler      (u32 evtId, void* ctx) -> void {
-                        Debug( "Flash::handler event : %d\n", evtId );
+                        DebugRtt << "Flash::handler event : " << evtId << endl;
                         if( evtId == NRF_EVT_FLASH_OPERATION_SUCCESS ){
-                            Debug( "    success\n" );
+                            DebugRtt << "    success" << endl;
                             dump();
                             busy_ = false;
                         }
                         if( evtId == NRF_EVT_FLASH_OPERATION_ERROR ){
-                            Debug( "    error\n" );
+                            DebugRtt << "    error" << endl;
                             busy_ = false;
                         }
                     }
@@ -56,19 +56,19 @@ SA  evtHandler      (u32 evtId, void* ctx) -> void {
 
                     //dump 32 bytes
 SA  dump            () -> void {
-                        Debug( "fullname flash values:\n    " );
+                        DebugRtt << "fullname flash values:" << endl << "    ";
                         for( auto i = 0; i < fullnameSiz_; i++ ){
-                            Debug( "%02X", fullnameFlash_[i] );
+                            DebugRtt << setw(2) << setfill('0') << fullnameFlash_[i];
                             if( (i bitand 15) == 15 ){
-                                Debug(" ");
+                                DebugRtt << " ";
                                 for( auto j = i-15; j <= i; j++ ){
-                                    Debug("%c", fullnameFlash_[j] > ' ' and fullnameFlash_[j] < 128 ? 
-                                                fullnameFlash_[j] : '.');                                    
+                                    DebugRtt << (fullnameFlash_[j] > ' ' and fullnameFlash_[j] < 128 ? 
+                                                fullnameFlash_[j] : '.');  
                                 }
-                                Debug("\n    ");
+                                DebugRtt << endl;
                             }
                         }
-                        Debug( "\n" );
+                        DebugRtt << endl;
                     }
                     //check if flash fullname is 0 terminated within 32 bytes
                     //if so, assume is a valid string 
@@ -89,9 +89,9 @@ SA  fullnameErased  () {
                     //returns true if already erased or a page erase was accepted by sd
 SA  sdErasePage     () { 
                         if( fullnameErased() ) return true;
-                        Debug( "Flash::sdErasePage\n" );
+                        DebugRtt << "Flash::sdErasePage" << endl;
                         if( busy_ ){
-                            Debug( "    flash busy\n" );
+                            DebugRtt << "    flash busy" << endl;
                             return false;
                         } 
                         dump();
@@ -103,20 +103,20 @@ SA  sdErasePage     () {
 
                     //returns true if write was accepted by sd
 SA  sdFlashWrite32  (const u32* vals, u16 valsN) { 
-                        Debug( "Flash::sdFlashWrite32\n" );
+                        DebugRtt << "Flash::sdFlashWrite32" << endl;
                         if( busy_ ){
-                            Debug( "    flash busy\n" );
+                            DebugRtt << "    flash busy" << endl;
                             return false;
                         } 
                         u32 err = sd_flash_write((u32*)fullnameFlash_, vals, valsN );
-                        Debug( "    return val: %u\n", err );
+                        DebugRtt << "    return val: " << err << endl;
                         if( err != NRF_SUCCESS ) return false;
                         busy_ = true;
                         return true;                       
                     }
 
 SA  saveName        () {
-                        Debug( "Flash::saveName : %s\n", fullnameRam_ );          
+                        DebugRtt << "Flash::saveName : " << fullnameRam_ << endl; 
                         if( not nrf_sdh_is_enabled() ) return; //these functions use sd
                         if( not sdErasePage() ) return;
                         //will try again from readName() if write is not accepted by sd
@@ -126,21 +126,21 @@ SA  saveName        () {
     public:
                     //stored flash name to ram, or use default if not set
 SA  init            () {
-                        Debug( "Flash::init...\n" );  
+                        DebugRtt << "Flash::init..." << endl; 
                         if( fullnameValid() ){
                             //copy to ram (include 0 terminator)
                             memcpy( (void*)fullnameRam_, (void*)fullnameFlash_, strlen(fullnameFlash_)+1 );
                         } else {
                             memcpy( (void*)fullnameRam_, (void*)"NoName", strlen("NoName")+1 );
                         }
-                        Debug( "    name: %s\n", fullnameRam_ );
+                        DebugRtt << "    name: " << fullnameRam_ << endl;
                     }
 
                     //truncated to 32chars including 0 terminator
                     //but only 15 or 16 can be used as setup in adv
                     //(which will do its own truncation)
 SA  updateName      (const char* str) {
-                        Debug( "Flash::updateName : %s\n", str );
+                        DebugRtt << "Flash::updateName : " << str << endl;
                         auto len = strlen(str);
                         if( len > fullnameSiz_-1 ) len = fullnameSiz_-1;
                         memset( (void*)fullnameRam_, 0, fullnameSiz_ ); //clear all

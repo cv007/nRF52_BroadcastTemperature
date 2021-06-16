@@ -18,7 +18,7 @@
 struct Gap {
 
 SA  init        () {
-                    Debug( "Gap::init...\n" );                    
+                    DebugRtt << "Gap::init..." << endl;               
 
                     ble_gap_conn_params_t   gap_conn_params;
                     ble_gap_conn_sec_mode_t sec_mode;

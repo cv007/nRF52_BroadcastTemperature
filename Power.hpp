@@ -17,7 +17,7 @@
 struct Power {
 
 SA  init        () {
-                    Debug( "Power::init...\n" );                    
+                    DebugRtt << "Power::init..." << endl;                
                     error.check( nrf_pwr_mgmt_init() );
                     //enable REG1 Dc-Dc (instead of LDO, for 1.8v system)
                     nrf_power_dcdcen_set( true );

@@ -227,7 +227,8 @@ SA  waitForStop     () {
                                 stop();
                                 while( not isStopped() ){}
                                 //DebugFuncHeader();
-                                //Debug(FG ORANGE "  twim xfer ERRORSRC:" WHITE " 0x%08X\n", reg.ERRORSRC);
+                                //DebugRtt << FG ORANGE "  twim xfer ERRORSRC:" WHITE " "
+                                //  << hex << setfill('0') << showbase << setw(8) << reg.ERRORSRC << endl << clear;
                                 return false;
                             }
                         }
