@@ -134,7 +134,7 @@ SA  update          ( u8 (&buf)[31] ) -> void {
                         //making our own decimal point, so %10 needs to be positive
                         u8 f10 = (f < 0) ? -f%10 : f%10;
                         f = f/10;
-                        BufPrinter<22+1> nambuf; //add 1 for 0 terminator
+                        BufoStreamer<22+1> nambuf; //add 1 for 0 terminator
                         nambuf << f << "." << f10 << "F " << flash.readName();
                         u8 idx = Flags01::make( buf, BLE_GAP_ADV_FLAG_BR_EDR_NOT_SUPPORTED ); //3
                         idx += BatteryService180F::make( &buf[idx] ); //4
@@ -215,8 +215,8 @@ SA  update          (void* pcontext = nullptr) -> void {
                             auto typ = buffer_[i++];
                             DebugRtt
                                 << clear
-                                << "  len: " << setfill(' ') << setw(2) << len-- 
-                                << "  type: " << hex << setfill('0') << setw(2) << uppercase << typ
+                                << "  len: " << setwf(2,' ') << len-- 
+                                << "  type: " << Hex << setwf(2,'0') << typ
                                 << "  data: ";
                             //name
                             if( typ == 9 ){ 
@@ -224,13 +224,13 @@ SA  update          (void* pcontext = nullptr) -> void {
                                 }
                             else {
                                 for( u32 j = 0; j < len; j++ ){ 
-                                    DebugRtt << setw(2) << setfill('0') << hex << uppercase << buffer_[i+j] << ' ';
+                                    DebugRtt << setwf(2,'0') << Hex << buffer_[i+j] << ' ';
                                     }
                             }
                             i += len;
                             DebugRtt << endl;
                         }
-                        DebugRtt << endl << clear;
+                        DebugRtt << endlc;
                         //=== Debug ===
 
                         start();

@@ -65,11 +65,12 @@ SCA operator "" _i64 (u64 v) { return (i64)v; }
     set debug device, debug device in Print.hpp
 ------------------------------------------------------------------------------*/
 #include "Print.hpp"
-using namespace prn;
+using namespace ost;
 
-#ifdef NRF52810_BL651_TEMP
+#ifdef NRF52810_BL651_TEMP //set in makefile
 
 inline DevRtt<0> DebugRtt{};
+// inline NullPrinter DebugRtt{}; //if want debug off
 
                 // using app timer rtc1 as system time, is /2 so 16384 per sec
                 [[ gnu::noinline ]] inline void 
@@ -83,7 +84,7 @@ DebugFuncHeader (){
                     << endl << ANSI_NORMAL << clear;
                 }
 
-#else
+#else //nrf52840 has no output, send debug to NullPrinter
 inline NullPrinter DebugRtt{};
 #define DebugFuncHeader()
 #endif

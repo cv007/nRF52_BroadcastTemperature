@@ -110,9 +110,9 @@ int main() {
 
     DebugRtt 
         << ANSI_NORMAL FG MEDIUM_PURPLE << endl
-        << setfill('=') << setw(60) << "" << endl
+        << cdup('=',60) << endl
         << "\tBoot start..." << endl 
-        << setfill('=') << setw(60) << "" << endl << ANSI_NORMAL;
+        << cdup('=',60) << endl << ANSI_NORMAL;
 
     board.init();           //init board pins
     board.alive();          //blink led's to show boot
@@ -126,9 +126,9 @@ int main() {
 
     DebugRtt << clear
         << ANSI_NORMAL FG MEDIUM_PURPLE << endl
-        << setfill('=') << setw(60) << "" << endl
+        << cdup('=',60) << endl
         << "\t...Boot end" << endl
-        << setfill('=') << setw(60) << "" << endl << ANSI_NORMAL;
+        << cdup('=',60) << endl << ANSI_NORMAL;
 
     power.loop();           //power.sleep() loop
 

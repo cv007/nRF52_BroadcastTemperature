@@ -10,37 +10,77 @@
 
 #include "SEGGER_RTT.h"
 
-
 /*-------------------------------------------------------------
-    Printer
+    oStreamer options - set first 3 as needed
+--------------------------------------------------------------*/
+#define OST_DOUBLE  0 //(will also get u64 and float)
+#define OST_U64     0 //u64 support
+#define OST_FLOAT   0 //can have float without u64/double
+
+//double
+#if     (defined(OST_DOUBLE) && OST_DOUBLE)
+#define OST_DOUBLE_ 1
+#define OST_FLOAT_TYPE_ double
+#define OST_PREMAX_ 16 //precision max
+#else
+#define OST_DOUBLE_ 0
+#endif
+//float only
+#if     (defined(OST_FLOAT) && OST_FLOAT) && !OST_DOUBLE_
+#define OST_FLOAT_  1
+#define OST_FLOAT_TYPE_ float
+#define OST_PREMAX_ 9 //precision max
+#else
+#define OST_FLOAT_  0
+#endif
+//u64 or double
+#if     (defined(OST_U64) && OST_U64) || OST_DOUBLE_
+using   u64 = uint64_t;
+using   i64 = int64_t;
+#define OST_USE_U64_ 1
+#define OST_U64_    u64 //all integer functions call u64 or i64
+#define OST_I64_    i64 //and in this case are actually u64/i64
+#define OST_BUFMAX_ 66  //64bit bin w/showbase is 66 chars
+#else
+#define OST_USE_U64_ 0
+#define OST_U64_    u32 //no u64 support, so call the u32/i32
+#define OST_I64_    i32 //functions instead
+#define OST_BUFMAX_ 34  //32bit bin w/showbase is 34 chars
+#endif
+/*-------------------------------------------------------------
+    oStreamer
 
     simple class to inherit for cout style 'printing'
-    via virtual write function which has a signature of-
+    via virtual put function which has a signature of-
 
-        bool write(const char)
+        bool put(const char)
         write return value is false if there is an error
 
-    no buffers used, all data goes directly out to the
-    device write function, if any buffering wanted it
-    has to be done in the device class that inherits this
-
+    all data goes directly out to the device put function,
+    if any buffering wanted it has to be done in the device
+    class that inherits this
 
     documentation-
 
     examples-
 
 --------------------------------------------------------------*/
-//match to this class name
-//if class name changes, change this to match
-class Printer;
-using PrinterT = Printer;
+class oStreamer {
 
-class Printer {
+//change function attributes for functions that return oStreamer&
+#define self    [[ gnu::noinline ]] oStreamer
+//#define self  oStreamer  //no attributes
 
-#define PrinterT [[ gnu::noinline ]] PrinterT
 //-------------|
     public:
 //-------------|
+
+                using u32 = uint32_t;
+                using i32 = int32_t;
+                using u16 = uint16_t;
+                using i16 = int16_t;
+                using u8 = uint8_t;
+                using i8 = int8_t;
 
                 auto
 count           (){ return count_; }
@@ -49,17 +89,18 @@ count           (){ return count_; }
 errors          (){ return errors_; }
 
 
-                // everything below returns PrinterT&
+// all functions below returns self&
 
 
-                //set to 1 or 2 chars you want for {N}ewline
+                //set to 1 or 2 chars you want for newline
                 //NL_[2] already 0, cannot change so no need to set
-                PrinterT&
-newline         (const char a, const char b = 0) { NL_[0] = a; NL_[1] = b; return *this; }
+                self&
+newline         (const char a, const char b = 0)
+                { NL_[0] = a; NL_[1] = b; return *this; }
 
 
                 // reset options,  << clear
-                PrinterT&
+                self&
 clear           ()
                 {
                 count_ = 0;
@@ -68,6 +109,10 @@ clear           ()
                 optionFIL_ = 0;
                 optionWMIN_ = 0;
                 optionWMAX_ = 0;
+            #if OST_DOUBLE_ || OST_FLOAT_
+                optionPRE_ = 9; //0 is a usable value (no decimal), so cannot use 0
+            #endif
+                optionPOS_ = false;
                 optionSB_ = false;
                 optionBA_ = false;
                 optionJL_ = false;
@@ -75,25 +120,19 @@ clear           ()
                 return *this;
                 }
 
-                // << setw(n) - n limited to OPTIONWMIN_MAX
-                PrinterT&
+                // << setw(n) - minumum width, n limited to sane value via OPTIONWMIN_MAX
+                self&
 width           (int v)
-                {
-                optionWMIN_ = v > OPTIONWMIN_MAX ? OPTIONWMIN_MAX : v;
-                return *this;
-                }
+                { optionWMIN_ = v > OPTIONWMIN_MAX ? OPTIONWMIN_MAX : v; return *this; }
 
-                // << setwmax(40) - maximum width
-                PrinterT&
+                // << setwmax(40) - maximum width (truncate output)
+                self&
 widthmax        (unsigned int v)
-                {
-                optionWMAX_ = v;
-                return *this;
-                }
+                { optionWMAX_ = v; return *this; }
 
                 // << bin|oct|dec|hex
                 // base is max of 16, as the hex table is only 0-F
-                PrinterT&
+                self&
 base            (int v)
                 {
                 if( v >= 16 ) optionB_ = 16;
@@ -102,76 +141,91 @@ base            (int v)
                 return *this;
                 }
 
-                // << setfill('char') (default is ' ')
-                PrinterT&
-fill            (char c) { optionFIL_ = c; return *this; }
+            #if OST_DOUBLE_ || OST_FLOAT_
+                // << setprecision(n)
+                self&
+precision       (int v)
+                { optionPRE_ = v > OST_PREMAX_ ? OST_PREMAX_ : v; return *this; }
+            #endif
 
-                // << noshowpos , << showpos
-                PrinterT&
-positive        (bool tf) { optionPOS_ = tf; return *this; }
+                // << setfill('char') (default value is ' ', unset is also ' ')
+                self&
+fill            (char c = ' ')
+                { optionFIL_ = c; return *this; }
 
-                // << noshowalpha , << showalpha
-                PrinterT&
-boolalpha       (bool tf) { optionBA_ = tf; return *this; }
+                // << noshowpos , << showpos , + for dec base values
+                self&
+positive        (bool tf)
+                { optionPOS_ = tf; return *this; }
 
-                // << left, << right
-                PrinterT&
-justifyleft     (bool tf) { optionJL_ = tf; return *this; }
+                // << noshowalpha , << showalpha , bool "true"/"false or 1 0
+                self&
+boolalpha       (bool tf)
+                { optionBA_ = tf; return *this; }
 
-                // << uppercase, << nouppercase
-                PrinterT&
-uppercase       (bool tf) { optionUC_ = tf; return *this; }
+                // << left, << right , justify output left/right if min width > output
+                self&
+justifyleft     (bool tf)
+                { optionJL_ = tf; return *this; }
 
-                // << showbase, << noshowbase
-                PrinterT&
-showbase        (bool tf) { optionSB_ = tf; return *this; }
+                // << uppercase, << nouppercase , for hex only (A-F/a-f)
+                self&
+uppercase       (bool tf)
+                { optionUC_ = tf; return *this; }
 
-                // << endl
-                PrinterT&
-newline         () { writeStr( NL_ ); return *this; }
+                // << showbase, << noshowbase , 0x 0b 0 (for oct if value not 0)
+                self&
+showbase        (bool tf)
+                { optionSB_ = tf; return *this; }
+
+                // << endl , newline as set in NL_
+                self&
+newline         ()
+                { putStr( NL_ ); return *this; }
 
 
                 //string
-                PrinterT&
+                self&
 operator<<      (const char* str)
                 {
                 auto w = optionWMIN_;
-                auto wmax = optionWMAX_; //if 0, first --wmax will make it 0xFFFFFFFF
-                auto fc = optionFIL_ ? optionFIL_ : ' ';
-                u32 i = w ? __builtin_strlen( str ) : 0;
-                auto fill = [&]{ while( (w-- > i) and --wmax ) write_( fc ); };
-                if( not optionJL_ ) fill(); //justify right, fill first
-                while( *str and --wmax ) write_( *str++ );
-                if( optionJL_ ) fill(); //justify left, fill last
-                optionWMIN_ = 0;
+                auto wmax = optionWMAX_;                    //if 0, first --wmax will make it 0xFFFF (effectively no max limit)
+                auto fc = optionFIL_ ? optionFIL_ : ' ';    //if 0, is ' '
+                u32 i = w ? __builtin_strlen( str ) : 0;    //if w set, need str length
+                auto fill = [&]{ while( (w-- > i) and --wmax ) put_( fc ); }; //lambda
+                if( not optionJL_ ) fill();                 //justify right, fill first
+                while( *str and --wmax ) put_( *str++ );  //srite str
+                if( optionJL_ ) fill();                     //justify left, fill last
+                optionWMIN_ = 0;                            //setw always cleared after use
                 return *this;
                 }
 
-                //unsigned int
-[[ gnu::noinline ]]
-                PrinterT&
-operator<<      (u32 vu)
+                //u64 (or u32 if no u64 support wanted)
+                self&
+operator<<      (OST_U64_ vu) //is u64 or u32
                 {
                 auto div = optionB_ ? optionB_ : 10; //2,8,10,16 (0 is 10)
                 auto w = optionWMIN_;
                 auto fc = optionFIL_ ? optionFIL_ : ' ';  //0 is ' '
-                u32 i = 0;
-                char buf[w > 34 ? w : 34]; //32bit binary with showbase uses 34 chars
-                if( div == 10 and optionNEG_ ) vu = -vu;
+                auto sb = (div == 8 and vu == 0) ? false : optionSB_; //oct 0 does not need showbase
+                u32 i = 0; //buf index
+                char buf[w > OST_BUFMAX_ ? w : OST_BUFMAX_]; //64bit binary with showbase uses 66 chars, 32bit 34
+                if( vu == 0 ) buf[i++] = '0'; //if 0, add '0' as below loop will be skipped
+                //convert number
                 while( vu ){
                     auto c = hexTable[vu % div];
-                    if( c >= 'a' and optionUC_ ) c and_eq compl (1<<5); //to uppercase
+                    if( c >= 'a' and optionUC_ ) c and_eq compl (1<<5); //to uppercase if hex/uppercase
                     buf[i++] = c;
                     vu /= div;
                     }
-                if( i == 0 ) buf[i++] = '0'; //if vu was 0, insert a '0' as while loop was skipped
+                //lambda functions
                 auto fill = [&](){ while( i < w ) buf[i++] = fc; };
                 auto xtras = [&](){
-                    if( div == 10 ) {
-                        if( optionNEG_ ) buf[i++] = '-'; //negative dec
-                        else if( optionPOS_ ) buf[i++] = '+'; //dec is positive and + wanted
+                    if( div == 10 ) {                           //dec
+                        if( optionNEG_ ) buf[i++] = '-';        //negative
+                        else if( optionPOS_ ) buf[i++] = '+';   //positive and + wanted
                         }
-                    else if( optionSB_ ){ // 2,8,16, showbase
+                    else if( sb ){ // 2,8,16, showbase
                         if( div == 16 ) buf[i++] = 'x';
                         else if( div == 2 ) buf[i++] = 'b';
                         buf[i++] = '0';
@@ -182,48 +236,108 @@ operator<<      (u32 vu)
                 //(remember this is a reverse buffer)
                 if( fc == '0' ){ fill(); xtras(); } else { xtras(); fill(); }
                 //i is 1 past our last char, i will be at least 1
-                while( i ) write_( buf[--i] );
-                optionNEG_ = false;
-                optionWMIN_ = 0;
+                while( i ) put_( buf[--i] );
+                optionNEG_ = false; //always clear after use
+                optionWMIN_ = 0; //always clear after use
                 return *this;
                 }
 
-                //signed int
-                PrinterT&
+            #if OST_DOUBLE_ || OST_FLOAT_
+                //double or float
+                self&
+operator<<      (OST_FLOAT_TYPE_ d)
+                {
+                //check for nan/inf
+                if( __builtin_isnan(d) ) return operator<<( "nan" );
+                if( __builtin_isinf_sign(d) ) return operator<<( "inf" );
+                if( d < 0 ){ optionNEG_ = true; d = -d; }
+                //save/restore any options we change that should normally remain unchanged
+                auto b = optionB_; optionB_ = 10;  //switch to dec
+                OST_U64_ vi = d; //integer part
+                //decimal part (from absolute remainder),
+                //get 1 more decimal precision than we need, so we can round up
+                OST_U64_ vu = (d - vi) * __builtin_powi(10,optionPRE_+1);
+                if( (vu % 10) >= 5 ) vu += 10;      //round up?
+                vu /= 10;                           //drop the extra decimal
+                if( optionPRE_ == 0 and vu ) vi++;  //precision set to 0, then use vu to round up
+                operator<<( vi );                   //write integer
+                if( optionPRE_ ){                   //if precision not 0, write decimal
+                    operator<<('.');                //decimal point
+                    optionWMIN_ = optionPRE_;       //min length from precision
+                    auto sp = optionPOS_; optionPOS_ = false; //no +
+                    auto fil = optionFIL_; optionFIL_ = '0'; //0 pad
+                    operator<<( vu );               //write decimal
+                    optionFIL_ = fil;               //restore values
+                    optionPOS_ = sp;
+                    }
+                optionB_ = b;                       //back to original base
+                return *this;
+                }
+            #endif //OST_DOUBLE_ || OST_FLOAT_
+
+            #if OST_DOUBLE_ //then need a float version also
+                //float
+                self&
+operator<<      (float f)
+                { return operator<<( (double)f ); }
+            #endif //OST_DOUBLE_
+
+
+                // the i64 (or i32) handles the negative numbers, then sends to u64 or u32
+                // only negated if < 0 when using dec base
+
+
+                //i64 (or i32)
+                self&
+operator<<      (OST_I64_ v)
+                {
+                if( (optionB_ == 10 or optionB_ == 0) and (v < 0) ) {
+                    optionNEG_ = true;
+                    v = -v;
+                    }
+                return operator<<( (OST_U64_)v );
+                }
+
+
+            #if OST_USE_U64_ //then need u32/i32 versions
+                //u32
+                self&
+operator<<      (u32 v)
+                { return operator<<( (u64)v ); }
+
+                //i32
+                self&
 operator<<      (i32 v)
-                {
-                if( v < 0 ) optionNEG_ = true;
-                return operator<<( (u32)v );
-                }
+                { return operator<<( (i64)v ); }
+            #endif
 
-                //signed short
-                PrinterT&
+
+                //i16
+                self&
 operator<<      (i16 v)
-                {
-                return operator<<( (i32)v );
-                }
+                { return operator<<( (OST_I64_)v ); }
 
-                //unsigned short
-                PrinterT&
-operator<<      (u16 v)
-                {
-                return operator<<( (u32)v );
-                }
+                //u16
+                self&
+operator<<      (u16 vu)
+                { return operator<<( (OST_U64_)vu ); }
 
-                //char
-                PrinterT&
-operator<<      (u8 v) { return operator<<( (u32)v ); }
+                //u8
+                self&
+operator<<      (u8 vu)
+                { return operator<<( (OST_U64_)vu ); }
 
                 //char
-                PrinterT&
-operator<<      (char v) { write_( v bitand 0xFF ); return *this; }
+                self&
+operator<<      (char v)
+                { put_( v bitand 0xFF ); return *this; }
 
                 //bool
-                PrinterT&
+                self&
 operator<<      (bool v)
                 {
                 if( optionBA_ ) return operator<<( v ? "true" : "false" );
-                return operator<<( (u32)v );
+                return operator<<( (OST_U64_)v );
                 }
 
 //-------------|
@@ -231,17 +345,20 @@ operator<<      (bool v)
 //-------------|
 
                 //parent class has the write function
-                virtual bool write(const char) = 0;
+                virtual bool put(const char) = 0;
 
                 static constexpr char hexTable[]{ "0123456789abcdef" };
                 static constexpr auto OPTIONWMIN_MAX{ 128 }; //maximum value of optionWMIN_
 
-                char NL_[3]     {"\n"};     //newline combo, can be changed at runtime
-                u32  count_     { 0 };      //number of chars printed
-                u32  errors_    { 0 };      //store any errors along the way
-                u32  optionWMIN_{ 0 };      //minimum width
-                u32  optionWMAX_{ 0 };      //maximum width
-                u32  optionB_   { 0 };      //base 2,8,10,16 (0 is also base 10)
+                char NL_[3]     {"\r\n"};   //newline combo, can be changed at runtime
+                u16  count_     { 0 };      //number of chars printed
+                u16  errors_    { 0 };      //store any errors along the way
+                u16  optionWMIN_{ 0 };      //minimum width
+                u16  optionWMAX_{ 0 };      //maximum width
+                u8   optionB_   { 0 };      //base 2,8,10,16 (0 is also base 10)
+            #if OST_DOUBLE_ || OST_FLOAT_
+                u8   optionPRE_ { 9 };      //float/double precision (decimal places)
+            #endif
                 char optionFIL_ { 0 };      //setfill char (0 is ' ')
                 bool optionUC_  { false };  //uppercase/nouppercase
                 bool optionSB_  { false };  //showbase/noshowbase
@@ -251,29 +368,39 @@ operator<<      (bool v)
                 bool optionJL_  { false };  //(justify) left/right
 
 
-                //helper write, so we can also inc count for each char written
+                //helper put, so we can also inc count for each char written
                 void
-write_          (char c)
-                { if( write(c) ) count_++; else errors_++; }
+put_            (char c)
+                { if( put(c) ) count_++; else errors_++; }
 
                 void
-writeStr        (const char* str)
-                { while( *str ) write_( *str++ ); }
+putStr          (const char* str)
+                { while( *str ) put_( *str++ ); }
 
-#undef PrinterT
+        #undef self
+        #undef OST_U64_
+        #undef OST_I64_
+        #undef OST_BUFMAX_
+        #undef OST_USE_U64_
+        #undef OST_PREMAX_
 
 };
 
 
 /*-------------------------------------------------------------
-    Printer helpers for <<
+    oStreamer helpers for << put in a ost namespace
 
-    setw(w)         set minimum width n (Printer class sets a limit to this value)
+    can bring in namespace if wanted-
+        using namespace ost;
+
+* = non-standar
+
+    setw(w)         set minimum width n (oStreamer class sets a limit to this value)
 *   setwmax(n)      set maximum width of output (0 is no max limit)
 
     setfill(c)      set fill char, default is ' '
 
-    endl            write newline combo as specified in Printer class
+    endl            write newline combo as specified in oStreamer class
 
 *   bin             set base to 2
     oct             set base to 8
@@ -294,101 +421,191 @@ writeStr        (const char* str)
     uppercase       hex output uppercase
     nouppercase     hex output lowercase
 
-    showbase        showbase for base 16,8,2 - 0x 0 0b
-    noshowbase      do not show base
+    setprecision    set decimal precision for float/double
 
 
     all options remain set except for setw(), which is cleared
     after use, also <<clear resets all options
 --------------------------------------------------------------*/
-namespace prn {
+namespace ost {
 
 //w/arguments -  << name() <<
 
-// #define inline [[ gnu::noinline ]] inline
-#define inline inline
-
-                struct Setw_prn { int n; };
-                inline Setw_prn
+                struct Setw_ost { int n; };
+                inline Setw_ost
 setw            (int n) { return {n}; }
-                inline PrinterT&
-                operator<<(PrinterT& p, Setw_prn s)
+                inline oStreamer&
+                operator<<(oStreamer& p, Setw_ost s)
                 { return p.width(s.n); }
 
-                struct SetwMax_prn { int n; };
-                inline SetwMax_prn
+                struct SetwMax_ost { int n; };
+                inline SetwMax_ost
 setwmax         (int n) { return {n}; }
-                inline PrinterT&
-                operator<<(PrinterT& p, SetwMax_prn s)
+                inline oStreamer&
+                operator<<(oStreamer& p, SetwMax_ost s)
                 { return p.widthmax(s.n); }
 
-                struct Setfill_prn { char c; };
-                inline Setfill_prn
+                struct Setfill_ost { char c; };
+                inline Setfill_ost
 setfill         (char c = ' ') { return {c}; }
-                inline PrinterT&
-                operator<<(PrinterT& p, Setfill_prn s)
+                inline oStreamer&
+                operator<<(oStreamer& p, Setfill_ost s)
                 { return p.fill(s.c); }
 
-                enum ENDL_prn {
+                enum ENDL_ost {
 endl            };
-                inline PrinterT&
-                operator<<(PrinterT& p, ENDL_prn e)
+                inline oStreamer&
+                operator<<(oStreamer& p, ENDL_ost e)
                 { (void)e; return p.newline(); }
+
+            #if OST_DOUBLE_ || OST_FLOAT_
+                struct Setprecision_ost { int n; };
+                inline Setprecision_ost
+setprecision    (int n) { return {n}; }
+                inline oStreamer&
+                operator<<(oStreamer& p, Setprecision_ost s)
+                { return p.precision(s.n); }
+            #endif
+            #undef OST_DOUBLE_ //done with these defines
+            #undef OST_FLOAT_
 
 //no argumets -  << name <<
 
-                enum BASE_prn {
+                enum BASE_ost {
 bin             = 2,
 oct             = 8,
 dec             = 10,
 hex             = 16 };
-                inline PrinterT&
-                operator<<(PrinterT& p, BASE_prn e)
+                inline oStreamer&
+                operator<<(oStreamer& p, BASE_ost e)
                 { return p.base(e); }
 
-                enum CLEAR_prn {
+                enum CLEAR_ost {
 clear           };
-                inline PrinterT&
-                operator<<(PrinterT& p, CLEAR_prn e)
+                inline oStreamer&
+                operator<<(oStreamer& p, CLEAR_ost e)
                 { (void)e; return p.clear(); }
 
-                enum POSITIVE_prn {
+                enum POSITIVE_ost {
 noshowpos,
 showpos         };
-                inline PrinterT&
-                operator<<(PrinterT& p, POSITIVE_prn e)
+                inline oStreamer&
+                operator<<(oStreamer& p, POSITIVE_ost e)
                 { return p.positive(e); }
 
-                enum ALPHA_prn {
+                enum ALPHA_ost {
 noshowalpha,
 showalpha       };
-                inline PrinterT&
-                operator<<(PrinterT& p, ALPHA_prn e)
+                inline oStreamer&
+                operator<<(oStreamer& p, ALPHA_ost e)
                 { return p.boolalpha(e); }
 
-                enum JUSTIFY_prn {
+                enum JUSTIFY_ost {
 right,
 left            };
-                inline PrinterT&
-                operator<<(PrinterT& p, JUSTIFY_prn e)
+                inline oStreamer&
+                operator<<(oStreamer& p, JUSTIFY_ost e)
                 { return p.justifyleft(e); }
 
-                enum UPPERCASE_prn {
+                enum UPPERCASE_ost {
 nouppercase,
 uppercase       };
-                inline PrinterT&
-                operator<<(PrinterT& p, UPPERCASE_prn e)
+                inline oStreamer&
+                operator<<(oStreamer& p, UPPERCASE_ost e)
                 { return p.uppercase(e); }
 
-                enum SHOWBASE_prn {
+                enum SHOWBASE_ost {
 noshowbase,
 showbase        };
-                inline PrinterT&
-                operator<<(PrinterT& p, SHOWBASE_prn e)
+                inline oStreamer&
+                operator<<(oStreamer& p, SHOWBASE_ost e)
                 { return p.showbase(e); }
 
-#undef inline
+
+//combo helpers to reduce some verbosity, macros seem to be the
+//easiest instead of creating a bunch more of the above
+//plus they all use the standard cout properties so these
+//also work on the pc when testing (except for the endlc, since
+//clear is not standard so would need to be changed)
+#define setwf(n,c)      setw(n) << setfill(c)
+#define hex0x           hex << showbase
+#define Hex             hex << uppercase
+#define Hex0x           hex << showbase << uppercase
+#define bin0b           bin << showbase
+#define endlc           endl << clear
+#define endl2           endl << endl
+#define endl2c          endl << endl << clear
+#define cdup(c,n)       setwf(n,c) << ""
+
 }
+
+
+
+/*------------------------------------------------------------------------------
+    Null oStreamer device - a black hole
+------------------------------------------------------------------------------*/
+class NulloStreamer : public oStreamer {
+
+                //oStreamer virtual put, 1 char
+                virtual bool
+put             (const char c){ (void)c; return 0; }
+
+};
+
+/*------------------------------------------------------------------------------
+    Buffer oStreamer device - like snprintf
+
+    BufoStreamer<32> bp;  //32 bytes allocated for buffer, includes 0 terminator
+                        //so only 31 useful
+
+    bp << "test" << 123; // bp.buf_ = "test123", 0 terminated
+    can use bp in a oStreamer << , which returns its buffer
+    dev << bp << 456; // prints "test123456"
+    bp.clear() << "hello"; // buf = "hello",  0 terminated
+------------------------------------------------------------------------------*/
+template<unsigned N>
+class BufoStreamer : public oStreamer {
+
+//-------------|
+    public:
+//-------------|
+
+BufoStreamer    (){ buf_[0] = 0; }
+
+                auto&
+buf             (){ return buf_; }
+
+                auto
+clear           (){ buf_[0] = 0; count_ = 0; return *this; }
+
+//-------------|
+    private:
+//-------------|
+                //oStreamer virtual put, 1 char
+                virtual bool
+put             (const char c)
+                {
+                if( count_ < (N-1) ) {
+                    buf_[count_++] = c;
+                    buf_[count_] = 0;
+                    return true;
+                    }
+                return false;
+                }
+
+                char buf_[N?N:1]; //at least 1, so is terminated
+                u16 count_{0};
+
+};
+namespace ost { //so can << bufoStreamer  and get the buffer printed out
+
+                template<unsigned N>
+                inline oStreamer&
+                operator<<(oStreamer& p, BufoStreamer<N>& b)
+                { p.operator<<( b.buf() ); return p; }
+
+}
+
 
 
 
@@ -403,11 +620,11 @@ showbase        };
         $ telnet localhost 19021
 ------------------------------------------------------------------------------*/
 template<int N>
-struct DevRtt : public Printer {
+struct DevRtt : public oStreamer {
 
-                //Printer virtual write, 1 char
+                //Printer virtual put, 1 char
                 [[ gnu::noinline ]] virtual bool 
-write           (const char c){ return SEGGER_RTT_Write(N, &c, 1); }
+put             (const char c){ return SEGGER_RTT_Write(N, &c, 1); }
 
                 //specified length (binary data)
                 [[ gnu::noinline ]] unsigned int 
@@ -425,68 +642,6 @@ write           (const char *buf)
 
 };
 
-
-
-/*------------------------------------------------------------------------------
-    Null Printer device - a black hole
-------------------------------------------------------------------------------*/
-class NullPrinter : public Printer {
-
-                //Printer virtual write, 1 char
-                virtual bool 
-write           (const char c){ (void)c; return 0; }
-
-};
-
-/*------------------------------------------------------------------------------
-    Buffer Printer device - like snprintf
-
-    BufPrinter<32> bp;  //32 bytes allocated for buffer, includes 0 terminator
-                        //so only 31 useful
-
-    bp << "test" << 123; // buf = "test123" 0 terminated
-    can use bp in a Printer <<
-    dev << bp << 456; // prints "test123456"
-    bp.clear() << "hello"; // buf = "hello" 0 terminated
-------------------------------------------------------------------------------*/
-template<unsigned N>
-class BufPrinter : public Printer {
-
-public:
-
-BufPrinter      (){ buf_[0] = 0; }
-
-                auto&
-buf             (){ return buf_; }
-
-                auto
-clear           (){ buf_[0] = 0; count_ = 0; return *this; }
-
-private:
-                //Printer virtual write, 1 char
-                virtual bool 
-write           (const char c)
-                {
-                if( count_ < (N-1) ) {
-                    buf_[count_++] = c;
-                    buf_[count_] = 0;
-                    return true;
-                    }
-                return false;
-                }
-
-                char buf_[N?N:1]; //at least 1, so is terminated
-                u16 count_{0};
-
-};
-namespace prn { //so can << bufprinter  and get the buffer printed out
-
-                template<unsigned N>
-                inline PrinterT&
-                operator<<(PrinterT& p, BufPrinter<N>& b)
-                { p.operator<<( b.buf() ); return p; }
-
-}
 
 
 /*-------------------------------------------------------------
