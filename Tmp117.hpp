@@ -48,8 +48,8 @@ SA  read        (const u8 r, T& v) {
                     }
                     // DebugFuncHeader();
                     // DebugRtt << "  read reg: " r << " " << (tf ? " " : "[failed]";
-                    // if( tf ) DebugRtt << '[' << hex << showbase << setfill('0') << setw(4) << v << ']';
-                    // DebugRtt << endl << clear;
+                    // if( tf ) DebugRtt << '[' << Hex0 << setwf(4,'0') << v << ']';
+                    // DebugRtt << endlc;
                     return tf;
                 }
 
@@ -61,7 +61,7 @@ SA  write       (const u8 r, const T& v) {
                     u8 buf[3] = { r, vH, vL };
                     bool tf = twi_.write( buf );
                     // DebugFuncHeader();
-                    // DebugRtt << "  write reg: " r << " [" << hex << showbase << setfil('0') << setw(4) << v << ']' << (tf ? " ok" : " failed" << clear;
+                    // DebugRtt << "  write reg: " r << " [" << Hex0 << setwf(4,'0') << v << ']' << (tf ? " ok" : " failed" << clear;
                     return tf;
                 }
 

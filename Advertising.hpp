@@ -134,7 +134,7 @@ SA  update          ( u8 (&buf)[31] ) -> void {
                         //making our own decimal point, so %10 needs to be positive
                         u8 f10 = (f < 0) ? -f%10 : f%10;
                         f = f/10;
-                        BufoStreamer<22+1> nambuf; //add 1 for 0 terminator
+                        BufFormat<22+1> nambuf; //add 1 for 0 terminator
                         nambuf << f << "." << f10 << "F " << flash.readName();
                         u8 idx = Flags01::make( buf, BLE_GAP_ADV_FLAG_BR_EDR_NOT_SUPPORTED ); //3
                         idx += BatteryService180F::make( &buf[idx] ); //4
@@ -214,7 +214,7 @@ SA  update          (void* pcontext = nullptr) -> void {
                             u32 len = buffer_[i++];
                             auto typ = buffer_[i++];
                             DebugRtt
-                                << clear
+                                << reset
                                 << "  len: " << setwf(2,' ') << len-- 
                                 << "  type: " << Hex << setwf(2,'0') << typ
                                 << "  data: ";
@@ -230,7 +230,7 @@ SA  update          (void* pcontext = nullptr) -> void {
                             i += len;
                             DebugRtt << endl;
                         }
-                        DebugRtt << endlc;
+                        DebugRtt << endlr;
                         //=== Debug ===
 
                         start();

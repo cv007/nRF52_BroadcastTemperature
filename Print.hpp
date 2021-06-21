@@ -5,50 +5,47 @@
 -----------------------------------------------------------------------------*/
 #include "nRFconfig.hpp"
 
-#include <cstdio>
-#include <cstring>
-
 #include "SEGGER_RTT.h"
 
 /*-------------------------------------------------------------
-    oStreamer options - set first 3 as needed
+    Format options - set first 3 as needed
 --------------------------------------------------------------*/
-#define OST_DOUBLE  0 //(will also get u64 and float)
-#define OST_U64     0 //u64 support
-#define OST_FLOAT   0 //can have float without u64/double
+#define FMT_DOUBLE  0 //(will also get u64 and float)
+#define FMT_U64     0 //u64 support
+#define FMT_FLOAT   0 //can have float without u64/double
 
 //double
-#if     (defined(OST_DOUBLE) && OST_DOUBLE)
-#define OST_DOUBLE_ 1
-#define OST_FLOAT_TYPE_ double
-#define OST_PREMAX_ 16 //precision max
+#if     (defined(FMT_DOUBLE) && FMT_DOUBLE)
+#define FMT_DOUBLE_ 1
+#define FMT_FLOAT_TYPE_ double
+#define FMT_PREMAX_ 14 //precision max (limit is 16)
 #else
-#define OST_DOUBLE_ 0
+#define FMT_DOUBLE_ 0
 #endif
 //float only
-#if     (defined(OST_FLOAT) && OST_FLOAT) && !OST_DOUBLE_
-#define OST_FLOAT_  1
-#define OST_FLOAT_TYPE_ float
-#define OST_PREMAX_ 9 //precision max
+#if     (defined(FMT_FLOAT) && FMT_FLOAT) && !FMT_DOUBLE_
+#define FMT_FLOAT_  1
+#define FMT_FLOAT_TYPE_ float
+#define FMT_PREMAX_ 7 //precision max (limit is 9)
 #else
-#define OST_FLOAT_  0
+#define FMT_FLOAT_  0
 #endif
 //u64 or double
-#if     (defined(OST_U64) && OST_U64) || OST_DOUBLE_
+#if     (defined(FMT_U64) && FMT_U64) || FMT_DOUBLE_
 using   u64 = uint64_t;
 using   i64 = int64_t;
-#define OST_USE_U64_ 1
-#define OST_U64_    u64 //all integer functions call u64 or i64
-#define OST_I64_    i64 //and in this case are actually u64/i64
-#define OST_BUFMAX_ 66  //64bit bin w/showbase is 66 chars
+#define FMT_USE_U64_ 1
+#define FMT_U64_    u64 //all integer functions call u64 or i64
+#define FMT_I64_    i64 //and in this case are actually u64/i64
+#define FMT_BUFMAX_ 66  //64bit bin w/showbase is 66 chars
 #else
-#define OST_USE_U64_ 0
-#define OST_U64_    u32 //no u64 support, so call the u32/i32
-#define OST_I64_    i32 //functions instead
-#define OST_BUFMAX_ 34  //32bit bin w/showbase is 34 chars
+#define FMT_USE_U64_ 0
+#define FMT_U64_    u32 //no u64 support, so call the u32/i32
+#define FMT_I64_    i32 //functions instead
+#define FMT_BUFMAX_ 34  //32bit bin w/showbase is 34 chars
 #endif
 /*-------------------------------------------------------------
-    oStreamer
+    Format
 
     simple class to inherit for cout style 'printing'
     via virtual put function which has a signature of-
@@ -65,11 +62,11 @@ using   i64 = int64_t;
     examples-
 
 --------------------------------------------------------------*/
-class oStreamer {
+class Format {
 
-//change function attributes for functions that return oStreamer&
-#define self    [[ gnu::noinline ]] oStreamer
-//#define self  oStreamer  //no attributes
+//change function attributes for functions that return Format&
+#define self    [[ gnu::noinline ]] Format
+//#define self  Format  //no attributes
 
 //-------------|
     public:
@@ -93,23 +90,23 @@ errors          (){ return errors_; }
 
 
                 //set to 1 or 2 chars you want for newline
-                //NL_[2] already 0, cannot change so no need to set
+                //if a set to 0, will get '\0' output
+                //(first char in NL_ is always used, second char only if not 0)
                 self&
 newline         (const char a, const char b = 0)
                 { NL_[0] = a; NL_[1] = b; return *this; }
 
-
-                // reset options,  << clear
+                // reset options,  << reset
                 self&
-clear           ()
+reset           ()
                 {
                 count_ = 0;
                 errors_ = 0;
-                optionB_ = 0;
+                optionB_ = 10;
                 optionFIL_ = 0;
                 optionWMIN_ = 0;
                 optionWMAX_ = 0;
-            #if OST_DOUBLE_ || OST_FLOAT_
+            #if FMT_DOUBLE_ || FMT_FLOAT_
                 optionPRE_ = 9; //0 is a usable value (no decimal), so cannot use 0
             #endif
                 optionPOS_ = false;
@@ -122,66 +119,71 @@ clear           ()
 
                 // << setw(n) - minumum width, n limited to sane value via OPTIONWMIN_MAX
                 self&
-width           (int v)
+width           (const int v)
                 { optionWMIN_ = v > OPTIONWMIN_MAX ? OPTIONWMIN_MAX : v; return *this; }
 
                 // << setwmax(40) - maximum width (truncate output)
                 self&
-widthmax        (unsigned int v)
+widthmax        (const unsigned int v)
                 { optionWMAX_ = v; return *this; }
 
                 // << bin|oct|dec|hex
                 // base is max of 16, as the hex table is only 0-F
                 self&
-base            (int v)
+base            (const int v)
                 {
                 if( v >= 16 ) optionB_ = 16;
                 else optionB_ = v bitand 10;//-> base 2,8,10
-                //if 1,4,5 sneaked in, resulting 0 is also base 10
+                //if 1,4,5 sneaked in, switch resulting 0 to base 10
+                if( not optionB_ ) optionB_ = 10;
                 return *this;
                 }
 
-            #if OST_DOUBLE_ || OST_FLOAT_
+            #if FMT_DOUBLE_ || FMT_FLOAT_
                 // << setprecision(n)
                 self&
-precision       (int v)
-                { optionPRE_ = v > OST_PREMAX_ ? OST_PREMAX_ : v; return *this; }
+precision       (const int v)
+                { optionPRE_ = v > FMT_PREMAX_ ? FMT_PREMAX_ : v; return *this; }
             #endif
 
                 // << setfill('char') (default value is ' ', unset is also ' ')
                 self&
-fill            (char c = ' ')
+fill            (const char c = ' ')
                 { optionFIL_ = c; return *this; }
 
                 // << noshowpos , << showpos , + for dec base values
                 self&
-positive        (bool tf)
+positive        (const bool tf)
                 { optionPOS_ = tf; return *this; }
 
                 // << noshowalpha , << showalpha , bool "true"/"false or 1 0
                 self&
-boolalpha       (bool tf)
+boolalpha       (const bool tf)
                 { optionBA_ = tf; return *this; }
 
                 // << left, << right , justify output left/right if min width > output
                 self&
-justifyleft     (bool tf)
+justify         (const bool tf)
                 { optionJL_ = tf; return *this; }
 
                 // << uppercase, << nouppercase , for hex only (A-F/a-f)
                 self&
-uppercase       (bool tf)
+uppercase       (const bool tf)
                 { optionUC_ = tf; return *this; }
 
                 // << showbase, << noshowbase , 0x 0b 0 (for oct if value not 0)
                 self&
-showbase        (bool tf)
+showbase        (const bool tf)
                 { optionSB_ = tf; return *this; }
 
                 // << endl , newline as set in NL_
                 self&
 newline         ()
-                { putStr( NL_ ); return *this; }
+                { //if NL_[0] was set to \0, will get it
+                put_( NL_[0] );
+                if( NL_[1] ) put_( NL_[1] ); 
+                return *this; 
+                }
 
 
                 //string
@@ -202,21 +204,22 @@ operator<<      (const char* str)
 
                 //u64 (or u32 if no u64 support wanted)
                 self&
-operator<<      (OST_U64_ vu) //is u64 or u32
+operator<<      (const FMT_U64_ vu) //is u64 or u32
                 {
-                auto div = optionB_ ? optionB_ : 10; //2,8,10,16 (0 is 10)
+                FMT_U64_ v = vu;
+                auto div = optionB_; //2,8,10,16 (already limited to only these values)
                 auto w = optionWMIN_;
                 auto fc = optionFIL_ ? optionFIL_ : ' ';  //0 is ' '
                 auto sb = (div == 8 and vu == 0) ? false : optionSB_; //oct 0 does not need showbase
                 u32 i = 0; //buf index
-                char buf[w > OST_BUFMAX_ ? w : OST_BUFMAX_]; //64bit binary with showbase uses 66 chars, 32bit 34
-                if( vu == 0 ) buf[i++] = '0'; //if 0, add '0' as below loop will be skipped
+                char buf[w > FMT_BUFMAX_ ? w : FMT_BUFMAX_]; //64bit binary with showbase uses 66 chars, 32bit 34
+                if( v == 0 ) buf[i++] = '0'; //if 0, add '0' as below loop will be skipped
                 //convert number
-                while( vu ){
-                    auto c = hexTable[vu % div];
+                while( v ){
+                    auto c = hexTable[v % div];
                     if( c >= 'a' and optionUC_ ) c and_eq compl (1<<5); //to uppercase if hex/uppercase
                     buf[i++] = c;
-                    vu /= div;
+                    v /= div;
                     }
                 //lambda functions
                 auto fill = [&](){ while( i < w ) buf[i++] = fc; };
@@ -242,45 +245,41 @@ operator<<      (OST_U64_ vu) //is u64 or u32
                 return *this;
                 }
 
-            #if OST_DOUBLE_ || OST_FLOAT_
+            #if FMT_DOUBLE_ || FMT_FLOAT_
                 //double or float
                 self&
-operator<<      (OST_FLOAT_TYPE_ d)
+operator<<      (const FMT_FLOAT_TYPE_ d)
                 {
+                FMT_FLOAT_TYPE_ f = d;
                 //check for nan/inf
-                if( __builtin_isnan(d) ) return operator<<( "nan" );
-                if( __builtin_isinf_sign(d) ) return operator<<( "inf" );
-                if( d < 0 ){ optionNEG_ = true; d = -d; }
-                //save/restore any options we change that should normally remain unchanged
-                auto b = optionB_; optionB_ = 10;  //switch to dec
-                OST_U64_ vi = d; //integer part
-                //decimal part (from absolute remainder),
-                //get 1 more decimal precision than we need, so we can round up
-                OST_U64_ vu = (d - vi) * __builtin_powi(10,optionPRE_+1);
-                if( (vu % 10) >= 5 ) vu += 10;      //round up?
+                if( __builtin_isnan(f) ) return operator<<( "nan" ); 
+                if( __builtin_isinf_sign(f) ) return operator<<( "inf" );
+                if( f < 0 ){ optionNEG_ = true; f = -f; } 
+                //save/restore any options we change that should normally remain unchanged               
+                auto b = optionB_; optionB_ = 10;  //switch to dec 
+                FMT_U64_ vi = f; //integer part  
+                //get 1 more decimal precision than we need, so we can round up 
+                auto i = optionPRE_;
+                FMT_U64_ mul = 10;                  //start at 1 more (10 instead of 1)
+                while( i-- ) mul *= 10;             //create multiplier from PRE value
+                FMT_U64_ vu = (f - vi) * mul;       //fractional part now integer
+                if( (vu % 10) >= 5 ) vu += 10;      //round up? (all are away from 0)
                 vu /= 10;                           //drop the extra decimal
-                if( optionPRE_ == 0 and vu ) vi++;  //precision set to 0, then use vu to round up
+                if( optionPRE_ == 0 and vu ) vi++;  //precision set to 0, then use vu to round up           
                 operator<<( vi );                   //write integer
                 if( optionPRE_ ){                   //if precision not 0, write decimal
-                    operator<<('.');                //decimal point
+                    operator<<('.');                //decimal point                
                     optionWMIN_ = optionPRE_;       //min length from precision
                     auto sp = optionPOS_; optionPOS_ = false; //no +
-                    auto fil = optionFIL_; optionFIL_ = '0'; //0 pad
+                    auto fil = optionFIL_; optionFIL_ = '0'; //0 pad 
                     operator<<( vu );               //write decimal
-                    optionFIL_ = fil;               //restore values
-                    optionPOS_ = sp;
+                    optionFIL_ = fil;               //restore values          
+                    optionPOS_ = sp;                    
                     }
                 optionB_ = b;                       //back to original base
                 return *this;
-                }
-            #endif //OST_DOUBLE_ || OST_FLOAT_
-
-            #if OST_DOUBLE_ //then need a float version also
-                //float
-                self&
-operator<<      (float f)
-                { return operator<<( (double)f ); }
-            #endif //OST_DOUBLE_
+                }  
+            #endif //FMT_DOUBLE_ || FMT_FLOAT_
 
 
                 // the i64 (or i32) handles the negative numbers, then sends to u64 or u32
@@ -289,63 +288,52 @@ operator<<      (float f)
 
                 //i64 (or i32)
                 self&
-operator<<      (OST_I64_ v)
+operator<<      (const FMT_I64_ v)
                 {
-                if( (optionB_ == 10 or optionB_ == 0) and (v < 0) ) {
-                    optionNEG_ = true;
-                    v = -v;
-                    }
-                return operator<<( (OST_U64_)v );
+                if( v >= 0 or optionB_ != 10 ) return operator<<( (FMT_U64_)v );
+                optionNEG_ = true;
+                return operator<<( (FMT_U64_)-v );
                 }
 
 
-            #if OST_USE_U64_ //then need u32/i32 versions
-                //u32
+            #if FMT_USE_U64_ //then need u32/i32 versions
                 self&
-operator<<      (u32 v)
-                { return operator<<( (u64)v ); }
-
-                //i32
+operator<<      (const u32 vu) { return operator<<( (u64)vu ); }
                 self&
-operator<<      (i32 v)
-                { return operator<<( (i64)v ); }
+operator<<      (const i32 v) { return operator<<( (i64)v ); }
             #endif
 
-
-                //i16
                 self&
-operator<<      (i16 v)
-                { return operator<<( (OST_I64_)v ); }
-
-                //u16
+operator<<      (const i16 v) { return operator<<( (FMT_I64_)v ); }
                 self&
-operator<<      (u16 vu)
-                { return operator<<( (OST_U64_)vu ); }
-
-                //u8
+operator<<      (const u16 vu) { return operator<<( (FMT_U64_)vu ); }
                 self&
-operator<<      (u8 vu)
-                { return operator<<( (OST_U64_)vu ); }
-
-                //char
+operator<<      (const i8 v) { return operator<<( (FMT_I64_)v ); }
                 self&
-operator<<      (char v)
-                { put_( v bitand 0xFF ); return *this; }
-
-                //bool
+operator<<      (const u8 vu) { return operator<<( (FMT_U64_)vu ); }
                 self&
-operator<<      (bool v)
+operator<<      (const char v) { put_( v bitand 0xFF ); return *this; }
+                self&
+operator<<      (const bool v)
                 {
                 if( optionBA_ ) return operator<<( v ? "true" : "false" );
-                return operator<<( (OST_U64_)v );
+                return operator<<( (FMT_U64_)v );
                 }
 
 //-------------|
     private:
 //-------------|
 
-                //parent class has the write function
-                virtual bool put(const char) = 0;
+                //parent class has the put function
+                virtual bool 
+put             (const char) = 0;
+
+                //helper put, so we can also inc count for each char written
+                //and count errors (whatever an error may be)
+                void
+put_            (const char c)
+                { if( put(c) ) count_++; else errors_++; }
+
 
                 static constexpr char hexTable[]{ "0123456789abcdef" };
                 static constexpr auto OPTIONWMIN_MAX{ 128 }; //maximum value of optionWMIN_
@@ -355,8 +343,8 @@ operator<<      (bool v)
                 u16  errors_    { 0 };      //store any errors along the way
                 u16  optionWMIN_{ 0 };      //minimum width
                 u16  optionWMAX_{ 0 };      //maximum width
-                u8   optionB_   { 0 };      //base 2,8,10,16 (0 is also base 10)
-            #if OST_DOUBLE_ || OST_FLOAT_
+                u8   optionB_   { 10 };     //base 2,8,10,16
+            #if FMT_DOUBLE_ || FMT_FLOAT_
                 u8   optionPRE_ { 9 };      //float/double precision (decimal places)
             #endif
                 char optionFIL_ { 0 };      //setfill char (0 is ' ')
@@ -366,48 +354,38 @@ operator<<      (bool v)
                 bool optionPOS_ { false };  //showpos/noshowpos
                 bool optionBA_  { false };  //boolalpha/noboolalpha
                 bool optionJL_  { false };  //(justify) left/right
-
-
-                //helper put, so we can also inc count for each char written
-                void
-put_            (char c)
-                { if( put(c) ) count_++; else errors_++; }
-
-                void
-putStr          (const char* str)
-                { while( *str ) put_( *str++ ); }
-
+ 
         #undef self
-        #undef OST_U64_
-        #undef OST_I64_
-        #undef OST_BUFMAX_
-        #undef OST_USE_U64_
-        #undef OST_PREMAX_
+        #undef FMT_U64_
+        #undef FMT_I64_
+        #undef FMT_BUFMAX_
+        #undef FMT_USE_U64_
+        #undef FMT_PREMAX_
 
 };
 
 
 /*-------------------------------------------------------------
-    oStreamer helpers for << put in a ost namespace
+    Format helpers for << put in a fmt namespace
 
     can bring in namespace if wanted-
-        using namespace ost;
+        using namespace fmt;
 
-* = non-standar
+* = non-standard
 
-    setw(w)         set minimum width n (oStreamer class sets a limit to this value)
+    setw(w)         set minimum width n (Format class sets a limit to this value)
 *   setwmax(n)      set maximum width of output (0 is no max limit)
 
     setfill(c)      set fill char, default is ' '
 
-    endl            write newline combo as specified in oStreamer class
+    endl            write newline combo as specified in Format class
 
 *   bin             set base to 2
     oct             set base to 8
     dec             set base to 10 (default)
     hex             set base to 16
 
-*   clear           set options to default, clear count, error
+*   reset           set options to default, clear count, error
 
     noshowpos       no + for dec
     showpos         show + for dec that are positive
@@ -423,102 +401,101 @@ putStr          (const char* str)
 
     setprecision    set decimal precision for float/double
 
-
     all options remain set except for setw(), which is cleared
     after use, also <<clear resets all options
 --------------------------------------------------------------*/
-namespace ost {
+namespace fmt {
 
-//w/arguments -  << name() <<
+// w/argument - << name(arg)
 
-                struct Setw_ost { int n; };
-                inline Setw_ost
+                struct Setw_fmt { int n; };
+                inline Setw_fmt
 setw            (int n) { return {n}; }
-                inline oStreamer&
-                operator<<(oStreamer& p, Setw_ost s)
+                inline Format&
+                operator<<(Format& p, Setw_fmt s)
                 { return p.width(s.n); }
 
-                struct SetwMax_ost { int n; };
-                inline SetwMax_ost
+                struct SetwMax_fmt { int n; };
+                inline SetwMax_fmt
 setwmax         (int n) { return {n}; }
-                inline oStreamer&
-                operator<<(oStreamer& p, SetwMax_ost s)
+                inline Format&
+                operator<<(Format& p, SetwMax_fmt s)
                 { return p.widthmax(s.n); }
 
-                struct Setfill_ost { char c; };
-                inline Setfill_ost
+                struct Setfill_fmt { char c; };
+                inline Setfill_fmt
 setfill         (char c = ' ') { return {c}; }
-                inline oStreamer&
-                operator<<(oStreamer& p, Setfill_ost s)
+                inline Format&
+                operator<<(Format& p, Setfill_fmt s)
                 { return p.fill(s.c); }
 
-                enum ENDL_ost {
-endl            };
-                inline oStreamer&
-                operator<<(oStreamer& p, ENDL_ost e)
-                { (void)e; return p.newline(); }
-
-            #if OST_DOUBLE_ || OST_FLOAT_
-                struct Setprecision_ost { int n; };
-                inline Setprecision_ost
+            #if FMT_DOUBLE_ || FMT_FLOAT_
+                struct Setprecision_fmt { int n; };
+                inline Setprecision_fmt
 setprecision    (int n) { return {n}; }
-                inline oStreamer&
-                operator<<(oStreamer& p, Setprecision_ost s)
+                inline Format&
+                operator<<(Format& p, Setprecision_fmt s)
                 { return p.precision(s.n); }
             #endif
-            #undef OST_DOUBLE_ //done with these defines
-            #undef OST_FLOAT_
+            #undef FMT_DOUBLE_ //done with these defines
+            #undef FMT_FLOAT_
 
 //no argumets -  << name <<
 
-                enum BASE_ost {
+                enum ENDL_fmt {
+endl            };
+                inline Format&
+                operator<<(Format& p, ENDL_fmt e)
+                { (void)e; return p.newline(); }
+
+                enum BASE_fmt {
 bin             = 2,
 oct             = 8,
 dec             = 10,
 hex             = 16 };
-                inline oStreamer&
-                operator<<(oStreamer& p, BASE_ost e)
+                inline Format&
+                operator<<(Format& p, BASE_fmt e)
                 { return p.base(e); }
 
-                enum CLEAR_ost {
-clear           };
-                inline oStreamer&
-                operator<<(oStreamer& p, CLEAR_ost e)
-                { (void)e; return p.clear(); }
+                enum RESET_fmt {
+reset           };
+                inline Format&
+                operator<<(Format& p, RESET_fmt e)
+                { (void)e; return p.reset(); }
 
-                enum POSITIVE_ost {
+                enum POSITIVE_fmt {
 noshowpos,
 showpos         };
-                inline oStreamer&
-                operator<<(oStreamer& p, POSITIVE_ost e)
+                inline Format&
+                operator<<(Format& p, POSITIVE_fmt e)
                 { return p.positive(e); }
 
-                enum ALPHA_ost {
+                enum ALPHA_fmt {
 noshowalpha,
 showalpha       };
-                inline oStreamer&
-                operator<<(oStreamer& p, ALPHA_ost e)
+                inline Format&
+                operator<<(Format& p, ALPHA_fmt e)
                 { return p.boolalpha(e); }
 
-                enum JUSTIFY_ost {
+                enum JUSTIFY_fmt {
 right,
 left            };
-                inline oStreamer&
-                operator<<(oStreamer& p, JUSTIFY_ost e)
-                { return p.justifyleft(e); }
+                inline Format&
+                operator<<(Format& p, JUSTIFY_fmt e)
+                { return p.justify(e); }
 
-                enum UPPERCASE_ost {
+                enum UPPERCASE_fmt {
 nouppercase,
 uppercase       };
-                inline oStreamer&
-                operator<<(oStreamer& p, UPPERCASE_ost e)
+                inline Format&
+                operator<<(Format& p, UPPERCASE_fmt e)
                 { return p.uppercase(e); }
 
-                enum SHOWBASE_ost {
+                enum SHOWBASE_fmt {
 noshowbase,
 showbase        };
-                inline oStreamer&
-                operator<<(oStreamer& p, SHOWBASE_ost e)
+                inline Format&
+                operator<<(Format& p, SHOWBASE_fmt e)
                 { return p.showbase(e); }
 
 
@@ -526,15 +503,15 @@ showbase        };
 //easiest instead of creating a bunch more of the above
 //plus they all use the standard cout properties so these
 //also work on the pc when testing (except for the endlc, since
-//clear is not standard so would need to be changed)
-#define setwf(n,c)      setw(n) << setfill(c)
-#define hex0x           hex << showbase
-#define Hex             hex << uppercase
-#define Hex0x           hex << showbase << uppercase
-#define bin0b           bin << showbase
-#define endlc           endl << clear
-#define endl2           endl << endl
-#define endl2c          endl << endl << clear
+//reset is not standard so would need to be changed)
+#define setwf(n,c)      fmt::setw(n) << fmt::setfill(c)
+#define hex0x           fmt::hex << fmt::showbase
+#define Hex             fmt::hex << fmt::uppercase
+#define Hex0x           fmt::hex << fmt::showbase << fmt::uppercase
+#define bin0b           fmt::bin << fmt::showbase
+#define endlr           fmt::endl << fmt::reset
+#define endl2           fmt::endl << fmt::endl
+#define endl2r          fmt::endl << fmt::endl << fmt::reset
 #define cdup(c,n)       setwf(n,c) << ""
 
 }
@@ -542,106 +519,109 @@ showbase        };
 
 
 /*------------------------------------------------------------------------------
-    Null oStreamer device - a black hole
-------------------------------------------------------------------------------*/
-class NulloStreamer : public oStreamer {
+    Null Format device - a black hole
+        overrides all the public functions in Format, 
+        but none of them do anything here, so compiler will optimize away
+        all uses
 
-                //oStreamer virtual put, 1 char
-                virtual bool
-put             (const char c){ (void)c; return 0; }
+    // Usart debugDev;      //not wanted anymore
+    NullFormat debugDev;    //so make it a NullFormat device
+------------------------------------------------------------------------------*/
+class NullFormat : public Format {
+
+                //Format virtual put, 1 char
+                virtual bool //unused, as it is never called
+put             (const char c) { (void)c; return 0; }
+
+public:
+auto count      (){ return 0; }
+auto errors     (){ return 0; }
+auto newline    (const char a, const char b = 0) { (void)a; (void)b; return *this; }
+auto reset      () { return *this; }
+auto width      (const int v) { (void)v; return *this; }
+auto widthmax   (const unsigned int v) { (void)v; return *this; }
+auto base       (const int v) { (void)v; return *this; }
+auto precision  (const int v) { (void)v; return *this; }
+auto fill       (const char c = ' ') { (void)c; return *this; }
+auto positive   (const bool tf) { (void)tf; return *this; }
+auto boolalpha  (const bool tf) { (void)tf; return *this; }
+auto justifyleft(const bool tf) { (void)tf; return *this; }
+auto uppercase  (const bool tf) { (void)tf; return *this; }
+auto showbase   (const bool tf) { (void)tf; return *this; }
+auto newline    () { return *this; }
+
+                template<typename T> // << anything
+auto operator<< (T t) { return *this; }                
+
 
 };
 
-/*------------------------------------------------------------------------------
-    Buffer oStreamer device - like snprintf
 
-    BufoStreamer<32> bp;  //32 bytes allocated for buffer, includes 0 terminator
-                        //so only 31 useful
+/*------------------------------------------------------------------------------
+    Buffer Format device - like snprintf with some extras
+
+    BufFormat<32> bp;   //32 usable bytes allocated for buffer
+                        //33 bytes allocated for buffer (buffer adds 1)
+
+    buffer is always 0 terminated in the class, although possible to manipulate
+    the buffer outside as a pointer is available via buf(), size/length will
+    0 the last byte so cannot get into problems (the last extra byte allocated
+    in the buffer belongs to the buffer so is free to clear it anytime)
 
     bp << "test" << 123; // bp.buf_ = "test123", 0 terminated
-    can use bp in a oStreamer << , which returns its buffer
+    can use bp in a Format << , which returns its buffer
     dev << bp << 456; // prints "test123456"
     bp.clear() << "hello"; // buf = "hello",  0 terminated
 ------------------------------------------------------------------------------*/
 template<unsigned N>
-class BufoStreamer : public oStreamer {
+class BufFormat : public Format {
 
 //-------------|
     public:
 //-------------|
 
-BufoStreamer    (){ buf_[0] = 0; }
-
-                auto&
-buf             (){ return buf_; }
+BufFormat       (){ buf_[0] = 0; } //0 terminate
 
                 auto
-clear           (){ buf_[0] = 0; count_ = 0; return *this; }
+buf             () { return buf_; }           
+                auto
+clear           () { buf_[0] = 0; count_ = 0; return *this; }
+                auto //in case someone messed with buffer, 0 terminate first
+length          () { buf_[N] = 0; return __builtin_strlen(buf_); }  
+                auto
+size            () { return length(); }   
+                auto
+operator[]      (int n) { return (n >= 0 and (n < (N-1))) ? buf_[n] : '\0'; }    
 
 //-------------|
     private:
 //-------------|
-                //oStreamer virtual put, 1 char
-                virtual bool
+
+                //Format virtual put, 1 char
+                virtual bool 
 put             (const char c)
                 {
                 if( count_ < (N-1) ) {
                     buf_[count_++] = c;
-                    buf_[count_] = 0;
+                    buf_[count_] = 0; //0 terminate
                     return true;
                     }
                 return false;
                 }
 
-                char buf_[N?N:1]; //at least 1, so is terminated
+                char buf_[N+1]; //we add the space for terminating '\0'
                 u16 count_{0};
 
 };
-namespace ost { //so can << bufoStreamer  and get the buffer printed out
-
+namespace fmt { 
+    
+                //so can  Format << bufFormat  and get the buffer printed out
                 template<unsigned N>
-                inline oStreamer&
-                operator<<(oStreamer& p, BufoStreamer<N>& b)
-                { p.operator<<( b.buf() ); return p; }
+                inline Format&
+                operator<<(Format& p, BufFormat<N>& b)
+                { return p.operator<<( b.buf() ); }
 
 }
-
-
-
-
-
-
-/*------------------------------------------------------------------------------
-    RTT
-        output to segger RTT via swd 
-        uses block(s) of memory to communictate via debugger (JLink)
-
-        $ JLinkExe -device nrf52 -if swd -speed 400
-        $ telnet localhost 19021
-------------------------------------------------------------------------------*/
-template<int N>
-struct DevRtt : public oStreamer {
-
-                //Printer virtual put, 1 char
-                [[ gnu::noinline ]] virtual bool 
-put             (const char c){ return SEGGER_RTT_Write(N, &c, 1); }
-
-                //specified length (binary data)
-                [[ gnu::noinline ]] unsigned int 
-write           (const char *buf, unsigned len)
-                {
-                return SEGGER_RTT_Write(N, buf, len);
-                }
-
-                //string, 0  terminated
-                [[ gnu::noinline ]] unsigned int
-write           (const char *buf)
-                {
-                return SEGGER_RTT_WriteString(N, buf);
-                }
-
-};
-
 
 
 /*-------------------------------------------------------------
@@ -713,7 +693,7 @@ write           (const char *buf)
 #define FOREST_GREEN             RGB(34,139,34)
 #define FUCHSIA                  RGB(255,0,255)
 #define GAINSBORO                RGB(220,220,220)
-#define GHOST_WHITE              RGB(248,248,255)
+#define GHFMT_WHITE              RGB(248,248,255)
 #define GOLD                     RGB(255,215,0)
 #define GOLDEN_ROD               RGB(218,165,32)
 #define GRAY                     RGB(128,128,128)
@@ -807,4 +787,37 @@ write           (const char *buf)
 #define WHITE_SMOKE              RGB(245,245,245)
 #define YELLOW                   RGB(255,255,0)
 #define YELLOW_GREEN             RGB(154,205,50)
+
+
+
+/*------------------------------------------------------------------------------
+    RTT
+        output to segger RTT via swd 
+        uses block(s) of memory to communictate via debugger (JLink)
+
+        $ JLinkExe -device nrf52 -if swd -speed 400
+        $ telnet localhost 19021
+------------------------------------------------------------------------------*/
+template<int N>
+struct DevRtt : public Format {
+
+                //Printer virtual put, 1 char
+                [[ gnu::noinline ]] virtual bool 
+put             (const char c){ return SEGGER_RTT_Write(N, &c, 1); }
+
+                //specified length (binary data)
+                [[ gnu::noinline ]] unsigned int 
+write           (const char *buf, unsigned len)
+                {
+                return SEGGER_RTT_Write(N, buf, len);
+                }
+
+                //string, 0  terminated
+                [[ gnu::noinline ]] unsigned int
+write           (const char *buf)
+                {
+                return SEGGER_RTT_WriteString(N, buf);
+                }
+
+};
 

@@ -124,8 +124,8 @@ int main() {
     conn.init();            //connection init
     adv.init();             //advertising init
 
-    DebugRtt << clear
-        << ANSI_NORMAL FG MEDIUM_PURPLE << endl
+    DebugRtt
+        << reset << ANSI_NORMAL FG MEDIUM_PURPLE << endl
         << cdup('=',60) << endl
         << "\t...Boot end" << endl
         << cdup('=',60) << endl << ANSI_NORMAL;

@@ -79,7 +79,7 @@ SA  read            () {
                         i16 f10 = f/10;
                         i16 f1 = __builtin_abs(f)%10;
                         DebugFuncHeader();
-                        DebugRtt << "  internal raw: " << t << "  F: " << setfill('0') << setw(2) << f10 << "." << f1 << endl;
+                        DebugRtt << "  internal raw: " << t << "  F: " << setwf(2,'0') << f10 << "." << f1 << endl;
                         return f;
                     }
 };
@@ -131,7 +131,7 @@ nrf_delay_ms(125);
                         f = tempH.addHistory( f );
                         i16 f10 = f/10;
                         i16 f1 = __builtin_abs(f)%10;
-                        DebugRtt << "  Tmp117 raw: " << t << "  F: " << setfill('0') << setw(2) << f10 << "." << f1 << endl;
+                        DebugRtt << "  Tmp117 raw: " << t << "  F: " << setwf(2,'0') << f10 << "." << f1 << endl;
                         return f;
                     }
 };
@@ -180,7 +180,7 @@ SA  read            () {
                         i16 f10 = f/10;
                         i16 f1 = __builtin_abs(f)%10;
                         DebugFuncHeader();
-                        DebugRtt << "  Si7051 raw: " << t << "  F: " << setfill('0') << setw(2) << f10 << "." << f1 << endl;
+                        DebugRtt << "  Si7051 raw: " << t << "  F: " << setwf(2,'0') << f10 << "." << f1 << endl;
                         return f;
                     }
 };

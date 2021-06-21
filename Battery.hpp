@@ -37,7 +37,7 @@ SA  update          () {
                             if( voltage_ < 500 ) voltage_ = 0; // <500mv, show 0000
                             if( voltage_ > 3600 ) voltage_ = 9999; //>3600, show 9999
                             DebugRtt << "Battery::update  " << (i16)(voltage_/1000) << '.' 
-                                    << setw(3) << setfill('0') << (i16)(voltage_%1000) << "uV" << endl << clear; 
+                                    << setwf(3,'0') << (i16)(voltage_%1000) << "uV" << endlr; 
                         }
                         if( ++count >= updateInterval_ ) count = 0;  
                         return voltage_;

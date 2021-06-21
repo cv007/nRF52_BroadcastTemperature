@@ -78,7 +78,7 @@ SA  init            () {
                         error.check( nrf_sdh_enable_request() );
                         error.check( nrf_sdh_ble_default_cfg_set(BLE_CONN_CFG_TAG_DEFAULT, &ram_start) );
                         error.check( nrf_sdh_ble_enable(&ram_start) );
-                        DebugRtt << "    ram start: " << showbase << setfill('0') << setw(8) << ram_start << endl << clear;
+                        DebugRtt << "    ram start: " << Hex0x << setwf(8,'0') << ram_start << endlr;
                         //_name, _prio, _handler, _context
                         NRF_SDH_BLE_OBSERVER(bleObserver_, 3, eventHandler, NULL);
                     }
