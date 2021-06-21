@@ -106,13 +106,18 @@ Timer timerTestTemp{
 /*-----------------------------------------------------------------------------
     functions
 -----------------------------------------------------------------------------*/
-int main() {
-
+static void headerMessage(const char* str){
     DebugRtt 
         << ANSI_NORMAL FG MEDIUM_PURPLE << endl
         << cdup('=',60) << endl
-        << "\tBoot start..." << endl 
+        << '\t' << str << endl 
         << cdup('=',60) << endl << ANSI_NORMAL;
+}
+
+
+int main() {
+
+    headerMessage("Boot start...");
 
     board.init();           //init board pins
     board.alive();          //blink led's to show boot
@@ -124,11 +129,7 @@ int main() {
     conn.init();            //connection init
     adv.init();             //advertising init
 
-    DebugRtt
-        << reset << ANSI_NORMAL FG MEDIUM_PURPLE << endl
-        << cdup('=',60) << endl
-        << "\t...Boot end" << endl
-        << cdup('=',60) << endl << ANSI_NORMAL;
+    headerMessage("...Boot end");
 
     power.loop();           //power.sleep() loop
 
