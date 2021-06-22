@@ -69,8 +69,10 @@ using namespace fmt;
 
 #ifdef NRF52810_BL651_TEMP //set in makefile
 
-inline DevRtt<0> DebugRtt{};
-// inline NullStreamer DebugRtt{}; //if want no debug output (all debug code 'disappears')
+using DebuRttT = DevRtt<0>;
+// using DebuRttT = NullStreamer; //if want no debug output
+inline DebuRttT DebugRtt;
+
 
                 // using app timer rtc1 as system time, is /2 so 16384 per sec
                 [[ gnu::noinline ]] inline void 
